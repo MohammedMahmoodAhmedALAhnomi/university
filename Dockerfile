@@ -1,20 +1,18 @@
-FROM php:8.2-apache
+FROM php:8.2-cli
 
-# تثبيت الامتدادات المطلوبة
-RUN docker-php-ext-install pdo pdo_mysql mysqli
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    && docker-php-ext-install pdo pdo_mysql
 
-# تفعيل mod_rewrite
-RUN a2enmod rewrite
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# تغيير مجلد الموقع إلى public
-ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
-
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
-    /etc/apache2/sites-available/*.conf \
-    /etc/apache2/apache2.conf
-
-WORKDIR /var/www/html
+WORKDIR /app
 
 COPY . .
 
-EXPOSE 80
+RUN composer install --no-dev --optimize-autoloader
+
+EXPOSE 8080
+
+CMD php -S 0.0.0.0:${PORT:-8080} -t public
