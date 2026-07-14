@@ -3,7 +3,7 @@
     "description": "نظام إدارة اللجنة العلمية",
     "type": "project",
     "require": {
-        "php": ">=7.4",
+        "php": ">=8.2",
         "ext-pdo": "*",
         "ext-mbstring": "*",
         "vlucas/phpdotenv": "^5.0",
