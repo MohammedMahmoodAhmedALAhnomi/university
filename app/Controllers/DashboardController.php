@@ -43,17 +43,17 @@ class DashboardController extends Controller
             'newFilesCount' => File::getRecentCount(48, $managedLevelId, $managedMajorId),
             'userRoles' => User::getCountByRole(),
             'courseCountsByMajor' => Course::getCountByMajor($managedLevelId, $managedMajorId),
-            'storageLimit' => 500 * 1024 * 1024,
+            'storageLimit' => 10 * 1024 * 1024 * 1024,
         ]);
     }
 
     private function getFileTypeStats(?int $levelId = null, ?int $majorId = null): array
     {
-        $types = ['lecture', 'summary', 'model', 'exam', 'other'];
+        $types = ['lecture', 'summary', 'model', 'reference'];
         $stats = [];
-        $labels = ['lecture' => 'محاضرة', 'summary' => 'ملخص', 'model' => 'نموذج', 'exam' => 'اختبار', 'other' => 'أخرى'];
-        $icons = ['lecture' => 'fa-book', 'summary' => 'fa-file-lines', 'model' => 'fa-clipboard', 'exam' => 'fa-pen-to-square', 'other' => 'fa-folder'];
-        $colors = ['lecture' => '#1a73e8', 'summary' => '#34a853', 'model' => '#f59e0b', 'exam' => '#dc3545', 'other' => '#6b7280'];
+        $labels = ['lecture' => 'محاضرة', 'summary' => 'ملخص', 'model' => 'نماذج', 'reference' => 'مرجع'];
+        $icons = ['lecture' => 'fa-book', 'summary' => 'fa-file-lines', 'model' => 'fa-clipboard', 'reference' => 'fa-bookmark'];
+        $colors = ['lecture' => '#1a73e8', 'summary' => '#34a853', 'model' => '#f59e0b', 'reference' => '#6b7280'];
 
         foreach ($types as $type) {
             $count = count(File::getByType($type, 9999, $levelId, $majorId));

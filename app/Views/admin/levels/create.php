@@ -1,8 +1,13 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h3><i class="fas fa-plus-circle ms-2"></i>إضافة مستوى جديد</h3>
-    <a href="<?php echo url('/admin/levels'); ?>" class="btn btn-secondary">
-        <i class="fas fa-arrow-right ms-1"></i>عودة
-    </a>
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+    <div>
+        <h4 class="fw-bold mb-1"><i class="fas fa-plus-circle ms-2 text-primary"></i>إضافة مستوى جديد</h4>
+        <p class="text-muted small mb-0">إضافة مستوى دراسي جديد</p>
+    </div>
+    <div>
+        <a href="<?php echo url('/admin/levels'); ?>" class="btn btn-outline-secondary rounded-pill px-3">
+            <i class="fas fa-arrow-right ms-1"></i>عودة
+        </a>
+    </div>
 </div>
 
 <div class="card shadow-sm">
@@ -28,8 +33,8 @@
                         <label class="form-check-label" for="is_active">نشط</label>
                     </div>
                 </div>
-                <div class="col-12">
-                    <button type="submit" class="btn btn-primary">
+                <div class="col-12 pt-2 border-top">
+                    <button type="submit" class="btn btn-primary px-4">
                         <i class="fas fa-save ms-1"></i>حفظ
                     </button>
                 </div>

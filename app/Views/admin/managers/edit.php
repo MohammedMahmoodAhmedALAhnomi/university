@@ -1,8 +1,13 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h3><i class="fas fa-user-edit ms-2"></i>تعديل المندوب</h3>
-    <a href="<?php echo url('/admin/managers'); ?>" class="btn btn-secondary">
-        <i class="fas fa-arrow-right ms-1"></i>عودة
-    </a>
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+    <div>
+        <h4 class="fw-bold mb-1"><i class="fas fa-user-edit ms-2 text-warning"></i>تعديل المندوب</h4>
+        <p class="text-muted small mb-0">تعديل بيانات حساب المندوب</p>
+    </div>
+    <div>
+        <a href="<?php echo url('/admin/managers'); ?>" class="btn btn-outline-secondary rounded-pill px-3">
+            <i class="fas fa-arrow-right ms-1"></i>عودة
+        </a>
+    </div>
 </div>
 
 <div class="card shadow-sm">
@@ -21,7 +26,12 @@
                 </div>
                 <div class="col-md-6">
                     <label for="password" class="form-label">كلمة المرور (اتركه فارغاً إذا لا تريد التغيير)</label>
-                    <input type="password" class="form-control" id="password" name="password">
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="password" name="password">
+                        <button type="button" class="btn btn-outline-secondary" id="toggleEditManagerPassword" tabindex="-1">
+                            <i class="fas fa-eye" id="editManagerPasswordIcon"></i>
+                        </button>
+                    </div>
                 </div>
                 <?php if (empty($managedMajor)): ?>
                 <div class="col-md-6">
@@ -56,3 +66,12 @@
         </form>
     </div>
 </div>
+
+<script>
+document.getElementById('toggleEditManagerPassword')?.addEventListener('click', function() {
+    const p = document.getElementById('password');
+    const i = document.getElementById('editManagerPasswordIcon');
+    if (p.type === 'password') { p.type = 'text'; i.classList.replace('fa-eye', 'fa-eye-slash'); }
+    else { p.type = 'password'; i.classList.replace('fa-eye-slash', 'fa-eye'); }
+});
+</script>

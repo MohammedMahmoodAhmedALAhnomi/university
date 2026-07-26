@@ -25,7 +25,7 @@
                         <div class="text-center mb-4">
                             <i class="fas fa-graduation-cap fa-3x text-primary mb-3"></i>
                             <h3 class="fw-bold">اللجنة العلمية</h3>
-                            <p class="text-muted">تسجيل الدخول إلى المنصة التعليمية</p>
+                            <p class="text-muted">تسجيل الدخول إلى لوحة التحكم</p>
                         </div>
                         <?php if (flash_has('error')): ?>
                             <div class="alert alert-danger text-center">
@@ -50,8 +50,8 @@
                                 </label>
                                 <div class="input-group">
                                     <input type="password" class="form-control <?php echo flash_has('password_error') ? 'is-invalid' : ''; ?>" id="password" name="password" required>
-                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword" tabindex="-1">
-                                        <i class="fas fa-eye"></i>
+                                    <button type="button" class="btn btn-outline-secondary" id="togglePassword" tabindex="-1">
+                                        <i class="fas fa-eye" id="passwordIcon"></i>
                                     </button>
                                     <?php if (flash_has('password_error')): ?>
                                         <div class="invalid-feedback"><?php echo flash('password_error'); ?></div>
@@ -68,20 +68,18 @@
             </div>
         </div>
     </div>
-<script>
-document.getElementById('togglePassword').addEventListener('click', function() {
-    var input = document.getElementById('password');
-    var icon = this.querySelector('i');
-    if (input.type === 'password') {
-        input.type = 'text';
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
-    } else {
-        input.type = 'password';
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
-    }
-});
-</script>
+    <script>
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const password = document.getElementById('password');
+            const icon = document.getElementById('passwordIcon');
+            if (password.type === 'password') {
+                password.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                password.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        });
+    </script>
 </body>
 </html>

@@ -1,8 +1,13 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h3><i class="fas fa-edit ms-2"></i>تعديل الملف</h3>
-    <a href="<?php echo url('/admin/files'); ?>" class="btn btn-secondary">
-        <i class="fas fa-arrow-right ms-1"></i>عودة
-    </a>
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+    <div>
+        <h4 class="fw-bold mb-1"><i class="fas fa-edit ms-2 text-warning"></i>تعديل الملف</h4>
+        <p class="text-muted small mb-0">تعديل بيانات الملف الدراسي</p>
+    </div>
+    <div>
+        <a href="<?php echo url('/admin/files'); ?>" class="btn btn-outline-secondary rounded-pill px-3">
+            <i class="fas fa-arrow-right ms-1"></i>عودة
+        </a>
+    </div>
 </div>
 
 <div class="card shadow-sm">
@@ -28,10 +33,13 @@
                         <option value="">اختر التصنيف</option>
                         <option value="lecture" <?php echo (old('file_type', $file->file_type ?? '') === 'lecture') ? 'selected' : ''; ?>>محاضرة</option>
                         <option value="summary" <?php echo (old('file_type', $file->file_type ?? '') === 'summary') ? 'selected' : ''; ?>>ملخص</option>
-                        <option value="model" <?php echo (old('file_type', $file->file_type ?? '') === 'model') ? 'selected' : ''; ?>>نموذج اختبار</option>
-                        <option value="exam" <?php echo (old('file_type', $file->file_type ?? '') === 'exam') ? 'selected' : ''; ?>>اختبار</option>
-                        <option value="other" <?php echo (old('file_type', $file->file_type ?? '') === 'other') ? 'selected' : ''; ?>>أخرى</option>
+                        <option value="model" <?php echo (old('file_type', $file->file_type ?? '') === 'model') ? 'selected' : ''; ?>>نماذج</option>
+                        <option value="reference" <?php echo (old('file_type', $file->file_type ?? '') === 'reference') ? 'selected' : ''; ?>>مرجع</option>
                     </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="doctor_name" class="form-label">اسم الدكتور</label>
+                    <input type="text" class="form-control" id="doctor_name" name="doctor_name" value="<?php echo escape(old('doctor_name', $file->doctor_name ?? '')); ?>" placeholder="اختياري">
                 </div>
                 <div class="col-md-6">
                     <label for="title" class="form-label">العنوان <span class="text-danger">*</span></label>

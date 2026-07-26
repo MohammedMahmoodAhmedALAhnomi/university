@@ -5,26 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>اللجنة العلمية</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="<?php echo asset('assets/css/style.css'); ?>">
 </head>
 <body class="d-flex flex-column h-100">
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm flex-shrink-0">
-        <div class="container">
-            <a class="navbar-brand fw-bold d-flex align-items-center" href="<?php echo url('/'); ?>">
-                <?php
-                $collegeLogo = \App\Models\Setting::get('college_logo');
-                if ($collegeLogo): ?>
-                    <img src="<?php echo asset($collegeLogo); ?>" alt="شعار الكلية" style="height: 40px; width: auto;" class="ms-2">
-                <?php else: ?>
-                    <i class="fas fa-university ms-1"></i>
+        <div class="container d-flex align-items-center flex-wrap">
+            <div class="navbar-logo-wrapper">
+                <?php $collegeLogo = \App\Models\Setting::get('college_logo'); ?>
+                <?php if ($collegeLogo): ?>
+                    <img src="<?php echo asset($collegeLogo); ?>" alt="شعار الكلية" class="navbar-logo-img">
                 <?php endif; ?>
-                <span class="d-none d-sm-inline">اللجنة العلمية</span>
+            </div>
+            <div class="d-flex align-items-center gap-2 order-3 order-lg-2">
+                <button class="navbar-toggler border-0 d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <button id="darkModeToggle" class="theme-toggle" title="الوضع الليلي" aria-label="الوضع الليلي">
+                    <i class="fas fa-moon"></i>
+                    <i class="fas fa-sun"></i>
+                    <span class="theme-toggle-label d-none d-lg-inline">ليلي</span>
+                </button>
+            </div>
+            <a class="navbar-brand fw-bold d-flex align-items-center navbar-brand-centered" href="<?php echo url('/'); ?>">
+                <span class="navbar-brand-text">اللجنة العلمية</span>
             </a>
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="mainNavbar">
+            <div class="d-flex align-items-center gap-2 order-lg-3">
+                <div class="d-none d-lg-flex align-items-center gap-2">
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <a href="<?php echo url('/admin/dashboard'); ?>" class="btn btn-light btn-sm rounded-pill px-3">
+                            <i class="fas fa-user ms-1"></i><?php echo escape($_SESSION['user_name']); ?>
+                        </a>
+                    <?php else: ?>
+                        <a href="<?php echo url('/login'); ?>" class="btn btn-light btn-sm rounded-pill px-3">
+                            <i class="fas fa-sign-in-alt ms-1"></i>تسجيل الدخول
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <div class="d-none d-lg-flex align-items-center order-lg-4 flex-grow-1">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
                         <a class="nav-link <?php echo is_active_route('/') ? 'active' : ''; ?>" href="<?php echo url('/'); ?>">
@@ -50,35 +70,58 @@
                         </button>
                     </div>
                 </form>
-                <div class="d-flex align-items-center gap-2 ms-lg-2 my-2 my-lg-0">
+            </div>
+            <div class="offcanvas offcanvas-end d-lg-none" tabindex="-1" id="mainNavbar" aria-labelledby="mainNavbarLabel">
+                <div class="offcanvas-header bg-primary text-white">
+                    <h5 class="offcanvas-title" id="mainNavbarLabel">
+                        <i class="fas fa-bars ms-1"></i>القائمة
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+                </div>
+                <div class="offcanvas-body">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo is_active_route('/') ? 'active' : ''; ?>" href="<?php echo url('/'); ?>">
+                            <i class="fas fa-home ms-1"></i>الرئيسية
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo is_active_route('/about') ? 'active' : ''; ?>" href="<?php echo url('/about'); ?>">
+                            <i class="fas fa-info-circle ms-1"></i>من نحن
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?php echo is_active_route('/contact') ? 'active' : ''; ?>" href="<?php echo url('/contact'); ?>">
+                            <i class="fas fa-envelope ms-1"></i>اتصل بنا
+                        </a>
+                    </li>
+                </ul>
+                <form class="d-flex mx-2 my-2 my-lg-0 offcanvas-search" action="<?php echo url('/search'); ?>" method="GET" role="search">
+                    <div class="input-group">
+                        <input class="form-control border" type="search" name="q" placeholder="بحث في المواد..." aria-label="بحث">
+                        <button class="btn btn-outline-primary btn-sm" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+                <hr class="my-2">
+                <div class="d-flex flex-column gap-2 px-2 pb-2">
                     <?php if (isset($_SESSION['user_id'])): ?>
                         <a href="<?php echo url('/admin/dashboard'); ?>" class="btn btn-light btn-sm rounded-pill px-3">
                             <i class="fas fa-user ms-1"></i><?php echo escape($_SESSION['user_name']); ?>
                         </a>
                     <?php else: ?>
-                        <a href="<?php echo url('/login'); ?>" class="btn btn-outline-light btn-sm rounded-pill px-3">
+                        <a href="<?php echo url('/login'); ?>" class="btn btn-light btn-sm rounded-pill px-3">
                             <i class="fas fa-sign-in-alt ms-1"></i>تسجيل الدخول
                         </a>
                     <?php endif; ?>
                 </div>
             </div>
-            <div class="d-flex align-items-center gap-2">
-                <button id="darkModeToggle" class="theme-toggle" title="الوضع الليلي" aria-label="الوضع الليلي">
-                    <i class="fas fa-moon"></i>
-                    <i class="fas fa-sun"></i>
-                    <span class="theme-toggle-label d-none d-lg-inline">ليلي</span>
-                </button>
-                <?php
-                $uniLogo = \App\Models\Setting::get('university_logo');
-                if ($uniLogo): ?>
-                    <img src="<?php echo asset($uniLogo); ?>" alt="شعار الجامعة" style="height: 36px; width: auto;">
-                <?php endif; ?>
-            </div>
         </div>
     </nav>
 
     <main class="flex-shrink-0">
-        <div class="container px-3 px-md-4">
+        <div class="container">
             <?php if (flash_has('success')): ?>
                 <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
                     <i class="fas fa-check-circle ms-1"></i>
@@ -103,10 +146,12 @@
         </div>
     </footer>
 
+    <button id="backToTop" class="back-to-top" title="العودة للأعلى" aria-label="العودة للأعلى">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="<?php echo asset('assets/js/main.js'); ?>"></script>
-
-
 
 <div class="modal fade" id="downloadConfirmModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">

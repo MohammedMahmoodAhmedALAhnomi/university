@@ -85,6 +85,9 @@ CREATE TABLE IF NOT EXISTS users (
     INDEX idx_role (role)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- لتحديث قاعدة البيانات الموجودة:
+-- ALTER TABLE files ADD COLUMN doctor_name VARCHAR(255) DEFAULT NULL AFTER description;
+
 -- ============================================================
 -- 6. جدول الملفات (Files)
 -- ============================================================
@@ -98,9 +101,10 @@ CREATE TABLE IF NOT EXISTS files (
     file_path VARCHAR(500) NOT NULL,
     file_size BIGINT DEFAULT 0,
     file_extension VARCHAR(10),
-    file_type ENUM('lecture', 'summary', 'model', 'exam', 'other') DEFAULT 'other',
+    file_type ENUM('lecture', 'summary', 'model', 'reference') DEFAULT 'lecture',
     download_count INT DEFAULT 0,
     is_approved BOOLEAN DEFAULT TRUE,
+    doctor_name VARCHAR(255) DEFAULT NULL,
     sort_order INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -205,14 +209,12 @@ INSERT INTO settings (setting_key, setting_value, setting_type, setting_group) V
 ('university_name', 'جامعة المثال', 'text', 'general'),
 ('primary_color', '#1a73e8', 'color', 'appearance'),
 ('secondary_color', '#34a853', 'color', 'appearance'),
-('logo_path', '/uploads/settings/logo.png', 'image', 'appearance'),
 ('college_logo', '', 'image', 'appearance'),
-('university_logo', '', 'image', 'appearance'),
 ('facebook_url', 'https://facebook.com', 'url', 'social'),
 ('twitter_url', 'https://twitter.com', 'url', 'social'),
 ('instagram_url', 'https://instagram.com', 'url', 'social'),
 ('youtube_url', 'https://youtube.com', 'url', 'social'),
-('max_file_size', '10485760', 'text', 'files'),
+('max_file_size', '104857600', 'text', 'files'),
 ('allowed_extensions', 'pdf,doc,docx,ppt,pptx,xls,xlsx,zip,rar', 'text', 'files'),
 ('maintenance_mode', '0', 'text', 'general');
 

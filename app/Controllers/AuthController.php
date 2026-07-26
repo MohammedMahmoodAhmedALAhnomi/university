@@ -23,22 +23,24 @@ class AuthController extends Controller
 
         $email = trim($this->postParam('email', ''));
         $password = $this->postParam('password', '');
+        $referer = $this->postParam('_referer', $_SERVER['HTTP_REFERER'] ?? '');
+        $fallback = $referer && $referer !== url('/login') ? $referer : url('/');
 
         if (empty($email) || empty($password)) {
             flash('error', 'يرجى إدخال البريد الإلكتروني وكلمة المرور');
-            redirect(url('/login'));
+            redirect(url('/'));
         }
 
         $user = User::findByEmail($email);
 
         if (!$user || !User::verifyPassword($password, $user->password)) {
             flash('error', 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
-            redirect(url('/login'));
+            redirect(url('/'));
         }
 
         if (!$user->is_active) {
             flash('error', 'الحساب غير نشط، يرجى التواصل مع الإدارة');
-            redirect(url('/login'));
+            redirect(url('/'));
         }
 
         $_SESSION['user_id'] = $user->id;

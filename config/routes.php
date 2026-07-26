@@ -57,12 +57,12 @@ return [
     '/admin/files/{id}/delete' => ['controller' => 'FileController', 'action' => 'delete', 'method' => 'GET', 'middleware' => ['Auth']],
     '/admin/files/{id}/toggle' => ['controller' => 'FileController', 'action' => 'toggleApproval', 'method' => 'GET', 'middleware' => ['Auth']],
 
-    '/admin/users' => ['controller' => 'UserController', 'action' => 'index', 'method' => 'GET', 'middleware' => ['Auth', 'Admin']],
-    '/admin/users/create' => ['controller' => 'UserController', 'action' => 'create', 'method' => 'GET', 'middleware' => ['Auth', 'Admin']],
-    '/admin/users/store' => ['controller' => 'UserController', 'action' => 'store', 'method' => 'POST', 'middleware' => ['Auth', 'Admin']],
-    '/admin/users/{id}/edit' => ['controller' => 'UserController', 'action' => 'edit', 'method' => 'GET', 'middleware' => ['Auth', 'Admin']],
-    '/admin/users/{id}/update' => ['controller' => 'UserController', 'action' => 'update', 'method' => 'POST', 'middleware' => ['Auth', 'Admin']],
-    '/admin/users/{id}/delete' => ['controller' => 'UserController', 'action' => 'delete', 'method' => 'GET', 'middleware' => ['Auth', 'Admin']],
+    '/admin/users' => ['controller' => 'UserController', 'action' => 'index', 'method' => 'GET', 'middleware' => ['Auth']],
+    '/admin/users/create' => ['controller' => 'UserController', 'action' => 'create', 'method' => 'GET', 'middleware' => ['Auth']],
+    '/admin/users/store' => ['controller' => 'UserController', 'action' => 'store', 'method' => 'POST', 'middleware' => ['Auth']],
+    '/admin/users/{id}/edit' => ['controller' => 'UserController', 'action' => 'edit', 'method' => 'GET', 'middleware' => ['Auth']],
+    '/admin/users/{id}/update' => ['controller' => 'UserController', 'action' => 'update', 'method' => 'POST', 'middleware' => ['Auth']],
+    '/admin/users/{id}/delete' => ['controller' => 'UserController', 'action' => 'delete', 'method' => 'GET', 'middleware' => ['Auth']],
 
     '/admin/announcements' => ['controller' => 'AnnouncementController', 'action' => 'adminIndex', 'method' => 'GET', 'middleware' => ['Auth']],
     '/admin/announcements/create' => ['controller' => 'AnnouncementController', 'action' => 'create', 'method' => 'GET', 'middleware' => ['Auth']],

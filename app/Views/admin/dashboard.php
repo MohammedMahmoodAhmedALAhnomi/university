@@ -205,13 +205,14 @@
                             <tr>
                                 <th class="ps-3">العنوان</th>
                                 <th>المادة</th>
+                                <th>الدكتور</th>
                                 <th>النوع</th>
                                 <th class="pe-3">التاريخ</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($recentFiles)): ?>
-                                <tr><td colspan="4" class="text-center text-muted py-4">لا توجد ملفات حديثة</td></tr>
+                                <tr><td colspan="5" class="text-center text-muted py-4">لا توجد ملفات حديثة</td></tr>
                             <?php else: ?>
                                 <?php foreach ($recentFiles as $file): ?>
                                     <tr>
@@ -222,11 +223,12 @@
                                             </div>
                                         </td>
                                         <td><small class="text-muted"><?php echo escape($file->course_name ?? '-'); ?></small></td>
+                                        <td><small class="text-muted"><?php echo escape($file->doctor_name ?? '-'); ?></small></td>
                                         <td>
                                             <span class="badge rounded-pill px-3 <?php
                                                 $t = $file->file_type ?? '';
-                                                $lbls = ['lecture' => 'محاضرة', 'summary' => 'ملخص', 'model' => 'نموذج', 'exam' => 'اختبار', 'other' => 'أخرى'];
-                                                $cls = $t === 'exam' ? 'bg-danger bg-opacity-10 text-danger' : ($t === 'summary' ? 'bg-success bg-opacity-10 text-success' : ($t === 'model' ? 'bg-warning bg-opacity-10 text-warning' : ($t === 'lecture' ? 'bg-info bg-opacity-10 text-info' : 'bg-secondary bg-opacity-10 text-secondary')));
+                                                $lbls = ['lecture' => 'محاضرة', 'summary' => 'ملخص', 'model' => 'نماذج', 'reference' => 'مرجع'];
+                                                $cls = $t === 'summary' ? 'bg-success bg-opacity-10 text-success' : ($t === 'model' ? 'bg-warning bg-opacity-10 text-warning' : ($t === 'reference' ? 'bg-secondary bg-opacity-10 text-secondary' : 'bg-info bg-opacity-10 text-info'));
                                             ?>"><?php echo escape($lbls[$t] ?? $t); ?></span>
                                         </td>
                                         <td class="pe-3"><small class="text-muted"><?php echo escape(format_date($file->created_at ?? '', 'Y-m-d')); ?></small></td>
@@ -303,7 +305,7 @@
     <div class="col-lg-4">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white border-bottom py-3">
-                <h6 class="fw-bold mb-0"><i class="fas fa-users text-warning ms-1"></i>المستخدمين</h6>
+                <h6 class="fw-bold mb-0"><i class="fas fa-users text-warning ms-1"></i>المسؤولين</h6>
             </div>
             <div class="card-body">
                 <?php if (empty($userRoles)): ?>

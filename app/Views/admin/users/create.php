@@ -1,8 +1,13 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h3><i class="fas fa-plus-circle ms-2"></i>إضافة مستخدم جديد</h3>
-    <a href="<?php echo url('/admin/users'); ?>" class="btn btn-secondary">
-        <i class="fas fa-arrow-right ms-1"></i>عودة
-    </a>
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+    <div>
+        <h4 class="fw-bold mb-1"><i class="fas fa-plus-circle ms-2 text-primary"></i>إضافة مسؤول جديد</h4>
+        <p class="text-muted small mb-0">إنشاء حساب مسؤول جديد في النظام</p>
+    </div>
+    <div>
+        <a href="<?php echo url('/admin/users'); ?>" class="btn btn-outline-secondary rounded-pill px-3">
+            <i class="fas fa-arrow-right ms-1"></i>عودة
+        </a>
+    </div>
 </div>
 
 <div class="card shadow-sm">
@@ -20,7 +25,12 @@
                 </div>
                 <div class="col-md-6">
                     <label for="password" class="form-label">كلمة المرور <span class="text-danger">*</span></label>
-                    <input type="password" class="form-control" id="password" name="password" required>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <button type="button" class="btn btn-outline-secondary" id="toggleCreateUserPassword" tabindex="-1">
+                            <i class="fas fa-eye" id="createUserPasswordIcon"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="col-md-6">
                     <label for="phone" class="form-label">رقم الهاتف</label>
@@ -30,7 +40,7 @@
                     <label for="role" class="form-label">الدور <span class="text-danger">*</span></label>
                     <select class="form-select" id="role" name="role" required>
                         <option value="manager" <?php echo old('role') === 'manager' ? 'selected' : ''; ?>>مسؤول</option>
-                        <option value="admin" <?php echo old('role') === 'admin' ? 'selected' : ''; ?>>مشرف</option>
+                        <option value="admin" <?php echo old('role') === 'admin' ? 'selected' : ''; ?>>مدير</option>
                     </select>
                 </div>
                 <div class="col-md-4">
@@ -59,3 +69,12 @@
         </form>
     </div>
 </div>
+
+<script>
+document.getElementById('toggleCreateUserPassword')?.addEventListener('click', function() {
+    const p = document.getElementById('password');
+    const i = document.getElementById('createUserPasswordIcon');
+    if (p.type === 'password') { p.type = 'text'; i.classList.replace('fa-eye', 'fa-eye-slash'); }
+    else { p.type = 'password'; i.classList.replace('fa-eye-slash', 'fa-eye'); }
+});
+</script>

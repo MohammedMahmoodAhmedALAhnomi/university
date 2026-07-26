@@ -5,88 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة التحكم - اللجنة العلمية</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="<?php echo asset('assets/css/admin.css'); ?>">
 </head>
 <body>
-    <div class="admin-wrapper sidebar-collapsed">
-        <aside class="admin-sidebar">
-            <div class="sidebar-header">
+    <div class="admin-wrapper">
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="sidebar-logo-wrapper">
+                <?php $collegeLogo = \App\Models\Setting::get('college_logo'); ?>
+                <?php if ($collegeLogo): ?>
+                    <img src="<?php echo asset($collegeLogo); ?>" alt="شعار الكلية" class="sidebar-top-logo">
+                <?php endif; ?>
+            </div>
+            <div class="sidebar-header d-flex align-items-center justify-content-between">
                 <a href="<?php echo url('/admin/dashboard'); ?>" class="sidebar-brand">
-                    <i class="fas fa-graduation-cap"></i>
+                    <i class="fas fa-graduation-cap text-primary ms-1"></i>
                     <span>اللجنة العلمية</span>
                 </a>
+                <button type="button" class="btn-close btn-close-white d-lg-none" id="mobileSidebarClose" aria-label="إغلاق"></button>
             </div>
             <ul class="sidebar-nav">
-                <li class="nav-item">
-                    <a class="nav-link <?php echo is_active_route('/admin') || is_active_route('/admin/dashboard') ? 'active' : ''; ?>" href="<?php echo url('/admin/dashboard'); ?>">
+                <li class="sidebar-li">
+                    <a class="sidebar-a <?php echo is_active_route('/admin') || is_active_route('/admin/dashboard') ? 'active' : ''; ?>" href="<?php echo url('/admin/dashboard'); ?>">
                         <i class="fas fa-tachometer-alt"></i>
                         <span>لوحة التحكم</span>
                     </a>
                 </li>
                 <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo is_active_route('/admin/majors') ? 'active' : ''; ?>" href="<?php echo url('/admin/majors'); ?>">
+                <li class="sidebar-li">
+                    <a class="sidebar-a <?php echo is_active_route('/admin/majors') ? 'active' : ''; ?>" href="<?php echo url('/admin/majors'); ?>">
                         <i class="fas fa-university"></i>
                         <span>التخصصات</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo is_active_route('/admin/levels') ? 'active' : ''; ?>" href="<?php echo url('/admin/levels'); ?>">
+                <li class="sidebar-li">
+                    <a class="sidebar-a <?php echo is_active_route('/admin/levels') ? 'active' : ''; ?>" href="<?php echo url('/admin/levels'); ?>">
                         <i class="fas fa-layer-group"></i>
                         <span>المستويات</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo is_active_route('/admin/semesters') ? 'active' : ''; ?>" href="<?php echo url('/admin/semesters'); ?>">
+                <li class="sidebar-li">
+                    <a class="sidebar-a <?php echo is_active_route('/admin/semesters') ? 'active' : ''; ?>" href="<?php echo url('/admin/semesters'); ?>">
                         <i class="fas fa-calendar-alt"></i>
                         <span>الفصول الدراسية</span>
                     </a>
                 </li>
                 <?php endif; ?>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo is_active_route('/admin/courses') ? 'active' : ''; ?>" href="<?php echo url('/admin/courses'); ?>">
+                <li class="sidebar-li">
+                    <a class="sidebar-a <?php echo is_active_route('/admin/courses') ? 'active' : ''; ?>" href="<?php echo url('/admin/courses'); ?>">
                         <i class="fas fa-book"></i>
                         <span>المواد الدراسية</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo is_active_route('/admin/files') ? 'active' : ''; ?>" href="<?php echo url('/admin/files'); ?>">
+                <li class="sidebar-li">
+                    <a class="sidebar-a <?php echo is_active_route('/admin/files') ? 'active' : ''; ?>" href="<?php echo url('/admin/files'); ?>">
                         <i class="fas fa-file"></i>
                         <span>الملفات</span>
                         <?php
                             $badgeCount = $newFilesCount ?? \App\Models\File::getRecentCount(48);
                             if ($badgeCount > 0):
                         ?>
-                            <span class="badge bg-danger ms-auto">+<?php echo $badgeCount; ?></span>
+                            <span class="badge bg-danger">+<?php echo $badgeCount; ?></span>
                         <?php endif; ?>
                     </a>
                 </li>
-                <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo is_active_route('/admin/users') ? 'active' : ''; ?>" href="<?php echo url('/admin/users'); ?>">
+                <?php if (isset($_SESSION['user_role']) && ($_SESSION['user_role'] === 'admin' || ($_SESSION['user_role'] === 'manager' && !empty($_SESSION['managed_major_id'])))): ?>
+                <li class="sidebar-li">
+                    <a class="sidebar-a <?php echo is_active_route('/admin/users') ? 'active' : ''; ?>" href="<?php echo url('/admin/users'); ?>">
                         <i class="fas fa-users"></i>
-                        <span>المستخدمين</span>
+                        <span>المسؤولين</span>
                     </a>
                 </li>
                 <?php endif; ?>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo is_active_route('/admin/announcements') ? 'active' : ''; ?>" href="<?php echo url('/admin/announcements'); ?>">
+                <li class="sidebar-li">
+                    <a class="sidebar-a <?php echo is_active_route('/admin/announcements') ? 'active' : ''; ?>" href="<?php echo url('/admin/announcements'); ?>">
                         <i class="fas fa-bullhorn"></i>
                         <span>الإعلانات</span>
                     </a>
                 </li>
                 <?php if (isset($_SESSION['user_role']) && ($_SESSION['user_role'] === 'admin' || ($_SESSION['user_role'] === 'manager' && !empty($_SESSION['managed_major_id'])))): ?>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo is_active_route('/admin/managers') ? 'active' : ''; ?>" href="<?php echo url('/admin/managers'); ?>">
+                <li class="sidebar-li">
+                    <a class="sidebar-a <?php echo is_active_route('/admin/managers') ? 'active' : ''; ?>" href="<?php echo url('/admin/managers'); ?>">
                         <i class="fas fa-user-tie"></i>
                         <span>المندوبين</span>
                     </a>
                 </li>
                 <?php endif; ?>
                 <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo is_active_route('/admin/settings') ? 'active' : ''; ?>" href="<?php echo url('/admin/settings'); ?>">
+                <li class="sidebar-li">
+                    <a class="sidebar-a <?php echo is_active_route('/admin/settings') ? 'active' : ''; ?>" href="<?php echo url('/admin/settings'); ?>">
                         <i class="fas fa-cogs"></i>
                         <span>الإعدادات</span>
                     </a>
@@ -102,20 +110,22 @@
                 </a>
             </div>
         </aside>
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
         <main class="admin-main">
             <nav class="admin-topbar">
                 <div class="d-flex align-items-center justify-content-between w-100">
-                    <div>
-                        <button class="btn btn-sm btn-outline-secondary sidebar-toggle" onclick="toggleSidebar()" title="إظهار/إخفاء القائمة">
+                    <div class="topbar-left">
+                        <button class="sidebar-toggle" id="sidebarToggle" title="إظهار/إخفاء القائمة">
                             <i class="fas fa-bars"></i>
                         </button>
                     </div>
-                    <div class="d-flex align-items-center gap-3">
-                        <button id="darkModeToggle" class="btn btn-sm btn-outline-secondary rounded-pill" title="الوضع الليلي">
+                    <div class="topbar-right">
+                        <button id="darkModeToggle" class="btn btn-sm btn-outline-secondary rounded-pill theme-toggle-admin px-3" title="الوضع الليلي">
                             <i class="fas fa-moon"></i>
+                            <i class="fas fa-sun"></i>
                         </button>
-                        <span class="text-muted small">
+                        <span class="text-muted small d-none d-md-inline">
                             <i class="fas fa-user ms-1"></i><?php echo escape($_SESSION['user_name'] ?? ''); ?>
                         </span>
                         <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">
@@ -149,30 +159,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="<?php echo asset('assets/js/admin.js'); ?>"></script>
     <script>
-    function toggleSidebar() {
-        var wrapper = document.querySelector('.admin-wrapper');
-        wrapper.classList.toggle('sidebar-collapsed');
-        var icon = document.querySelector('.sidebar-toggle i');
-        if (icon) {
-            var isCollapsed = wrapper.classList.contains('sidebar-collapsed');
-            icon.className = isCollapsed ? 'fas fa-bars' : 'fas fa-times';
-        }
-    }
-
-    document.addEventListener('click', function (e) {
-        var wrapper = document.querySelector('.admin-wrapper');
-        var sidebar = document.querySelector('.admin-sidebar');
-        var toggle = document.querySelector('.sidebar-toggle');
-        if (!wrapper || !sidebar || !toggle) return;
-        if (!wrapper.classList.contains('sidebar-collapsed') && !sidebar.contains(e.target) && !toggle.contains(e.target)) {
-            wrapper.classList.add('sidebar-collapsed');
-            var icon = toggle.querySelector('i');
-            if (icon) icon.className = 'fas fa-bars';
-        }
-    });
-    </script>
-
-    <script>
     (function() {
         var saved = localStorage.getItem('darkMode');
         if (saved === 'true') {
@@ -181,19 +167,16 @@
         document.addEventListener('DOMContentLoaded', function() {
             var btn = document.getElementById('darkModeToggle');
             if (!btn) return;
-            var isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
-            btn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
             btn.addEventListener('click', function() {
                 var html = document.documentElement;
-                var dark = html.getAttribute('data-bs-theme') === 'dark';
-                if (dark) {
+                var isDark = html.getAttribute('data-bs-theme') === 'dark';
+                if (isDark) {
                     html.removeAttribute('data-bs-theme');
                     localStorage.setItem('darkMode', 'false');
                 } else {
                     html.setAttribute('data-bs-theme', 'dark');
                     localStorage.setItem('darkMode', 'true');
                 }
-                btn.innerHTML = dark ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
             });
         });
     })();

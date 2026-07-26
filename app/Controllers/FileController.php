@@ -80,6 +80,7 @@ class FileController extends Controller
             'title' => trim($this->postParam('title', '')),
             'course_id' => $this->postParam('course_id', ''),
             'description' => trim($this->postParam('description', '')),
+            'doctor_name' => trim($this->postParam('doctor_name', '')),
             'uploaded_by' => $_SESSION['user_id'] ?? 0,
         ];
 
@@ -138,7 +139,7 @@ class FileController extends Controller
         $data['file_name'] = $fileName;
         $data['file_path'] = 'uploads/files/' . $fileName;
         $data['file_extension'] = $extension;
-        $data['file_type'] = $this->postParam('file_type', 'other');
+        $data['file_type'] = $this->postParam('file_type', 'lecture');
         $data['file_size'] = $file['size'];
         $data['is_approved'] = $this->postParam('is_approved', 0) ? 1 : 0;
 
@@ -212,7 +213,8 @@ class FileController extends Controller
             'title' => trim($this->postParam('title', '')),
             'course_id' => $this->postParam('course_id', ''),
             'description' => trim($this->postParam('description', '')),
-            'file_type' => $this->postParam('file_type', 'other'),
+            'doctor_name' => trim($this->postParam('doctor_name', '')),
+            'file_type' => $this->postParam('file_type', 'lecture'),
             'is_approved' => $this->postParam('is_approved', 0) ? 1 : 0,
         ];
 

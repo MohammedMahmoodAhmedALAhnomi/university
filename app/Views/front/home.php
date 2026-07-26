@@ -2,12 +2,12 @@
     <div class="hero-overlay"></div>
     <div class="container position-relative" style="z-index: 2;">
         <div class="mb-4">
-            <span class="badge bg-dark bg-opacity-25 text-white px-4 py-2 rounded-pill fs-6 fw-normal border border-white border-opacity-25">
+            <span class="badge rounded-pill px-4 py-2 fs-6 fw-bold shadow-sm" style="background: rgba(255, 255, 255, 0.22) !important; color: #ffffff !important; backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.4) !important;">
                 <i class="fas fa-graduation-cap ms-2"></i>اللجنة العلمية - كلية الحاسوب وتقنية المعلومات
             </span>
         </div>
         <h1 class="display-4 fw-bold mb-3 text-white">مرحباً بكم في اللجنة العلمية</h1>
-        <p class="lead mb-4 fs-5 opacity-90 mx-auto" style="max-width: 700px;">منصة المشاركة العلمية - نوفر لكم جميع المواد الدراسية والملفات التعليمية بأحدث الوسائل التقنية</p>
+        <p class="lead mb-4 fs-5 mx-auto" style="max-width: 700px; color: #ffffff !important; opacity: 0.95;">منصة المشاركة العلمية - نوفر لكم جميع المواد الدراسية والملفات التعليمية بأحدث الوسائل التقنية</p>
         <div class="d-flex justify-content-center gap-3 flex-wrap mb-5">
             <a href="#majors-section" class="btn btn-light btn-lg rounded-pill px-5 fw-bold shadow-sm">
                 <i class="fas fa-university ms-2"></i>تصفح التخصصات
@@ -28,8 +28,8 @@
     <div class="row g-3 mb-5">
         <div class="col-6 col-md-3">
             <div class="stat-card-modern text-center p-4 bg-white shadow-sm rounded-4 border-0 h-100">
-                <div class="stat-icon-modern mx-auto mb-2 rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
-                    <i class="fas fa-book text-primary fs-4"></i>
+                <div class="stat-icon-modern mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; background: rgba(79, 70, 229, 0.12) !important; color: #4f46e5 !important;">
+                    <i class="fas fa-book-open fs-4"></i>
                 </div>
                 <div class="stat-number-modern fs-2 fw-bold text-dark"><?php echo $courseCount; ?></div>
                 <div class="stat-label-modern small text-muted">مادة دراسية</div>
@@ -37,8 +37,8 @@
         </div>
         <div class="col-6 col-md-3">
             <div class="stat-card-modern text-center p-4 bg-white shadow-sm rounded-4 border-0 h-100">
-                <div class="stat-icon-modern mx-auto mb-2 rounded-circle bg-success bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
-                    <i class="fas fa-file-alt text-success fs-4"></i>
+                <div class="stat-icon-modern mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; background: rgba(16, 185, 129, 0.12) !important; color: #10b981 !important;">
+                    <i class="fas fa-file-alt fs-4"></i>
                 </div>
                 <div class="stat-number-modern fs-2 fw-bold text-dark"><?php echo $fileCount; ?></div>
                 <div class="stat-label-modern small text-muted">ملف تعليمي</div>
@@ -46,8 +46,8 @@
         </div>
         <div class="col-6 col-md-3">
             <div class="stat-card-modern text-center p-4 bg-white shadow-sm rounded-4 border-0 h-100">
-                <div class="stat-icon-modern mx-auto mb-2 rounded-circle bg-warning bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
-                    <i class="fas fa-layer-group text-warning fs-4"></i>
+                <div class="stat-icon-modern mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; background: rgba(245, 158, 11, 0.12) !important; color: #d97706 !important;">
+                    <i class="fas fa-layer-group fs-4"></i>
                 </div>
                 <div class="stat-number-modern fs-2 fw-bold text-dark"><?php echo $majorCount; ?></div>
                 <div class="stat-label-modern small text-muted">تخصص علمي</div>
@@ -55,8 +55,8 @@
         </div>
         <div class="col-6 col-md-3">
             <div class="stat-card-modern text-center p-4 bg-white shadow-sm rounded-4 border-0 h-100">
-                <div class="stat-icon-modern mx-auto mb-2 rounded-circle bg-info bg-opacity-10 d-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
-                    <i class="fas fa-clock text-info fs-4"></i>
+                <div class="stat-icon-modern mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; background: rgba(6, 182, 212, 0.12) !important; color: #0891b2 !important;">
+                    <i class="fas fa-clock fs-4"></i>
                 </div>
                 <div class="stat-number-modern fs-2 fw-bold text-dark"><?php echo $newFilesCount; ?></div>
                 <div class="stat-label-modern small text-muted">مضاف حديثاً</div>
@@ -67,24 +67,33 @@
     <section id="majors-section" class="mb-5">
         <div class="d-flex align-items-center justify-content-between mb-4">
             <div>
-                <h2 class="fw-bold mb-1">التخصصات العلمية</h2>
+                <h2 class="fw-bold mb-1"><i class="fas fa-graduation-cap me-2 text-primary"></i>التخصصات العلمية</h2>
                 <p class="text-muted mb-0">اختر تخصصك لتصفح المواد الدراسية والملفات التعليمية</p>
             </div>
         </div>
         <?php if (!empty($majors)): ?>
             <div class="row g-4">
                 <?php foreach ($majors as $major): ?>
+                    <?php
+                        $iconClass = get_major_icon($major->name, $major->icon ?? 'fas fa-university');
+                        $codeTag = get_major_badge_code($major->name);
+                    ?>
                     <div class="col-md-6 col-lg-4">
-                        <div class="card h-100 border-0 card-hover" role="button" data-bs-toggle="modal" data-bs-target="#levelModal" data-major-id="<?php echo $major->id; ?>" data-major-name="<?php echo escape($major->name); ?>">
+                        <div class="card h-100 border-0 card-hover shadow-sm rounded-4" role="button" data-bs-toggle="modal" data-bs-target="#levelModal" data-major-id="<?php echo $major->id; ?>" data-major-name="<?php echo escape($major->name); ?>">
                             <div class="card-body p-4">
                                 <div class="d-flex align-items-center mb-3">
-                                    <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 54px; height: 54px;">
-                                        <i class="<?php echo escape($major->icon ?? 'fas fa-university'); ?> fs-5 text-primary"></i>
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 54px; height: 54px; background: rgba(79, 70, 229, 0.12) !important; color: #4f46e5 !important;">
+                                        <i class="<?php echo escape($iconClass); ?> fs-4"></i>
                                     </div>
                                     <div class="me-3">
-                                        <h5 class="fw-bold mb-1"><?php echo escape($major->name); ?></h5>
-                                        <span class="badge bg-primary text-white rounded-pill px-3 py-1">
-                                            <i class="fas fa-book ms-1"></i><?php echo escape($major->courses_count ?? 0); ?> مادة
+                                        <h5 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                                            <?php echo escape($major->name); ?>
+                                            <?php if ($codeTag): ?>
+                                                <span class="badge rounded-pill px-2 py-1 fs-6 fw-bold" style="background: #4f46e5 !important; color: #ffffff !important;"><?php echo $codeTag; ?></span>
+                                            <?php endif; ?>
+                                        </h5>
+                                        <span class="badge rounded-pill px-3 py-1" style="background: rgba(79, 70, 229, 0.12) !important; color: #4f46e5 !important; font-weight: 600;">
+                                            <i class="fas fa-book-open ms-1"></i><?php echo escape($major->courses_count ?? 0); ?> مادة
                                         </span>
                                     </div>
                                 </div>
