@@ -17,9 +17,21 @@ return [
 
     '/login' => ['controller' => 'AuthController', 'action' => 'loginForm', 'method' => 'GET'],
     '/login/post' => ['controller' => 'AuthController', 'action' => 'login', 'method' => 'POST'],
+    '/register' => ['controller' => 'AuthController', 'action' => 'registerForm', 'method' => 'GET'],
+    '/register/post' => ['controller' => 'AuthController', 'action' => 'register', 'method' => 'POST'],
+    '/auth/google' => ['controller' => 'AuthController', 'action' => 'googleRedirect', 'method' => 'GET'],
+    '/auth/google/callback' => ['controller' => 'AuthController', 'action' => 'googleCallback', 'method' => 'GET'],
     '/logout' => ['controller' => 'AuthController', 'action' => 'logout', 'method' => 'GET'],
 
-    '/admin' => ['controller' => 'DashboardController', 'action' => 'index', 'method' => 'GET', 'middleware' => ['Auth', 'Admin']],
+    '/request-role' => ['controller' => 'JoinRequestController', 'action' => 'requestForm', 'method' => 'GET'],
+    '/request-role/post' => ['controller' => 'JoinRequestController', 'action' => 'submitRequest', 'method' => 'POST'],
+    '/pending-approval' => ['controller' => 'JoinRequestController', 'action' => 'pendingApproval', 'method' => 'GET'],
+
+    '/admin/requests' => ['controller' => 'JoinRequestController', 'action' => 'adminIndex', 'method' => 'GET', 'middleware' => ['Auth', 'Admin']],
+    '/admin/requests/{id}/approve' => ['controller' => 'JoinRequestController', 'action' => 'approve', 'method' => 'GET', 'middleware' => ['Auth', 'Admin']],
+    '/admin/requests/{id}/reject' => ['controller' => 'JoinRequestController', 'action' => 'reject', 'method' => 'GET', 'middleware' => ['Auth', 'Admin']],
+
+    '/admin' => ['controller' => 'DashboardController', 'action' => 'index', 'method' => 'GET', 'middleware' => ['Auth']],
     '/admin/dashboard' => ['controller' => 'DashboardController', 'action' => 'index', 'method' => 'GET', 'middleware' => ['Auth']],
 
     '/admin/majors' => ['controller' => 'MajorController', 'action' => 'index', 'method' => 'GET', 'middleware' => ['Auth']],
