@@ -54,7 +54,7 @@
                 </div>
                 <div class="col-md-6">
                     <div class="form-check form-switch mt-2">
-                        <input class="form-check-input" type="checkbox" id="is_approved" name="is_approved" value="1" <?php echo old('is_approved') ? 'checked' : ''; ?> checked>
+                        <input class="form-check-input" type="checkbox" id="is_approved" name="is_approved" value="1" <?php echo (old('is_approved') !== '0' && old('is_approved') !== 0) ? 'checked' : ''; ?>>
                         <label class="form-check-label" for="is_approved">موافق عليه</label>
                     </div>
                 </div>

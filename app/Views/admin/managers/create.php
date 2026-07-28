@@ -38,7 +38,7 @@
                     <select class="form-select" id="managed_major_id" name="managed_major_id" required>
                         <option value="">اختر التخصص</option>
                         <?php foreach ($majors as $major): ?>
-                            <option value="<?php echo $major->id; ?>"><?php echo escape($major->name); ?></option>
+                            <option value="<?php echo $major->id; ?>" <?php echo old('managed_major_id') == $major->id ? 'selected' : ''; ?>><?php echo escape($major->name); ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -50,7 +50,7 @@
                     <select class="form-select" id="managed_level_id" name="managed_level_id" required>
                         <option value="">اختر المستوى</option>
                         <?php foreach ($levels as $level): ?>
-                            <option value="<?php echo $level->id; ?>"><?php echo escape($level->name); ?></option>
+                            <option value="<?php echo $level->id; ?>" <?php echo old('managed_level_id') == $level->id ? 'selected' : ''; ?>><?php echo escape($level->name); ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>

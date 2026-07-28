@@ -333,13 +333,13 @@
                 <div class="position-relative mb-3" style="width: 120px; height: 120px;">
                     <canvas id="storageChart" width="120" height="120"></canvas>
                     <div class="position-absolute top-50 start-50 translate-middle">
-                        <h4 class="fw-bold mb-0"><?php echo round(($totalSizeBytes > 0 ? min(100, ($totalSizeBytes / $storageLimit) * 100) : 0)); ?>%</h4>
+                        <h4 class="fw-bold mb-0"><?php echo (!empty($storageLimit) && $storageLimit > 0 && $totalSizeBytes > 0) ? round(min(100, ($totalSizeBytes / $storageLimit) * 100)) : 0; ?>%</h4>
                     </div>
                 </div>
                 <h6 class="fw-bold mb-1"><?php echo escape($totalFileSize ?? '0 B'); ?></h6>
-                <small class="text-muted">من <?php echo $storageLimit > 1048576 ? round($storageLimit / 1048576) . ' MB' : '500 MB'; ?></small>
+                <small class="text-muted">من <?php echo (!empty($storageLimit) && $storageLimit >= 1073741824) ? round($storageLimit / 1073741824) . ' GB' : ((!empty($storageLimit) && $storageLimit >= 1048576) ? round($storageLimit / 1048576) . ' MB' : '500 MB'); ?></small>
                 <div class="progress w-100 mt-2" style="height: 4px;">
-                    <div class="progress-bar rounded-pill <?php echo ($totalSizeBytes / $storageLimit) > 0.8 ? 'bg-danger' : (($totalSizeBytes / $storageLimit) > 0.5 ? 'bg-warning' : 'bg-success'); ?>" style="width: <?php echo round(min(100, ($totalSizeBytes / $storageLimit) * 100)); ?>%"></div>
+                    <div class="progress-bar rounded-pill <?php echo (!empty($storageLimit) && $storageLimit > 0 && ($totalSizeBytes / $storageLimit) > 0.8) ? 'bg-danger' : ((!empty($storageLimit) && $storageLimit > 0 && ($totalSizeBytes / $storageLimit) > 0.5) ? 'bg-warning' : 'bg-success'); ?>" style="width: <?php echo (!empty($storageLimit) && $storageLimit > 0) ? round(min(100, ($totalSizeBytes / $storageLimit) * 100)) : 0; ?>%"></div>
                 </div>
             </div>
         </div>
@@ -364,7 +364,7 @@
     var c = document.getElementById('storageChart');
     if (!c) return;
     var ctx = c.getContext('2d');
-    var pct = <?php echo $totalSizeBytes > 0 ? round(min(100, ($totalSizeBytes / $storageLimit) * 100)) : 0; ?> / 100;
+    var pct = <?php echo (!empty($storageLimit) && $storageLimit > 0 && $totalSizeBytes > 0) ? round(min(100, ($totalSizeBytes / $storageLimit) * 100)) : 0; ?> / 100;
     var cx = 60, cy = 60, r = 50;
     ctx.clearRect(0, 0, 120, 120);
     ctx.beginPath();

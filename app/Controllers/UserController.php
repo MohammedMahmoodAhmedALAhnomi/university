@@ -11,7 +11,7 @@ class UserController extends Controller
     private function canManage(): bool
     {
         $role = $_SESSION['user_role'] ?? '';
-        return $role === 'admin' || ($role === 'manager' && !empty($_SESSION['managed_major_id']));
+        return $role === 'admin' || $role === 'major_admin';
     }
 
     public function index(): void

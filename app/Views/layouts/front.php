@@ -28,10 +28,17 @@
                     <span class="theme-toggle-label d-none d-lg-inline">ليلي</span>
                 </button>
             </div>
-            <a class="navbar-brand fw-bold d-flex align-items-center navbar-brand-centered" href="<?php echo url('/'); ?>">
+            <a class="navbar-brand fw-bold d-flex align-items-center navbar-brand-centered" href="<?php echo url('/?home=1'); ?>">
                 <span class="navbar-brand-text">اللجنة العلمية</span>
             </a>
             <div class="d-flex align-items-center gap-2 order-lg-3">
+                <div id="userPrefNavWidget" class="d-none d-lg-flex align-items-center me-1">
+                    <button type="button" class="btn btn-light btn-sm rounded-pill shadow-sm px-3 py-1 d-flex align-items-center gap-2 border" data-bs-toggle="modal" data-bs-target="#preferenceModal" style="background: rgba(255,255,255,0.92); font-size: 0.85rem;" title="انقر لتغيير التخصص والمستوى">
+                        <span class="badge bg-primary rounded-circle p-1"><i class="fas fa-graduation-cap"></i></span>
+                        <span id="userPrefNavLabel" class="fw-bold text-dark"></span>
+                        <i class="fas fa-sliders-h text-primary ms-1" style="font-size: 0.75rem;"></i>
+                    </button>
+                </div>
                 <div class="d-none d-lg-flex align-items-center gap-2">
                     <?php if (isset($_SESSION['user_id'])): ?>
                         <a href="<?php echo url('/admin/dashboard'); ?>" class="btn btn-light btn-sm rounded-pill px-3">
@@ -47,7 +54,7 @@
             <div class="d-none d-lg-flex align-items-center order-lg-4 flex-grow-1">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link <?php echo is_active_route('/') ? 'active' : ''; ?>" href="<?php echo url('/'); ?>">
+                        <a class="nav-link <?php echo is_active_route('/') ? 'active' : ''; ?>" href="<?php echo url('/?home=1'); ?>">
                             <i class="fas fa-home ms-1"></i>الرئيسية
                         </a>
                     </li>
@@ -81,7 +88,7 @@
                 <div class="offcanvas-body">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link <?php echo is_active_route('/') ? 'active' : ''; ?>" href="<?php echo url('/'); ?>">
+                        <a class="nav-link <?php echo is_active_route('/') ? 'active' : ''; ?>" href="<?php echo url('/?home=1'); ?>">
                             <i class="fas fa-home ms-1"></i>الرئيسية
                         </a>
                     </li>
@@ -104,6 +111,19 @@
                         </button>
                     </div>
                 </form>
+                <div id="userPrefNavWidgetMobile" class="d-none mt-3 px-2">
+                    <div class="card border-primary border-opacity-25 bg-primary bg-opacity-10 rounded-3">
+                        <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                            <div>
+                                <small class="text-muted d-block mb-1" style="font-size: 0.75rem;">تخصصك ومستواك الحالي:</small>
+                                <strong id="userPrefNavLabelMobile" class="text-primary fs-6"></strong>
+                            </div>
+                            <button type="button" class="btn btn-primary btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#preferenceModal">
+                                <i class="fas fa-sliders-h ms-1"></i>تغيير
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <hr class="my-2">
                 <div class="d-flex flex-column gap-2 px-2 pb-2">
                     <?php if (isset($_SESSION['user_id'])): ?>
@@ -250,6 +270,174 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 })();
+</script>
+
+<?php
+$globalMajors = \App\Models\Major::getActive();
+$globalLevels = \App\Models\Level::getActive();
+?>
+
+<!-- Preference Selection Modal -->
+<div class="modal fade" id="preferenceModal" tabindex="-1" aria-labelledby="preferenceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header bg-primary text-white py-3 border-0">
+                <h5 class="modal-title fw-bold" id="preferenceModalLabel">
+                    <i class="fas fa-graduation-cap ms-2"></i>حدد تخصصك ومستواك الدراسي
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <p class="text-muted small mb-4 text-center">
+                    سيتم حفظ اختيارك في متصفحك لفتح موادك مباشرة في كل زيارة. يمكنك تغيير الاختيار في أي وقت!
+                </p>
+
+                <!-- Step 1: Major Selection -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-dark mb-2">
+                        <span class="badge bg-primary rounded-circle me-1">1</span> اختر التخصص العلمي:
+                    </label>
+                    <div class="row g-2" id="prefMajorOptions">
+                        <?php foreach ($globalMajors as $m): ?>
+                            <div class="col-md-6">
+                                <input type="radio" class="btn-check" name="pref_major" id="pref_major_<?php echo $m->id; ?>" value="<?php echo $m->id; ?>" data-name="<?php echo escape($m->name); ?>" autocomplete="off">
+                                <label class="btn btn-outline-primary w-100 p-3 text-start rounded-3 shadow-sm d-flex align-items-center justify-content-between pref-major-label" for="pref_major_<?php echo $m->id; ?>">
+                                    <span class="fw-bold"><i class="fas fa-university ms-2 text-primary opacity-75"></i><?php echo escape($m->name); ?></span>
+                                </label>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <!-- Step 2: Level Selection -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-dark mb-2">
+                        <span class="badge bg-primary rounded-circle me-1">2</span> اختر المستوى الدراسي:
+                    </label>
+                    <div class="row g-2" id="prefLevelOptions">
+                        <?php foreach ($globalLevels as $l): ?>
+                            <div class="col-6 col-md-3">
+                                <input type="radio" class="btn-check" name="pref_level" id="pref_level_<?php echo $l->id; ?>" value="<?php echo $l->id; ?>" data-name="<?php echo escape($l->name); ?>" autocomplete="off">
+                                <label class="btn btn-outline-secondary w-100 p-2 text-center rounded-3 pref-level-label" for="pref_level_<?php echo $l->id; ?>">
+                                    <small class="fw-bold d-block"><?php echo escape($l->name); ?></small>
+                                </label>
+                            </div>
+                        <?php endforeach; ?>
+                        <div class="col-6 col-md-3">
+                            <input type="radio" class="btn-check" name="pref_level" id="pref_level_all" value="" data-name="جميع المستويات" autocomplete="off" checked>
+                            <label class="btn btn-outline-secondary w-100 p-2 text-center rounded-3 pref-level-label" for="pref_level_all">
+                                <small class="fw-bold d-block"><i class="fas fa-globe ms-1"></i>الكل</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div id="prefErrorMsg" class="alert alert-danger d-none py-2 mb-0 small text-center" role="alert"></div>
+            </div>
+            <div class="modal-footer border-0 bg-white justify-content-center p-3">
+                <button type="button" id="savePrefBtn" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow">
+                    <i class="fas fa-sign-in-alt ms-2"></i>دخول وحفظ الاختيار
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+window.AppPref = {
+    getKey: function(k) { return localStorage.getItem('app_' + k); },
+    setKey: function(k, v) { localStorage.setItem('app_' + k, v); },
+    clear: function() {
+        localStorage.removeItem('app_major_id');
+        localStorage.removeItem('app_major_name');
+        localStorage.removeItem('app_level_id');
+        localStorage.removeItem('app_level_name');
+    },
+    get: function() {
+        var mid = this.getKey('major_id');
+        if (!mid) return null;
+        return {
+            majorId: mid,
+            majorName: this.getKey('major_name') || '',
+            levelId: this.getKey('level_id') || '',
+            levelName: this.getKey('level_name') || ''
+        };
+    },
+    save: function(majorId, majorName, levelId, levelName) {
+        this.setKey('major_id', majorId);
+        this.setKey('major_name', majorName);
+        this.setKey('level_id', levelId || '');
+        this.setKey('level_name', levelName || '');
+        this.updateNav();
+    },
+    updateNav: function() {
+        var pref = this.get();
+        var desktopWidget = document.getElementById('userPrefNavWidget');
+        var mobileWidget = document.getElementById('userPrefNavWidgetMobile');
+        var labelDesktop = document.getElementById('userPrefNavLabel');
+        var labelMobile = document.getElementById('userPrefNavLabelMobile');
+        
+        if (pref && pref.majorId) {
+            var text = pref.majorName;
+            if (pref.levelName && pref.levelName !== 'جميع المستويات') {
+                text += ' • ' + pref.levelName;
+            }
+            if (labelDesktop) labelDesktop.textContent = text;
+            if (labelMobile) labelMobile.textContent = text;
+            if (desktopWidget) desktopWidget.classList.remove('d-none');
+            if (mobileWidget) mobileWidget.classList.remove('d-none');
+        } else {
+            if (desktopWidget) desktopWidget.classList.add('d-none');
+            if (mobileWidget) mobileWidget.classList.add('d-none');
+        }
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    AppPref.updateNav();
+
+    var prefModalEl = document.getElementById('preferenceModal');
+    if (prefModalEl) {
+        prefModalEl.addEventListener('show.bs.modal', function() {
+            var pref = AppPref.get();
+            if (pref) {
+                var mRadio = document.getElementById('pref_major_' + pref.majorId);
+                if (mRadio) mRadio.checked = true;
+                
+                var lRadio = pref.levelId ? document.getElementById('pref_level_' + pref.levelId) : document.getElementById('pref_level_all');
+                if (lRadio) lRadio.checked = true;
+            }
+        });
+
+        var saveBtn = document.getElementById('savePrefBtn');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', function() {
+                var selectedMajor = document.querySelector('input[name="pref_major"]:checked');
+                var errDiv = document.getElementById('prefErrorMsg');
+                
+                if (!selectedMajor) {
+                    if (errDiv) {
+                        errDiv.textContent = 'يرجى اختيار التخصص العلمي أولاً';
+                        errDiv.classList.remove('d-none');
+                    }
+                    return;
+                }
+                if (errDiv) errDiv.classList.add('d-none');
+
+                var majorId = selectedMajor.value;
+                var majorName = selectedMajor.getAttribute('data-name');
+
+                var selectedLevel = document.querySelector('input[name="pref_level"]:checked');
+                var levelId = selectedLevel ? selectedLevel.value : '';
+                var levelName = selectedLevel ? selectedLevel.getAttribute('data-name') : '';
+
+                AppPref.save(majorId, majorName, levelId, levelName);
+
+                var targetUrl = '<?php echo url('/majors/'); ?>' + majorId + (levelId ? '?level=' + levelId : '');
+                window.location.href = targetUrl;
+            });
+        }
+    }
+});
 </script>
 </body>
 </html>

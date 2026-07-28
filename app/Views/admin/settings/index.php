@@ -34,6 +34,8 @@
                                 'max_file_size' => 'الحد الأقصى للملفات (بايت)',
                                 'allowed_extensions' => 'امتدادات الملفات المسموحة',
                                 'maintenance_mode' => 'وضع الصيانة',
+                                'google_client_id' => 'Google Client ID (معرف التطبيق)',
+                                'google_client_secret' => 'Google Client Secret (المفتاح السري)',
                             ];
                             echo escape($labels[$setting->setting_key] ?? $setting->setting_key);
                             ?>
@@ -55,7 +57,7 @@
 
                             <?php elseif ($setting->setting_type === 'color'): ?>
                                 <div class="input-group">
-                                    <input type="color" class="form-control form-control-color" name="settings[<?php echo escape($setting->id); ?>]" value="<?php echo escape($setting->setting_value ?? '#0d6efd'); ?>">
+                                    <input type="color" class="form-control form-control-color" name="settings[<?php echo escape($setting->id); ?>]" value="<?php echo escape($setting->setting_value ?? '#0d6efd'); ?>" oninput="this.nextElementSibling.value=this.value">
                                     <input type="text" class="form-control" name="settings_display[<?php echo escape($setting->id); ?>]" value="<?php echo escape($setting->setting_value ?? '#0d6efd'); ?>" oninput="this.previousElementSibling.value=this.value">
                                 </div>
 

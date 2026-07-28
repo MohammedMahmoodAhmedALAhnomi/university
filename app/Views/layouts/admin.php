@@ -28,39 +28,51 @@
             <ul class="sidebar-nav">
                 <li class="sidebar-li">
                     <a class="sidebar-a <?php echo is_active_route('/admin') || is_active_route('/admin/dashboard') ? 'active' : ''; ?>" href="<?php echo url('/admin/dashboard'); ?>">
-                        <i class="fas fa-tachometer-alt"></i>
+                        <i class="fa-solid fa-chart-pie me-2 text-primary"></i>
                         <span>لوحة التحكم</span>
                     </a>
                 </li>
                 <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
                 <li class="sidebar-li">
+                    <a class="sidebar-a <?php echo is_active_route('/admin/requests') ? 'active' : ''; ?>" href="<?php echo url('/admin/requests'); ?>">
+                        <i class="fa-solid fa-user-check me-2 text-success"></i>
+                        <span>طلبات الانضمام</span>
+                        <?php
+                            $pendingReqCount = \App\Config\Database::fetch("SELECT COUNT(*) as cnt FROM join_requests WHERE status = 'pending'")->cnt ?? 0;
+                            if ($pendingReqCount > 0):
+                        ?>
+                            <span class="badge bg-warning text-dark me-auto"><?php echo $pendingReqCount; ?></span>
+                        <?php endif; ?>
+                    </a>
+                </li>
+                <li class="sidebar-li">
                     <a class="sidebar-a <?php echo is_active_route('/admin/majors') ? 'active' : ''; ?>" href="<?php echo url('/admin/majors'); ?>">
-                        <i class="fas fa-university"></i>
+                        <i class="fa-solid fa-graduation-cap me-2 text-warning"></i>
                         <span>التخصصات</span>
                     </a>
                 </li>
                 <li class="sidebar-li">
                     <a class="sidebar-a <?php echo is_active_route('/admin/levels') ? 'active' : ''; ?>" href="<?php echo url('/admin/levels'); ?>">
-                        <i class="fas fa-layer-group"></i>
+                        <i class="fa-solid fa-layer-group me-2 text-info"></i>
                         <span>المستويات</span>
                     </a>
                 </li>
                 <li class="sidebar-li">
                     <a class="sidebar-a <?php echo is_active_route('/admin/semesters') ? 'active' : ''; ?>" href="<?php echo url('/admin/semesters'); ?>">
-                        <i class="fas fa-calendar-alt"></i>
+                        <i class="fa-solid fa-calendar-days me-2 text-success"></i>
                         <span>الفصول الدراسية</span>
                     </a>
                 </li>
                 <?php endif; ?>
                 <li class="sidebar-li">
                     <a class="sidebar-a <?php echo is_active_route('/admin/courses') ? 'active' : ''; ?>" href="<?php echo url('/admin/courses'); ?>">
-                        <i class="fas fa-book"></i>
+                        <i class="fa-solid fa-book-bookmark me-2 text-danger"></i>
                         <span>المواد الدراسية</span>
                     </a>
                 </li>
                 <li class="sidebar-li">
                     <a class="sidebar-a <?php echo is_active_route('/admin/files') ? 'active' : ''; ?>" href="<?php echo url('/admin/files'); ?>">
-                        <i class="fas fa-file"></i>
+                        <i class="fa-solid fa-folder-open me-2 text-primary"></i>
                         <span>الملفات</span>
                         <?php
                             $badgeCount = $newFilesCount ?? \App\Models\File::getRecentCount(48);
@@ -70,24 +82,24 @@
                         <?php endif; ?>
                     </a>
                 </li>
-                <?php if (isset($_SESSION['user_role']) && ($_SESSION['user_role'] === 'admin' || ($_SESSION['user_role'] === 'manager' && !empty($_SESSION['managed_major_id'])))): ?>
+                <?php if (isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['admin', 'major_admin'])): ?>
                 <li class="sidebar-li">
                     <a class="sidebar-a <?php echo is_active_route('/admin/users') ? 'active' : ''; ?>" href="<?php echo url('/admin/users'); ?>">
-                        <i class="fas fa-users"></i>
+                        <i class="fa-solid fa-user-shield me-2 text-info"></i>
                         <span>المسؤولين</span>
                     </a>
                 </li>
                 <?php endif; ?>
                 <li class="sidebar-li">
                     <a class="sidebar-a <?php echo is_active_route('/admin/announcements') ? 'active' : ''; ?>" href="<?php echo url('/admin/announcements'); ?>">
-                        <i class="fas fa-bullhorn"></i>
+                        <i class="fa-solid fa-bullhorn me-2 text-warning"></i>
                         <span>الإعلانات</span>
                     </a>
                 </li>
-                <?php if (isset($_SESSION['user_role']) && ($_SESSION['user_role'] === 'admin' || ($_SESSION['user_role'] === 'manager' && !empty($_SESSION['managed_major_id'])))): ?>
+                <?php if (isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['admin', 'major_admin'])): ?>
                 <li class="sidebar-li">
                     <a class="sidebar-a <?php echo is_active_route('/admin/managers') ? 'active' : ''; ?>" href="<?php echo url('/admin/managers'); ?>">
-                        <i class="fas fa-user-tie"></i>
+                        <i class="fa-solid fa-user-tie me-2 text-success"></i>
                         <span>المندوبين</span>
                     </a>
                 </li>
@@ -95,7 +107,7 @@
                 <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
                 <li class="sidebar-li">
                     <a class="sidebar-a <?php echo is_active_route('/admin/settings') ? 'active' : ''; ?>" href="<?php echo url('/admin/settings'); ?>">
-                        <i class="fas fa-cogs"></i>
+                        <i class="fa-solid fa-sliders me-2 text-secondary"></i>
                         <span>الإعدادات</span>
                     </a>
                 </li>

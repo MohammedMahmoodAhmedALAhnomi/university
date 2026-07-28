@@ -7,15 +7,15 @@
                 </div>
                 <h2 class="fw-bold mb-2">اتصل بنا</h2>
                 <p class="lead text-muted mb-0">
-                    نحن هنا لمساعدتك! يمكنك التواصل المباشر مع مطوري المنصة لأي استفسار أو اقتراح.
+                    نحن هنا لمساعدتك! يمكنك التواصل المباشر مع مطور المنصة لأي استفسار أو اقتراح.
                 </p>
             </div>
         </div>
 
-        <h4 class="fw-bold mb-3 d-flex align-items-center"><i class="fas fa-laptop-code text-primary ms-2"></i>مطورين المنصة</h4>
-        <div class="row g-4 mb-4">
+        <h4 class="fw-bold mb-3 d-flex align-items-center"><i class="fas fa-laptop-code text-primary ms-2"></i>مطور المنصة</h4>
+        <div class="row justify-content-center mb-4">
             <!-- Developer 1 -->
-            <div class="col-md-6">
+            <div class="col-md-7">
                 <div class="card border-0 shadow-sm rounded-4 h-100 card-hover">
                     <div class="card-body p-4 text-center">
                         <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; background: rgba(79, 70, 229, 0.15) !important; color: #4f46e5 !important;">
@@ -35,33 +35,6 @@
                             <a href="mailto:mohammedalahnomi04@gmail.com" class="btn btn-outline-secondary btn-sm rounded-pill d-flex align-items-center justify-content-between px-3">
                                 <span><i class="fas fa-envelope ms-2"></i>البريد</span>
                                 <span dir="ltr" class="small">mohammedalahnomi04@gmail.com</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Developer 2 -->
-            <div class="col-md-6">
-                <div class="card border-0 shadow-sm rounded-4 h-100 card-hover">
-                    <div class="card-body p-4 text-center">
-                        <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 64px; height: 64px; background: rgba(16, 185, 129, 0.15) !important; color: #10b981 !important;">
-                            <i class="fas fa-code fs-3"></i>
-                        </div>
-                        <h5 class="fw-bold mb-1">سيد أحمد حسين الغيلي</h5>
-                        <span class="badge rounded-pill px-3 py-1 mb-3" style="background: rgba(16, 185, 129, 0.15) !important; color: #10b981 !important; font-weight: 700 !important;">مطور المنصة</span>
-                        <div class="d-flex flex-column gap-2 text-start mt-2">
-                            <a href="tel:772348925" class="btn btn-outline-primary btn-sm rounded-pill d-flex align-items-center justify-content-between px-3">
-                                <span><i class="fas fa-phone-alt ms-2"></i>الهاتف</span>
-                                <span dir="ltr" class="fw-bold">772348925</span>
-                            </a>
-                            <a href="https://wa.me/967772348925" target="_blank" class="btn btn-outline-success btn-sm rounded-pill d-flex align-items-center justify-content-between px-3">
-                                <span><i class="fab fa-whatsapp ms-2"></i>واتساب</span>
-                                <span dir="ltr" class="fw-bold">772348925</span>
-                            </a>
-                            <a href="mailto:sayedahmed77169@gmail.com" class="btn btn-outline-secondary btn-sm rounded-pill d-flex align-items-center justify-content-between px-3">
-                                <span><i class="fas fa-envelope ms-2"></i>البريد</span>
-                                <span dir="ltr" class="small">sayedahmed77169@gmail.com</span>
                             </a>
                         </div>
                     </div>

@@ -25,6 +25,25 @@
 </div>
 
 <div class="container" style="margin-top: -2rem; position: relative; z-index: 3;">
+    <div id="homeSavedPrefBanner" class="alert alert-info border-0 shadow-sm rounded-4 d-none p-3 mb-4 align-items-center justify-content-between flex-wrap gap-2" style="background: linear-gradient(135deg, #e0e7ff 0%, #f0f9ff 100%); border-right: 5px solid #4f46e5 !important;">
+        <div class="d-flex align-items-center gap-2">
+            <div class="rounded-circle bg-primary bg-opacity-10 p-2 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                <i class="fas fa-graduation-cap text-primary fs-5"></i>
+            </div>
+            <div>
+                <small class="text-muted d-block" style="font-size: 0.8rem;">تخصصك ومستواك المحفوظ لدينا:</small>
+                <strong id="homeBannerPrefText" class="text-primary fs-6"></strong>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="#" id="homeBannerGoBtn" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm fw-bold">
+                <i class="fas fa-book-open ms-1"></i>الانتقال لموادك مباشرة
+            </a>
+            <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#preferenceModal">
+                <i class="fas fa-sliders-h ms-1"></i>تغيير
+            </button>
+        </div>
+    </div>
     <div class="row g-3 mb-5">
         <div class="col-6 col-md-3">
             <div class="stat-card-modern text-center p-4 bg-white shadow-sm rounded-4 border-0 h-100">
@@ -191,11 +210,39 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // 1. Check for automatic redirection if user has a saved preference
+    var urlParams = new URLSearchParams(window.location.search);
+    var isForced = urlParams.has('home') || urlParams.has('choose') || urlParams.has('all') || urlParams.has('change');
+    
+    if (window.AppPref) {
+        var pref = window.AppPref.get();
+        if (pref && pref.majorId) {
+            var banner = document.getElementById('homeSavedPrefBanner');
+            var bannerText = document.getElementById('homeBannerPrefText');
+            var bannerBtn = document.getElementById('homeBannerGoBtn');
+            if (banner && bannerText && bannerBtn) {
+                var text = pref.majorName + (pref.levelName && pref.levelName !== 'جميع المستويات' ? ' • ' + pref.levelName : '');
+                bannerText.textContent = text;
+                bannerBtn.href = '<?php echo url('/majors/'); ?>' + pref.majorId + (pref.levelId ? '?level=' + pref.levelId : '');
+                banner.classList.remove('d-none');
+                banner.classList.add('d-flex');
+            }
+
+            if (!isForced) {
+                var targetUrl = '<?php echo url('/majors/'); ?>' + pref.majorId + (pref.levelId ? '?level=' + pref.levelId : '');
+                window.location.replace(targetUrl);
+                return;
+            }
+        }
+    }
+
+    // 2. Level Modal Handler for manual major cards click
     var modal = document.getElementById('levelModal');
     if (!modal) return;
 
     modal.addEventListener('show.bs.modal', function(event) {
         var card = event.relatedTarget;
+        if (!card) return;
         var majorId = card.getAttribute('data-major-id');
         var majorName = card.getAttribute('data-major-name');
         document.getElementById('levelModalTitle').textContent = majorName;
@@ -203,6 +250,14 @@ document.addEventListener('DOMContentLoaded', function() {
         var links = modal.querySelectorAll('.level-link, .level-link-all');
         links.forEach(function(link) {
             var levelId = link.getAttribute('data-level-id');
+            var levelName = link.textContent.trim();
+            
+            link.addEventListener('click', function(e) {
+                if (window.AppPref) {
+                    window.AppPref.save(majorId, majorName, levelId || '', levelId ? levelName : 'جميع المستويات');
+                }
+            });
+
             if (levelId) {
                 link.href = '<?php echo url('/'); ?>majors/' + majorId + '?level=' + levelId;
             } else {

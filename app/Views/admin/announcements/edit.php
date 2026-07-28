@@ -29,7 +29,7 @@
                     <input type="file" class="form-control" id="image" name="image" accept="image/*">
                     <?php if (!empty($announcement->image)): ?>
                         <div class="mt-2">
-                            <img src="<?php echo asset('uploads/' . escape($announcement->image)); ?>" class="img-thumbnail" style="max-height: 100px;">
+                            <img src="<?php echo asset(str_starts_with($announcement->image, 'uploads/') ? $announcement->image : 'uploads/announcements/' . escape($announcement->image)); ?>" class="img-thumbnail" style="max-height: 100px;">
                         </div>
                     <?php endif; ?>
                 </div>

@@ -37,7 +37,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="form-check form-switch mt-2">
-                        <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" <?php echo old('is_active') ? 'checked' : ''; ?> checked>
+                        <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" <?php echo (old('is_active') !== '0' && old('is_active') !== 0) ? 'checked' : ''; ?>>
                         <label class="form-check-label" for="is_active">نشط</label>
                     </div>
                 </div>

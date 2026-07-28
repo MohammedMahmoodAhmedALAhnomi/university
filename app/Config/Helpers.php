@@ -211,7 +211,8 @@ if (!function_exists('log_activity')) {
 if (!function_exists('get_managed_level_id')) {
     function get_managed_level_id(): ?int
     {
-        if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'manager' && isset($_SESSION['managed_level_id'])) {
+        $role = $_SESSION['user_role'] ?? '';
+        if ($role === 'manager' && isset($_SESSION['managed_level_id'])) {
             return (int)$_SESSION['managed_level_id'];
         }
         return null;
@@ -221,7 +222,8 @@ if (!function_exists('get_managed_level_id')) {
 if (!function_exists('get_managed_major_id')) {
     function get_managed_major_id(): ?int
     {
-        if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'manager' && isset($_SESSION['managed_major_id'])) {
+        $role = $_SESSION['user_role'] ?? '';
+        if (in_array($role, ['manager', 'major_admin']) && isset($_SESSION['managed_major_id'])) {
             return (int)$_SESSION['managed_major_id'];
         }
         return null;

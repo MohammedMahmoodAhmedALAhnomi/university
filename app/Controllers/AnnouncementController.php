@@ -47,13 +47,29 @@ class AnnouncementController extends Controller
             'title' => trim($this->postParam('title', '')),
             'content' => trim($this->postParam('content', '')),
             'is_active' => $this->postParam('is_active') ? 1 : 0,
-            'created_by' => $_SESSION['user_id'],
+            'is_pinned' => $this->postParam('is_pinned') ? 1 : 0,
+            'starts_at' => $this->postParam('starts_at') ?: null,
+            'expires_at' => $this->postParam('expires_at') ?: null,
+            'created_by' => $_SESSION['user_id'] ?? 0,
         ];
 
         $errors = $this->validate($data, [
             'title' => 'required',
             'content' => 'required',
         ]);
+
+        $image = $this->fileParam('image');
+        if ($image && $image['error'] === UPLOAD_ERR_OK) {
+            $uploadDir = __DIR__ . '/../../public/uploads/announcements/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+            $ext = pathinfo($image['name'], PATHINFO_EXTENSION);
+            $imgName = uniqid('announcement_') . '.' . $ext;
+            if (move_uploaded_file($image['tmp_name'], $uploadDir . $imgName)) {
+                $data['image'] = $imgName;
+            }
+        }
 
         if (!empty($errors)) {
             flash('error', 'يرجى التحقق من الحقول المطلوبة');
@@ -92,7 +108,23 @@ class AnnouncementController extends Controller
             'title' => trim($this->postParam('title', '')),
             'content' => trim($this->postParam('content', '')),
             'is_active' => $this->postParam('is_active') ? 1 : 0,
+            'is_pinned' => $this->postParam('is_pinned') ? 1 : 0,
+            'starts_at' => $this->postParam('starts_at') ?: null,
+            'expires_at' => $this->postParam('expires_at') ?: null,
         ];
+
+        $image = $this->fileParam('image');
+        if ($image && $image['error'] === UPLOAD_ERR_OK) {
+            $uploadDir = __DIR__ . '/../../public/uploads/announcements/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+            $ext = pathinfo($image['name'], PATHINFO_EXTENSION);
+            $imgName = uniqid('announcement_') . '.' . $ext;
+            if (move_uploaded_file($image['tmp_name'], $uploadDir . $imgName)) {
+                $data['image'] = $imgName;
+            }
+        }
 
         $errors = $this->validate($data, [
             'title' => 'required',

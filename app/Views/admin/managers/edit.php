@@ -18,11 +18,11 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label for="full_name" class="form-label">الاسم <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="full_name" name="full_name" value="<?php echo escape($manager->full_name); ?>" required>
+                    <input type="text" class="form-control" id="full_name" name="full_name" value="<?php echo escape(old('full_name', $manager->full_name)); ?>" required>
                 </div>
                 <div class="col-md-6">
                     <label for="email" class="form-label">البريد الإلكتروني <span class="text-danger">*</span></label>
-                    <input type="email" class="form-control" id="email" name="email" value="<?php echo escape($manager->email); ?>" required>
+                    <input type="email" class="form-control" id="email" name="email" value="<?php echo escape(old('email', $manager->email)); ?>" required>
                 </div>
                 <div class="col-md-6">
                     <label for="password" class="form-label">كلمة المرور (اتركه فارغاً إذا لا تريد التغيير)</label>
@@ -38,7 +38,7 @@
                     <label for="managed_major_id" class="form-label">التخصص المسؤول عنه <span class="text-danger">*</span></label>
                     <select class="form-select" id="managed_major_id" name="managed_major_id" required>
                         <?php foreach ($majors as $major): ?>
-                            <option value="<?php echo $major->id; ?>" <?php echo $manager->managed_major_id == $major->id ? 'selected' : ''; ?>>
+                            <option value="<?php echo $major->id; ?>" <?php echo old('managed_major_id', $manager->managed_major_id) == $major->id ? 'selected' : ''; ?>>
                                 <?php echo escape($major->name); ?>
                             </option>
                         <?php endforeach; ?>
@@ -51,7 +51,7 @@
                     <label for="managed_level_id" class="form-label">المستوى المسؤول عنه <span class="text-danger">*</span></label>
                     <select class="form-select" id="managed_level_id" name="managed_level_id" required>
                         <?php foreach ($levels as $level): ?>
-                            <option value="<?php echo $level->id; ?>" <?php echo $manager->managed_level_id == $level->id ? 'selected' : ''; ?>>
+                            <option value="<?php echo $level->id; ?>" <?php echo old('managed_level_id', $manager->managed_level_id) == $level->id ? 'selected' : ''; ?>>
                                 <?php echo escape($level->name); ?>
                             </option>
                         <?php endforeach; ?>

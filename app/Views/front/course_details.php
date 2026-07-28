@@ -1,10 +1,23 @@
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb mb-3">
-        <li class="breadcrumb-item"><a href="<?php echo url('/'); ?>"><i class="fas fa-home ms-1"></i>الرئيسية</a></li>
-        <li class="breadcrumb-item"><a href="<?php echo url('/majors/' . escape($course->major_id)); ?>"><?php echo escape($course->major_name ?? ''); ?></a></li>
-        <li class="breadcrumb-item active"><?php echo escape($course->name); ?></li>
-    </ol>
-</nav>
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="<?php echo url('/?home=1'); ?>"><i class="fas fa-home ms-1"></i>الرئيسية</a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url('/majors/' . escape($course->major_id)); ?>"><?php echo escape($course->major_name ?? ''); ?></a></li>
+            <?php if (!empty($course->level_name)): ?>
+                <li class="breadcrumb-item active"><?php echo escape($course->level_name); ?></li>
+            <?php endif; ?>
+            <li class="breadcrumb-item active"><?php echo escape($course->name); ?></li>
+        </ol>
+    </nav>
+    <div class="d-flex gap-2">
+        <a href="<?php echo url('/majors/' . escape($course->major_id) . ($course->level_id ? '?level=' . escape($course->level_id) : '')); ?>" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+            <i class="fas fa-layer-group ms-1"></i>الرجوع للمستويات والمواد
+        </a>
+        <a href="<?php echo url('/?home=1'); ?>" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <i class="fas fa-home ms-1"></i>الرئيسية
+        </a>
+    </div>
+</div>
 
 <div class="card shadow-sm border-0 mb-4">
     <div class="card-body">
