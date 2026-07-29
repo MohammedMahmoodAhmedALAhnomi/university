@@ -19,19 +19,21 @@
                 <?php endif; ?>
             </div>
             <div class="sidebar-header d-flex align-items-center justify-content-between">
-                <a href="<?php echo url('/admin/dashboard'); ?>" class="sidebar-brand">
+                <a href="<?php echo (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin') ? url('/admin/dashboard') : url('/admin/courses'); ?>" class="sidebar-brand">
                     <i class="fas fa-graduation-cap text-primary ms-1"></i>
                     <span>اللجنة العلمية</span>
                 </a>
                 <button type="button" class="btn-close btn-close-white d-lg-none" id="mobileSidebarClose" aria-label="إغلاق"></button>
             </div>
             <ul class="sidebar-nav">
+                <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
                 <li class="sidebar-li">
                     <a class="sidebar-a <?php echo is_active_route('/admin') || is_active_route('/admin/dashboard') ? 'active' : ''; ?>" href="<?php echo url('/admin/dashboard'); ?>">
                         <i class="fa-solid fa-chart-pie me-2 text-primary"></i>
                         <span>لوحة التحكم</span>
                     </a>
                 </li>
+                <?php endif; ?>
                 <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
                 <li class="sidebar-li">
                     <a class="sidebar-a <?php echo is_active_route('/admin/requests') ? 'active' : ''; ?>" href="<?php echo url('/admin/requests'); ?>">
@@ -82,7 +84,7 @@
                         <?php endif; ?>
                     </a>
                 </li>
-                <?php if (isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['admin', 'major_admin'])): ?>
+                <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
                 <li class="sidebar-li">
                     <a class="sidebar-a <?php echo is_active_route('/admin/users') ? 'active' : ''; ?>" href="<?php echo url('/admin/users'); ?>">
                         <i class="fa-solid fa-user-shield me-2 text-info"></i>
@@ -132,7 +134,65 @@
                             <i class="fas fa-bars"></i>
                         </button>
                     </div>
-                    <div class="topbar-right">
+                    <div class="topbar-right d-flex align-items-center gap-3">
+                        <!-- Notification Bell Dropdown -->
+                        <?php
+                            $currentUserId = $_SESSION['user_id'] ?? null;
+                            $currentUserRole = $_SESSION['user_role'] ?? 'guest';
+                            $notifTargetUserId = ($currentUserRole === 'admin') ? null : $currentUserId;
+                            $unreadNotifCount = \App\Models\Notification::getUnreadCount($notifTargetUserId);
+                            $recentNotifications = \App\Models\Notification::getForUser($notifTargetUserId, 6);
+                        ?>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary position-relative rounded-circle p-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="الإشعارات" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-bell"></i>
+                                <?php if ($unreadNotifCount > 0): ?>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                                        <?php echo $unreadNotifCount > 9 ? '+9' : $unreadNotifCount; ?>
+                                    </span>
+                                <?php endif; ?>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-0 mt-2" style="width: 320px; max-height: 420px; overflow-y: auto; z-index: 1050;">
+                                <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0 fw-bold"><i class="fas fa-bell text-primary me-2"></i>الإشعارات</h6>
+                                    <?php if ($unreadNotifCount > 0): ?>
+                                        <form action="<?php echo url('/notifications/read-all'); ?>" method="POST" class="d-inline">
+                                            <button type="submit" class="btn btn-link p-0 text-decoration-none small text-muted" style="font-size: 0.8rem;">تحديد الكل كمقروء</button>
+                                        </form>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="list-group list-group-flush">
+                                    <?php if (empty($recentNotifications)): ?>
+                                        <div class="p-4 text-center text-muted small"><i class="fas fa-inbox fs-4 d-block mb-2 text-secondary opacity-50"></i>لا توجد إشعارات حالياً</div>
+                                    <?php else: ?>
+                                        <?php foreach ($recentNotifications as $notif): ?>
+                                            <div class="list-group-item p-3 <?php echo !$notif->is_read ? 'bg-light border-start border-3 border-primary' : ''; ?>">
+                                                <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                                                    <span class="badge bg-<?php echo $notif->type === 'success' ? 'success' : ($notif->type === 'danger' ? 'danger' : ($notif->type === 'warning' ? 'warning' : 'info')); ?>">
+                                                        <?php echo escape($notif->title); ?>
+                                                    </span>
+                                                    <small class="text-muted" style="font-size: 0.7rem;"><?php echo format_date($notif->created_at, 'H:i Y/m/d'); ?></small>
+                                                </div>
+                                                <p class="mb-1 text-dark small" style="font-size: 0.85rem; line-height: 1.4;"><?php echo escape($notif->message); ?></p>
+                                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                                    <?php if ($notif->link): ?>
+                                                        <a href="<?php echo $notif->link; ?>" class="small text-primary text-decoration-none fw-bold" style="font-size: 0.78rem;">التفاصيل <i class="fas fa-arrow-left ms-1"></i></a>
+                                                    <?php else: ?>
+                                                        <span></span>
+                                                    <?php endif; ?>
+                                                    <?php if (!$notif->is_read): ?>
+                                                        <form action="<?php echo url('/notifications/' . $notif->id . '/read'); ?>" method="POST" class="d-inline">
+                                                            <button type="submit" class="btn btn-sm btn-link text-muted p-0 text-decoration-none" style="font-size: 0.75rem;"><i class="fas fa-check ms-1"></i>تم القراءة</button>
+                                                        </form>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+
                         <button id="darkModeToggle" class="btn btn-sm btn-outline-secondary rounded-pill theme-toggle-admin px-3" title="الوضع الليلي">
                             <i class="fas fa-moon"></i>
                             <i class="fas fa-sun"></i>

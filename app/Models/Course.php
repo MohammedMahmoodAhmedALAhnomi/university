@@ -12,7 +12,8 @@ class Course extends Model
 
     public static function getAllWithDetails(?string $where = null, array $params = []): array
     {
-        $sql = "SELECT c.*, m.name as major_name, l.name as level_name, s.name as semester_name
+        $sql = "SELECT c.*, m.name as major_name, l.name as level_name, s.name as semester_name,
+                       (SELECT COUNT(*) FROM files f WHERE f.course_id = c.id) as files_count
                 FROM courses c
                 JOIN majors m ON m.id = c.major_id
                 JOIN levels l ON l.id = c.level_id

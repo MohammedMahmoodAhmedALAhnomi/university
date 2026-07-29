@@ -90,10 +90,10 @@
                                 </td>
                                 <td class="text-end pe-4">
                                     <?php if ($req->status === 'pending'): ?>
-                                        <a href="<?php echo url('/admin/requests/' . $req->id . '/approve'); ?>" class="btn btn-success btn-sm rounded-pill px-3 me-1" onclick="return confirm('هل أنت تأكد من الموافقة على الطلب ومنح الصلاحيات؟')">
+                                        <a href="<?php echo url('/admin/requests/' . $req->id . '/approve?_csrf_token=' . csrf_token()); ?>" class="btn btn-success btn-sm rounded-pill px-3 me-1" onclick="return confirm('هل أنت تأكد من الموافقة على الطلب ومنح الصلاحيات؟')">
                                             <i class="fas fa-check ms-1"></i>موافقة
                                         </a>
-                                        <a href="<?php echo url('/admin/requests/' . $req->id . '/reject'); ?>" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="return confirm('هل أنت تأكد من رفض هذا الطلب؟')">
+                                        <a href="<?php echo url('/admin/requests/' . $req->id . '/reject?_csrf_token=' . csrf_token()); ?>" class="btn btn-outline-danger btn-sm rounded-pill px-3" onclick="return confirm('هل أنت تأكد من رفض هذا الطلب؟')">
                                             <i class="fas fa-times ms-1"></i>رفض
                                         </a>
                                     <?php else: ?>

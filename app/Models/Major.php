@@ -20,8 +20,14 @@ class Major extends Model
         );
     }
 
+    private static ?array $cacheActive = null;
+
     public static function getActive(): array
     {
-        return Database::fetchAll("SELECT * FROM majors WHERE is_active = 1 ORDER BY name");
+        if (self::$cacheActive !== null) {
+            return self::$cacheActive;
+        }
+        self::$cacheActive = Database::fetchAll("SELECT * FROM majors WHERE is_active = 1 ORDER BY name");
+        return self::$cacheActive;
     }
 }

@@ -56,7 +56,7 @@
                                     <a href="<?php echo url('/admin/managers/' . escape($m->id) . '/edit'); ?>" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a href="<?php echo url('/admin/managers/' . escape($m->id) . '/delete'); ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('حذف المندوب؟')">
+                                    <a href="<?php echo url('/admin/managers/' . escape($m->id) . '/delete?_csrf_token=' . csrf_token()); ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('حذف المندوب؟')">
                                         <i class="fas fa-trash"></i>
                                     </a>
                                 </td>

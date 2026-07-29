@@ -41,6 +41,63 @@
                 </div>
                 <div class="d-none d-lg-flex align-items-center gap-2">
                     <?php if (isset($_SESSION['user_id'])): ?>
+                        <?php
+                            $frontUserId = $_SESSION['user_id'];
+                            $frontUserRole = $_SESSION['user_role'] ?? 'guest';
+                            $notifTargetUserId = ($frontUserRole === 'admin') ? null : $frontUserId;
+                            $unreadNotifCount = \App\Models\Notification::getUnreadCount($notifTargetUserId);
+                            $recentNotifications = \App\Models\Notification::getForUser($notifTargetUserId, 6);
+                        ?>
+                        <div class="dropdown me-1">
+                            <button class="btn btn-light btn-sm position-relative rounded-circle p-2 shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="الإشعارات" style="width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-bell text-primary"></i>
+                                <?php if ($unreadNotifCount > 0): ?>
+                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                                        <?php echo $unreadNotifCount > 9 ? '+9' : $unreadNotifCount; ?>
+                                    </span>
+                                <?php endif; ?>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-0 mt-2 text-dark" style="width: 320px; max-height: 400px; overflow-y: auto; z-index: 1050;">
+                                <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-bell text-primary me-2"></i>الإشعارات</h6>
+                                    <?php if ($unreadNotifCount > 0): ?>
+                                        <form action="<?php echo url('/notifications/read-all'); ?>" method="POST" class="d-inline">
+                                            <button type="submit" class="btn btn-link p-0 text-decoration-none small text-muted" style="font-size: 0.8rem;">تحديد الكل كمقروء</button>
+                                        </form>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="list-group list-group-flush">
+                                    <?php if (empty($recentNotifications)): ?>
+                                        <div class="p-4 text-center text-muted small"><i class="fas fa-inbox fs-4 d-block mb-2 text-secondary opacity-50"></i>لا توجد إشعارات حالياً</div>
+                                    <?php else: ?>
+                                        <?php foreach ($recentNotifications as $notif): ?>
+                                            <div class="list-group-item p-3 <?php echo !$notif->is_read ? 'bg-light border-start border-3 border-primary' : ''; ?>">
+                                                <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                                                    <span class="badge bg-<?php echo $notif->type === 'success' ? 'success' : ($notif->type === 'danger' ? 'danger' : ($notif->type === 'warning' ? 'warning' : 'info')); ?>">
+                                                        <?php echo escape($notif->title); ?>
+                                                    </span>
+                                                    <small class="text-muted" style="font-size: 0.7rem;"><?php echo format_date($notif->created_at, 'H:i Y/m/d'); ?></small>
+                                                </div>
+                                                <p class="mb-1 text-dark small" style="font-size: 0.85rem; line-height: 1.4;"><?php echo escape($notif->message); ?></p>
+                                                <div class="d-flex justify-content-between align-items-center mt-2">
+                                                    <?php if ($notif->link): ?>
+                                                        <a href="<?php echo $notif->link; ?>" class="small text-primary text-decoration-none fw-bold" style="font-size: 0.78rem;">التفاصيل <i class="fas fa-arrow-left ms-1"></i></a>
+                                                    <?php else: ?>
+                                                        <span></span>
+                                                    <?php endif; ?>
+                                                    <?php if (!$notif->is_read): ?>
+                                                        <form action="<?php echo url('/notifications/' . $notif->id . '/read'); ?>" method="POST" class="d-inline">
+                                                            <button type="submit" class="btn btn-sm btn-link text-muted p-0 text-decoration-none" style="font-size: 0.75rem;"><i class="fas fa-check ms-1"></i>تم القراءة</button>
+                                                        </form>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+
                         <a href="<?php echo url('/admin/dashboard'); ?>" class="btn btn-light btn-sm rounded-pill px-3">
                             <i class="fas fa-user ms-1"></i><?php echo escape($_SESSION['user_name']); ?>
                         </a>
@@ -78,66 +135,119 @@
                     </div>
                 </form>
             </div>
-            <div class="offcanvas offcanvas-end d-lg-none" tabindex="-1" id="mainNavbar" aria-labelledby="mainNavbarLabel">
-                <div class="offcanvas-header bg-primary text-white">
-                    <h5 class="offcanvas-title" id="mainNavbarLabel">
-                        <i class="fas fa-bars ms-1"></i>القائمة
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
-                </div>
-                <div class="offcanvas-body">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo is_active_route('/') ? 'active' : ''; ?>" href="<?php echo url('/?home=1'); ?>">
-                            <i class="fas fa-home ms-1"></i>الرئيسية
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo is_active_route('/about') ? 'active' : ''; ?>" href="<?php echo url('/about'); ?>">
-                            <i class="fas fa-info-circle ms-1"></i>من نحن
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?php echo is_active_route('/contact') ? 'active' : ''; ?>" href="<?php echo url('/contact'); ?>">
-                            <i class="fas fa-envelope ms-1"></i>اتصل بنا
-                        </a>
-                    </li>
-                </ul>
-                <form class="d-flex mx-2 my-2 my-lg-0 offcanvas-search" action="<?php echo url('/search'); ?>" method="GET" role="search">
-                    <div class="input-group">
-                        <input class="form-control border" type="search" name="q" placeholder="بحث في المواد..." aria-label="بحث">
-                        <button class="btn btn-outline-primary btn-sm" type="submit">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                </form>
-                <div id="userPrefNavWidgetMobile" class="d-none mt-3 px-2">
-                    <div class="card border-primary border-opacity-25 bg-primary bg-opacity-10 rounded-3">
-                        <div class="card-body p-3 d-flex align-items-center justify-content-between">
-                            <div>
-                                <small class="text-muted d-block mb-1" style="font-size: 0.75rem;">تخصصك ومستواك الحالي:</small>
-                                <strong id="userPrefNavLabelMobile" class="text-primary fs-6"></strong>
-                            </div>
-                            <button type="button" class="btn btn-primary btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#preferenceModal">
-                                <i class="fas fa-sliders-h ms-1"></i>تغيير
-                            </button>
+            <!-- Modern Enhanced Mobile Offcanvas Menu -->
+            <div class="offcanvas offcanvas-end d-lg-none custom-offcanvas" tabindex="-1" id="mainNavbar" aria-labelledby="mainNavbarLabel">
+                <div class="offcanvas-header-custom d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle bg-white bg-opacity-20 p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <i class="fas fa-graduation-cap text-white fs-5"></i>
+                        </div>
+                        <div>
+                            <div class="offcanvas-brand-title">اللجنة العلمية</div>
+                            <div class="offcanvas-brand-subtitle">كلية الحاسوب وتقنية المعلومات</div>
                         </div>
                     </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="إغلاق"></button>
                 </div>
-                <hr class="my-2">
-                <div class="d-flex flex-column gap-2 px-2 pb-2">
-                    <?php if (isset($_SESSION['user_id'])): ?>
-                        <a href="<?php echo url('/admin/dashboard'); ?>" class="btn btn-light btn-sm rounded-pill px-3">
-                            <i class="fas fa-user ms-1"></i><?php echo escape($_SESSION['user_name']); ?>
-                        </a>
-                    <?php else: ?>
-                        <a href="<?php echo url('/login'); ?>" class="btn btn-light btn-sm rounded-pill px-3">
-                            <i class="fas fa-sign-in-alt ms-1"></i>تسجيل الدخول
-                        </a>
-                    <?php endif; ?>
+
+                <div class="offcanvas-body p-3 d-flex flex-column justify-content-between">
+                    <div>
+                        <!-- User Card / Auth Actions -->
+                        <div class="offcanvas-user-card mb-3">
+                            <?php if (isset($_SESSION['user_id'])): ?>
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-2 d-flex align-items-center justify-content-center fw-bold" style="width: 42px; height: 42px;">
+                                            <i class="fas fa-user fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <strong class="d-block text-dark small"><?php echo escape($_SESSION['user_name']); ?></strong>
+                                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill" style="font-size: 0.7rem;">
+                                                <?php echo escape($_SESSION['user_role'] ?? 'طالب'); ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <a href="<?php echo url('/admin/dashboard'); ?>" class="btn btn-primary btn-sm rounded-circle p-2" title="لوحة التحكم" style="width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-arrow-left"></i>
+                                    </a>
+                                </div>
+                            <?php else: ?>
+                                <div class="text-center py-1">
+                                    <p class="small text-muted mb-2" style="font-size: 0.82rem;">أهلاً بك! قم بتسجيل الدخول للاستفادة الكاملة من الميزات</p>
+                                    <div class="d-flex gap-2">
+                                        <a href="<?php echo url('/login'); ?>" class="btn btn-primary btn-sm rounded-pill w-100 fw-bold">
+                                            <i class="fas fa-sign-in-alt ms-1"></i>تسجيل الدخول
+                                        </a>
+                                        <a href="<?php echo url('/register'); ?>" class="btn btn-outline-primary btn-sm rounded-pill w-100 fw-bold">
+                                            <i class="fas fa-user-plus ms-1"></i>حساب جديد
+                                        </a>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Mobile Search -->
+                        <form class="mb-3" action="<?php echo url('/search'); ?>" method="GET" role="search">
+                            <div class="input-group">
+                                <input class="form-control rounded-pill-start border-end-0 bg-light shadow-none" type="search" name="q" placeholder="ابحث عن مادة..." aria-label="بحث" style="font-size: 0.88rem;">
+                                <button class="btn btn-primary offcanvas-search-btn rounded-pill-end px-3 fw-bold d-flex align-items-center gap-1" type="submit">
+                                    <i class="fas fa-search"></i>
+                                    <span>بحث</span>
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Nav List -->
+                        <div class="nav-menu-mobile">
+                            <a class="offcanvas-nav-item <?php echo is_active_route('/') ? 'active' : ''; ?>" href="<?php echo url('/?home=1'); ?>">
+                                <i class="fas fa-home text-primary"></i>
+                                <span>الرئيسية</span>
+                            </a>
+                            <a class="offcanvas-nav-item <?php echo is_active_route('/courses') ? 'active' : ''; ?>" href="<?php echo url('/courses'); ?>">
+                                <i class="fas fa-book-open text-warning"></i>
+                                <span>المواد الدراسية</span>
+                            </a>
+                            <a class="offcanvas-nav-item <?php echo is_active_route('/announcements') ? 'active' : ''; ?>" href="<?php echo url('/announcements'); ?>">
+                                <i class="fas fa-bullhorn text-danger"></i>
+                                <span>الإعلانات</span>
+                            </a>
+                            <a class="offcanvas-nav-item <?php echo is_active_route('/about') ? 'active' : ''; ?>" href="<?php echo url('/about'); ?>">
+                                <i class="fas fa-info-circle text-info"></i>
+                                <span>من نحن</span>
+                            </a>
+                            <a class="offcanvas-nav-item <?php echo is_active_route('/contact') ? 'active' : ''; ?>" href="<?php echo url('/contact'); ?>">
+                                <i class="fas fa-envelope text-success"></i>
+                                <span>اتصل بنا</span>
+                            </a>
+                        </div>
+
+                        <!-- Saved Preference Banner for Mobile -->
+                        <div id="userPrefNavWidgetMobile" class="d-none mt-3">
+                            <div class="card border-primary border-opacity-25 bg-primary bg-opacity-10 rounded-3">
+                                <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <small class="text-muted d-block mb-1" style="font-size: 0.75rem;">تخصصك ومستواك المحفوظ:</small>
+                                        <strong id="userPrefNavLabelMobile" class="text-primary fs-6"></strong>
+                                    </div>
+                                    <button type="button" class="btn btn-primary btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#preferenceModal">
+                                        <i class="fas fa-sliders-h ms-1"></i>تغيير
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Offcanvas Footer -->
+                    <div class="pt-3 border-top mt-3 d-flex align-items-center justify-content-between text-muted small">
+                        <span>اللجنة العلمية &copy; <?php echo date('Y'); ?></span>
+                        <?php if (isset($_SESSION['user_id'])): ?>
+                            <a href="<?php echo url('/logout'); ?>" class="text-danger text-decoration-none fw-bold small">
+                                <i class="fas fa-sign-out-alt ms-1"></i>خروج
+                            </a>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
-        </div>
     </nav>
 
     <main class="flex-shrink-0">

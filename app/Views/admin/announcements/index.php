@@ -64,7 +64,7 @@
                                         <a href="<?php echo url('/admin/announcements/' . escape($announcement->id) . '/edit'); ?>" class="btn btn-warning btn-sm rounded-pill px-3">
                                             <i class="fas fa-edit ms-1"></i>تعديل
                                         </a>
-                                        <a href="<?php echo url('/admin/announcements/' . escape($announcement->id) . '/delete'); ?>" class="btn btn-danger btn-sm rounded-pill px-3" onclick="return confirm('هل أنت متأكد من الحذف؟')">
+                                        <a href="<?php echo url('/admin/announcements/' . escape($announcement->id) . '/delete?_csrf_token=' . csrf_token()); ?>" class="btn btn-danger btn-sm rounded-pill px-3" onclick="return confirm('هل أنت متأكد من الحذف؟')">
                                             <i class="fas fa-trash ms-1"></i>حذف
                                         </a>
                                     </div>

@@ -71,7 +71,7 @@
                                         <a href="<?php echo url('/admin/majors/' . escape($major->id) . '/edit'); ?>" class="btn btn-warning btn-sm">
                                             <i class="fas fa-edit ms-1"></i>تعديل
                                         </a>
-                                        <a href="<?php echo url('/admin/majors/' . escape($major->id) . '/delete'); ?>" class="btn btn-danger btn-sm" onclick="return confirm('هل أنت متأكد من الحذف؟')">
+                                        <a href="<?php echo url('/admin/majors/' . escape($major->id) . '/delete?_csrf_token=' . csrf_token()); ?>" class="btn btn-danger btn-sm" onclick="return confirm('هل أنت متأكد من الحذف؟')">
                                             <i class="fas fa-trash ms-1"></i>حذف
                                         </a>
                                     </div>

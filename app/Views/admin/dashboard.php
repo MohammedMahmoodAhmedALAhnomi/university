@@ -131,6 +131,65 @@
 </div>
 
 <div class="row g-3 mb-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm text-white p-3 rounded-4 h-100" style="background: linear-gradient(135deg, #312e81 0%, #1e1b4b 100%) !important; color: #ffffff !important;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="small fw-bold text-white mb-1">إجمالي مستخدمي النظام</div>
+                    <h2 class="fw-bold my-1 text-white"><?php echo escape($usersCount ?? 0); ?></h2>
+                    <small class="text-white fw-semibold"><i class="fas fa-user-check me-1"></i><?php echo escape($activeUsersCount ?? $usersCount); ?> حساب نشط</small>
+                </div>
+                <div class="rounded-circle bg-white bg-opacity-20 p-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+                    <i class="fas fa-users fs-3 text-white"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm text-white p-3 rounded-4 h-100" style="background: linear-gradient(135deg, #831843 0%, #500724 100%) !important; color: #ffffff !important;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="small fw-bold text-white mb-1">إجمالي عمليات التنزيل</div>
+                    <h2 class="fw-bold my-1 text-white"><?php echo escape($totalDownloads ?? 0); ?></h2>
+                    <small class="text-white fw-semibold"><i class="fas fa-chart-line me-1"></i>تحميل واستفادة علمية</small>
+                </div>
+                <div class="rounded-circle bg-white bg-opacity-20 p-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+                    <i class="fas fa-download fs-3 text-white"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm text-white p-3 rounded-4 h-100" style="background: linear-gradient(135deg, #064e3b 0%, #022c22 100%) !important; color: #ffffff !important;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="small fw-bold text-white mb-1">إجمالي الملفات المرفوعة</div>
+                    <h2 class="fw-bold my-1 text-white"><?php echo escape($filesCount ?? 0); ?></h2>
+                    <small class="text-white fw-semibold"><i class="fas fa-hdd me-1"></i>الحجم: <?php echo escape($totalFileSize ?? '0 B'); ?></small>
+                </div>
+                <div class="rounded-circle bg-white bg-opacity-20 p-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+                    <i class="fas fa-folder-open fs-3 text-white"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm text-white p-3 rounded-4 h-100" style="background: linear-gradient(135deg, #78350f 0%, #451a03 100%) !important; color: #ffffff !important;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="small fw-bold text-white mb-1">المواد والتخصصات</div>
+                    <h2 class="fw-bold my-1 text-white"><?php echo escape($coursesCount ?? 0); ?></h2>
+                    <small class="text-white fw-semibold"><i class="fas fa-university me-1"></i>في <?php echo escape($majorsCount ?? 0); ?> تخصصات معتمدة</small>
+                </div>
+                <div class="rounded-circle bg-white bg-opacity-20 p-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+                    <i class="fas fa-book-open fs-3 text-white"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
     <div class="col-12">
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between py-3">

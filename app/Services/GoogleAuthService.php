@@ -8,13 +8,13 @@ class GoogleAuthService
 {
     public static function getClientId(): ?string
     {
-        $id = Setting::get('google_client_id');
+        $id = Setting::get('google_client_id') ?: env('GOOGLE_CLIENT_ID');
         return (!empty($id) && !str_contains($id, 'YOUR_')) ? trim($id) : null;
     }
 
     public static function getClientSecret(): ?string
     {
-        $secret = Setting::get('google_client_secret');
+        $secret = Setting::get('google_client_secret') ?: env('GOOGLE_CLIENT_SECRET');
         return (!empty($secret) && !str_contains($secret, 'YOUR_')) ? trim($secret) : null;
     }
 

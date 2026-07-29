@@ -11,14 +11,14 @@ class UserController extends Controller
     private function canManage(): bool
     {
         $role = $_SESSION['user_role'] ?? '';
-        return $role === 'admin' || $role === 'major_admin';
+        return $role === 'admin';
     }
 
     public function index(): void
     {
         if (!$this->canManage()) {
             flash('error', 'لا تملك صلاحية الوصول');
-            redirect(url('/admin/dashboard'));
+            redirect(url('/admin/courses'));
         }
         $users = User::getAllWithMajor();
         $this->view('admin/users/index', ['users' => $users]);
@@ -28,7 +28,7 @@ class UserController extends Controller
     {
         if (!$this->canManage()) {
             flash('error', 'لا تملك صلاحية الوصول');
-            redirect(url('/admin/dashboard'));
+            redirect(url('/admin/courses'));
         }
         $majors = Major::getActive();
         $this->view('admin/users/create', ['majors' => $majors]);
@@ -38,7 +38,7 @@ class UserController extends Controller
     {
         if (!$this->canManage()) {
             flash('error', 'لا تملك صلاحية الوصول');
-            redirect(url('/admin/dashboard'));
+            redirect(url('/admin/courses'));
         }
         if (!$this->isPost() || !verify_csrf()) {
             redirect(url('/admin/users'));
@@ -100,7 +100,7 @@ class UserController extends Controller
     {
         if (!$this->canManage()) {
             flash('error', 'لا تملك صلاحية الوصول');
-            redirect(url('/admin/dashboard'));
+            redirect(url('/admin/courses'));
         }
         $id = $this->getParam('id');
         $user = User::find($id);
@@ -118,7 +118,7 @@ class UserController extends Controller
     {
         if (!$this->canManage()) {
             flash('error', 'لا تملك صلاحية الوصول');
-            redirect(url('/admin/dashboard'));
+            redirect(url('/admin/courses'));
         }
         if (!$this->isPost() || !verify_csrf()) {
             redirect(url('/admin/users'));
@@ -201,7 +201,11 @@ class UserController extends Controller
     {
         if (!$this->canManage()) {
             flash('error', 'لا تملك صلاحية الوصول');
-            redirect(url('/admin/dashboard'));
+            redirect(url('/admin/courses'));
+        }
+        if (!verify_csrf()) {
+            flash('error', 'طلب غير صالح أو انتهت مهلة الجلسة');
+            redirect(url('/admin/users'));
         }
         $id = $this->getParam('id');
 

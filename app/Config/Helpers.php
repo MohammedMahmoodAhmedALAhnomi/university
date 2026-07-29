@@ -109,8 +109,9 @@ if (!function_exists('csrf_field')) {
 if (!function_exists('verify_csrf')) {
     function verify_csrf(): bool
     {
-        $token = $_POST['_csrf_token'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
-        return hash_equals($_SESSION['_csrf_token'] ?? '', $token);
+        $token = $_POST['_csrf_token'] ?? ($_GET['_csrf_token'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''));
+        $sessionToken = $_SESSION['_csrf_token'] ?? '';
+        return !empty($sessionToken) && !empty($token) && hash_equals($sessionToken, $token);
     }
 }
 
@@ -175,7 +176,7 @@ if (!function_exists('is_active_route')) {
     function is_active_route(string $path): string
     {
         $currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
-        $basePath = dirname($_SERVER['SCRIPT_NAME']);
+        $basePath = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
         $normalized = str_replace($basePath, '', $currentPath);
         $normalized = '/' . trim($normalized, '/');
 

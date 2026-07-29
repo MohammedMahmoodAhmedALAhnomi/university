@@ -8,7 +8,6 @@ use App\Config\Database;
 class JoinRequest extends Model
 {
     protected static string $table = 'join_requests';
-
     public static function findPendingByUserId(int $userId)
     {
         return Database::fetch(
@@ -53,6 +52,7 @@ class JoinRequest extends Model
         // Update User Account Role & Scope
         Database::update('users', [
             'role' => $targetRole,
+            'major_id' => $req->major_id,
             'managed_major_id' => $req->major_id,
             'managed_level_id' => $req->account_type === 'representative' ? $req->level_id : null,
             'is_active' => 1

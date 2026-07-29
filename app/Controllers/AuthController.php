@@ -23,7 +23,8 @@ class AuthController extends Controller
 
     public function login(): void
     {
-        if (!$this->isPost()) {
+        if (!$this->isPost() || !verify_csrf()) {
+            flash('error', 'طلب غير صالح أو انتهت مهلة الجلسة');
             redirect(url('/login'));
         }
 
@@ -47,6 +48,7 @@ class AuthController extends Controller
             redirect(url('/login'));
         }
 
+        session_regenerate_id(true);
         $_SESSION['user_id'] = $user->id;
         $_SESSION['user_name'] = $user->full_name;
         $_SESSION['user_role'] = $user->role;
@@ -66,7 +68,11 @@ class AuthController extends Controller
         }
 
         flash('success', 'مرحبًا بعودتك، ' . $user->full_name);
-        redirect(url('/admin/dashboard'));
+        if ($user->role === 'admin') {
+            redirect(url('/admin/dashboard'));
+        } else {
+            redirect(url('/admin/courses'));
+        }
     }
 
     public function registerForm(): void
@@ -107,6 +113,7 @@ class AuthController extends Controller
             'is_active' => 1,
         ]);
 
+        session_regenerate_id(true);
         $_SESSION['user_id'] = $userId;
         $_SESSION['user_name'] = $fullName;
         $_SESSION['user_role'] = 'guest';
@@ -144,10 +151,10 @@ class AuthController extends Controller
         $googleId = $googleUser['id'] ?? null;
         $fullName = $googleUser['name'] ?? $email;
 
-        // Check if user already exists
+        // Check if user already exists by email or google_id
         $user = User::findByEmail($email);
         if (!$user && $googleId) {
-            $user = \App\Config\Database::fetch("SELECT * FROM users WHERE google_id = ? LIMIT 1", [$googleId]);
+            $user = User::findByGoogleId($googleId);
         }
 
         if (!$user) {
@@ -172,6 +179,7 @@ class AuthController extends Controller
             redirect(url('/login'));
         }
 
+        session_regenerate_id(true);
         $_SESSION['user_id'] = $user->id;
         $_SESSION['user_name'] = $user->full_name;
         $_SESSION['user_role'] = $user->role;
@@ -187,7 +195,11 @@ class AuthController extends Controller
         }
 
         flash('success', 'مرحباً بعودتك، ' . $user->full_name);
-        redirect(url('/admin/dashboard'));
+        if ($user->role === 'admin') {
+            redirect(url('/admin/dashboard'));
+        } else {
+            redirect(url('/admin/courses'));
+        }
     }
 
     public function logout(): void

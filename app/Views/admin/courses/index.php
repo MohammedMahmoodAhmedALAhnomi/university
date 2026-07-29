@@ -85,6 +85,7 @@
                         <th>التخصص</th>
                         <th>المستوى</th>
                         <th>الفصل</th>
+                        <th>الملفات</th>
                         <th>الحالة</th>
                         <th class="pe-3">الإجراءات</th>
                     </tr>
@@ -92,7 +93,7 @@
                 <tbody>
                     <?php if (empty($courses)): ?>
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-5">
+                            <td colspan="7" class="text-center text-muted py-5">
                                 <i class="fas fa-book fa-2x mb-2 d-block text-gray-300"></i>
                                 لا توجد مواد دراسية
                             </td>
@@ -104,6 +105,7 @@
                                 <td><span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2"><i class="fas fa-university ms-1"></i><?php echo escape($course->major_name ?? '-'); ?></span></td>
                                 <td><span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3 py-2"><i class="fas fa-layer-group ms-1"></i><?php echo escape($course->level_name ?? '-'); ?></span></td>
                                 <td><span class="badge bg-purple bg-opacity-10 text-purple rounded-pill px-3 py-2"><i class="fas fa-calendar-alt ms-1"></i><?php echo escape($course->semester_name ?? '-'); ?></span></td>
+                                <td><span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2"><i class="fas fa-paperclip ms-1"></i><?php echo escape($course->files_count ?? 0); ?> ملف</span></td>
                                 <td>
                                     <?php if ($course->is_active): ?>
                                         <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2"><i class="fas fa-check-circle ms-1"></i>نشط</span>
@@ -116,7 +118,7 @@
                                         <a href="<?php echo url('/admin/courses/' . escape($course->id) . '/edit'); ?>" class="btn btn-warning btn-sm rounded-pill px-3">
                                             <i class="fas fa-edit ms-1"></i>تعديل
                                         </a>
-                                        <a href="<?php echo url('/admin/courses/' . escape($course->id) . '/delete'); ?>" class="btn btn-danger btn-sm rounded-pill px-3" onclick="return confirm('هل أنت متأكد من الحذف؟')">
+                                        <a href="<?php echo url('/admin/courses/' . escape($course->id) . '/delete?_csrf_token=' . csrf_token()); ?>" class="btn btn-danger btn-sm rounded-pill px-3" onclick="return confirm('هل أنت متأكد من الحذف؟')">
                                             <i class="fas fa-trash ms-1"></i>حذف
                                         </a>
                                     </div>

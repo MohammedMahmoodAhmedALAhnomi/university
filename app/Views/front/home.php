@@ -1,20 +1,35 @@
 <div class="hero-section">
-    <div class="hero-overlay"></div>
     <div class="container position-relative" style="z-index: 2;">
         <div class="mb-4">
-            <span class="badge rounded-pill px-4 py-2 fs-6 fw-bold shadow-sm" style="background: rgba(255, 255, 255, 0.22) !important; color: #ffffff !important; backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.4) !important;">
-                <i class="fas fa-graduation-cap ms-2"></i>اللجنة العلمية - كلية الحاسوب وتقنية المعلومات
+            <span class="hero-badge-pill">
+                <span class="hero-pulse-dot"></span>
+                <i class="fas fa-graduation-cap ms-1"></i>اللجنة العلمية - كلية الحاسوب وتقنية المعلومات
             </span>
         </div>
-        <h1 class="display-4 fw-bold mb-3 text-white">مرحباً بكم في اللجنة العلمية</h1>
-        <p class="lead mb-4 fs-5 mx-auto" style="max-width: 700px; color: #ffffff !important; opacity: 0.95;">منصة المشاركة العلمية - نوفر لكم جميع المواد الدراسية والملفات التعليمية بأحدث الوسائل التقنية</p>
-        <div class="d-flex justify-content-center gap-3 flex-wrap mb-5">
-            <a href="#majors-section" class="btn btn-light btn-lg rounded-pill px-5 fw-bold shadow-sm">
-                <i class="fas fa-university ms-2"></i>تصفح التخصصات
+        <h1 class="hero-title mb-3">منصتك الموحدة للمحتوى الأكاديمي والتعلم الذكي</h1>
+        <p class="hero-subtitle mb-4">نوفر لكم جميع المواد الدراسية، الملخصات الشاملة، النماذج الامتحانية، والمراجع العلمية بضغطة زر واحدة</p>
+
+        <!-- Integrated Fast Search Bar -->
+        <form class="hero-search-box d-flex align-items-center mb-4" action="<?php echo url('/search'); ?>" method="GET">
+            <input type="search" name="q" class="form-control hero-search-input" placeholder="ابحث عن مادة، ملخص، أو نموذج امتحان..." required>
+            <button type="submit" class="btn btn-primary hero-search-btn text-white">
+                <i class="fas fa-search ms-1"></i>بحث
+            </button>
+        </form>
+
+        <div class="d-flex justify-content-center gap-3 flex-wrap mb-3">
+            <a href="#majors-section" class="btn btn-light btn-lg rounded-pill px-4 fw-bold shadow-sm hero-btn-primary">
+                <i class="fas fa-university ms-2"></i>استكشف التخصصات
             </a>
-            <a href="<?php echo url('/announcements'); ?>" class="btn btn-outline-light btn-lg rounded-pill px-5 fw-bold">
-                <i class="fas fa-bullhorn ms-2"></i>الإعلانات
+            <a href="<?php echo url('/announcements'); ?>" class="btn btn-outline-light btn-lg rounded-pill px-4 fw-bold">
+                <i class="fas fa-bullhorn ms-2"></i>آخر الإعلانات
             </a>
+        </div>
+
+        <div class="hero-features-strip">
+            <span class="hero-feature-tag"><i class="fas fa-check-circle text-success ms-1"></i>محتوى معتمد ومحدث</span>
+            <span class="hero-feature-tag"><i class="fas fa-layer-group text-warning ms-1"></i>مصنف بحسب المستوى والترم</span>
+            <span class="hero-feature-tag"><i class="fas fa-bolt text-info ms-1"></i>تحميل سريع ومباشر</span>
         </div>
     </div>
     <div class="hero-wave position-absolute bottom-0 start-0 end-0" style="z-index: 1;">
@@ -25,7 +40,7 @@
 </div>
 
 <div class="container" style="margin-top: -2rem; position: relative; z-index: 3;">
-    <div id="homeSavedPrefBanner" class="alert alert-info border-0 shadow-sm rounded-4 d-none p-3 mb-4 align-items-center justify-content-between flex-wrap gap-2" style="background: linear-gradient(135deg, #e0e7ff 0%, #f0f9ff 100%); border-right: 5px solid #4f46e5 !important;">
+    <div id="homeSavedPrefBanner" class="alert alert-info home-pref-banner border-0 shadow-sm rounded-4 d-none p-3 mb-4 align-items-center justify-content-between flex-wrap gap-2">
         <div class="d-flex align-items-center gap-2">
             <div class="rounded-circle bg-primary bg-opacity-10 p-2 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
                 <i class="fas fa-graduation-cap text-primary fs-5"></i>
@@ -45,40 +60,49 @@
         </div>
     </div>
     <div class="row g-3 mb-5">
-        <div class="col-6 col-md-3">
-            <div class="stat-card-modern text-center p-4 bg-white shadow-sm rounded-4 border-0 h-100">
-                <div class="stat-icon-modern mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; background: rgba(79, 70, 229, 0.12) !important; color: #4f46e5 !important;">
+        <div class="col-6 col-md-4 col-lg">
+            <div class="stat-card-modern text-center p-3 p-md-4 bg-white shadow-sm rounded-4 border-0 h-100">
+                <div class="stat-icon-modern mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(99, 102, 241, 0.12) !important; color: #6366f1 !important;">
+                    <i class="fas fa-users fs-4"></i>
+                </div>
+                <div class="stat-number-modern fs-2 fw-bold text-dark"><?php echo $userCount ?? 0; ?></div>
+                <div class="stat-label-modern small text-muted">مستخدم ومستفيد</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg">
+            <div class="stat-card-modern text-center p-3 p-md-4 bg-white shadow-sm rounded-4 border-0 h-100">
+                <div class="stat-icon-modern mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(236, 72, 153, 0.12) !important; color: #ec4899 !important;">
+                    <i class="fas fa-download fs-4"></i>
+                </div>
+                <div class="stat-number-modern fs-2 fw-bold text-dark"><?php echo $totalDownloads ?? 0; ?></div>
+                <div class="stat-label-modern small text-muted">إجمالي التنزيلات</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg">
+            <div class="stat-card-modern text-center p-3 p-md-4 bg-white shadow-sm rounded-4 border-0 h-100">
+                <div class="stat-icon-modern mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(79, 70, 229, 0.12) !important; color: #4f46e5 !important;">
                     <i class="fas fa-book-open fs-4"></i>
                 </div>
                 <div class="stat-number-modern fs-2 fw-bold text-dark"><?php echo $courseCount; ?></div>
                 <div class="stat-label-modern small text-muted">مادة دراسية</div>
             </div>
         </div>
-        <div class="col-6 col-md-3">
-            <div class="stat-card-modern text-center p-4 bg-white shadow-sm rounded-4 border-0 h-100">
-                <div class="stat-icon-modern mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; background: rgba(16, 185, 129, 0.12) !important; color: #10b981 !important;">
+        <div class="col-6 col-md-6 col-lg">
+            <div class="stat-card-modern text-center p-3 p-md-4 bg-white shadow-sm rounded-4 border-0 h-100">
+                <div class="stat-icon-modern mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(16, 185, 129, 0.12) !important; color: #10b981 !important;">
                     <i class="fas fa-file-alt fs-4"></i>
                 </div>
                 <div class="stat-number-modern fs-2 fw-bold text-dark"><?php echo $fileCount; ?></div>
                 <div class="stat-label-modern small text-muted">ملف تعليمي</div>
             </div>
         </div>
-        <div class="col-6 col-md-3">
-            <div class="stat-card-modern text-center p-4 bg-white shadow-sm rounded-4 border-0 h-100">
-                <div class="stat-icon-modern mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; background: rgba(245, 158, 11, 0.12) !important; color: #d97706 !important;">
+        <div class="col-12 col-md-6 col-lg">
+            <div class="stat-card-modern text-center p-3 p-md-4 bg-white shadow-sm rounded-4 border-0 h-100">
+                <div class="stat-icon-modern mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(245, 158, 11, 0.12) !important; color: #d97706 !important;">
                     <i class="fas fa-layer-group fs-4"></i>
                 </div>
                 <div class="stat-number-modern fs-2 fw-bold text-dark"><?php echo $majorCount; ?></div>
                 <div class="stat-label-modern small text-muted">تخصص علمي</div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="stat-card-modern text-center p-4 bg-white shadow-sm rounded-4 border-0 h-100">
-                <div class="stat-icon-modern mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; background: rgba(6, 182, 212, 0.12) !important; color: #0891b2 !important;">
-                    <i class="fas fa-clock fs-4"></i>
-                </div>
-                <div class="stat-number-modern fs-2 fw-bold text-dark"><?php echo $newFilesCount; ?></div>
-                <div class="stat-label-modern small text-muted">مضاف حديثاً</div>
             </div>
         </div>
     </div>

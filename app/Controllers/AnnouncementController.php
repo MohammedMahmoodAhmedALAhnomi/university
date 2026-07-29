@@ -60,14 +60,19 @@ class AnnouncementController extends Controller
 
         $image = $this->fileParam('image');
         if ($image && $image['error'] === UPLOAD_ERR_OK) {
-            $uploadDir = __DIR__ . '/../../public/uploads/announcements/';
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
-            $ext = pathinfo($image['name'], PATHINFO_EXTENSION);
-            $imgName = uniqid('announcement_') . '.' . $ext;
-            if (move_uploaded_file($image['tmp_name'], $uploadDir . $imgName)) {
-                $data['image'] = $imgName;
+            $ext = strtolower(pathinfo($image['name'], PATHINFO_EXTENSION));
+            $allowedImages = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            if (!in_array($ext, $allowedImages, true)) {
+                $errors['image'][] = 'نوع الملف المرفوع غير مسموح به كصورة إعلان';
+            } else {
+                $uploadDir = __DIR__ . '/../../public/uploads/announcements/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+                $imgName = uniqid('announcement_') . '.' . $ext;
+                if (move_uploaded_file($image['tmp_name'], $uploadDir . $imgName)) {
+                    $data['image_path'] = 'uploads/announcements/' . $imgName;
+                }
             }
         }
 
@@ -115,14 +120,19 @@ class AnnouncementController extends Controller
 
         $image = $this->fileParam('image');
         if ($image && $image['error'] === UPLOAD_ERR_OK) {
-            $uploadDir = __DIR__ . '/../../public/uploads/announcements/';
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
-            $ext = pathinfo($image['name'], PATHINFO_EXTENSION);
-            $imgName = uniqid('announcement_') . '.' . $ext;
-            if (move_uploaded_file($image['tmp_name'], $uploadDir . $imgName)) {
-                $data['image'] = $imgName;
+            $ext = strtolower(pathinfo($image['name'], PATHINFO_EXTENSION));
+            $allowedImages = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            if (!in_array($ext, $allowedImages, true)) {
+                $errors['image'][] = 'نوع الملف المرفوع غير مسموح به كصورة إعلان';
+            } else {
+                $uploadDir = __DIR__ . '/../../public/uploads/announcements/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+                $imgName = uniqid('announcement_') . '.' . $ext;
+                if (move_uploaded_file($image['tmp_name'], $uploadDir . $imgName)) {
+                    $data['image_path'] = 'uploads/announcements/' . $imgName;
+                }
             }
         }
 
@@ -149,6 +159,11 @@ class AnnouncementController extends Controller
 
     public function delete(): void
     {
+        if (!verify_csrf()) {
+            flash('error', 'طلب غير صالح أو انتهت مهلة الجلسة');
+            redirect(url('/admin/announcements'));
+        }
+
         $id = $this->getParam('id');
         $announcement = Announcement::find($id);
 

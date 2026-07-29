@@ -8,6 +8,8 @@ use App\Models\Major;
 use App\Models\Level;
 use App\Models\User;
 
+use App\Models\Notification;
+
 class JoinRequestController extends Controller
 {
     public function requestForm(): void
@@ -66,6 +68,10 @@ class JoinRequestController extends Controller
             'status' => 'pending',
         ]);
 
+        $user = User::find($userId);
+        $userName = $user->full_name ?? 'مستخدم جديد';
+        Notification::send(null, 'طلب انضمام جديد 📩', 'قام ' . $userName . ' بتقديم طلب انضمام جديد كـ ' . ($accountType === 'representative' ? 'مندوب مستوى' : 'مسؤول تخصص'), 'warning', url('/admin/requests'));
+
         log_activity('create', 'join_requests', $userId, 'إرسال طلب انضمام كـ ' . ($accountType === 'representative' ? 'مندوب' : 'مسؤول'));
         redirect(url('/pending-approval'));
     }
@@ -111,8 +117,18 @@ class JoinRequestController extends Controller
     // Super Admin: Approve request
     public function approve(): void
     {
+        if (!verify_csrf()) {
+            flash('error', 'طلب غير صالح أو انتهت مهلة الجلسة');
+            redirect(url('/admin/requests'));
+        }
+
         $id = (int)$this->getParam('id');
+        $req = \App\Config\Database::fetch("SELECT user_id FROM join_requests WHERE id = ?", [$id]);
+
         if (JoinRequest::approve($id)) {
+            if ($req) {
+                Notification::send((int)$req->user_id, 'تمت الموافقة على طلبك 🎉', 'تمت الموافقة على طلب الانضمام وتفعيل صلاحياتك بنجاح. أهلاً بك في لوحة التحكم!', 'success', url('/admin/dashboard'));
+            }
             log_activity('update', 'join_requests', $id, 'الموافقة على طلب الانضمام رقم ' . $id);
             flash('success', 'تمت الموافقة على الطلب وتعيين الصلاحيات بنجاح');
         } else {
@@ -124,8 +140,18 @@ class JoinRequestController extends Controller
     // Super Admin: Reject request
     public function reject(): void
     {
+        if (!verify_csrf()) {
+            flash('error', 'طلب غير صالح أو انتهت مهلة الجلسة');
+            redirect(url('/admin/requests'));
+        }
+
         $id = (int)$this->getParam('id');
+        $req = \App\Config\Database::fetch("SELECT user_id FROM join_requests WHERE id = ?", [$id]);
+
         if (JoinRequest::reject($id)) {
+            if ($req) {
+                Notification::send((int)$req->user_id, 'نتيجة طلب الانضمام ❌', 'نأسف، تم رفض طلب الانضمام الخاص بك.', 'danger', url('/request-role'));
+            }
             log_activity('update', 'join_requests', $id, 'رفض طلب الانضمام رقم ' . $id);
             flash('success', 'تم رفض طلب الانضمام');
         } else {

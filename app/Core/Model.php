@@ -52,15 +52,17 @@ abstract class Model
 
     public static function paginate(int $page = 1, int $perPage = 10): array
     {
+        $page = max(1, $page);
+        $perPage = max(1, $perPage);
         $offset = ($page - 1) * $perPage;
         $total = static::count();
-        $items = Database::fetchAll("SELECT * FROM " . static::$table . " ORDER BY id DESC LIMIT ? OFFSET ?", [$perPage, $offset]);
+        $items = Database::fetchAll("SELECT * FROM " . static::$table . " ORDER BY id DESC LIMIT {$perPage} OFFSET {$offset}");
         return [
             'items' => $items,
             'total' => $total,
             'page' => $page,
             'perPage' => $perPage,
-            'totalPages' => ceil($total / $perPage),
+            'totalPages' => (int) ceil($total / $perPage),
         ];
     }
 }
