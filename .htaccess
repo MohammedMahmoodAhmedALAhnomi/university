@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Let requests to public/ pass through
+RewriteRule ^public/ - [L]
+
+# If not a real file or directory, send to index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
