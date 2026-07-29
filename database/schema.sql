@@ -1,4 +1,4 @@
-﻿-- ============================================================
+-- ============================================================
 -- قاعدة البيانات: university_system
 -- ============================================================
 
@@ -58,7 +58,8 @@ CREATE TABLE IF NOT EXISTS courses (
     FOREIGN KEY (major_id) REFERENCES majors(id) ON DELETE CASCADE,
     FOREIGN KEY (level_id) REFERENCES levels(id) ON DELETE CASCADE,
     FOREIGN KEY (semester_id) REFERENCES semesters(id) ON DELETE CASCADE,
-    INDEX idx_major_level (major_id, level_id)
+    INDEX idx_major_level (major_id, level_id),
+    INDEX idx_major_level_semester (major_id, level_id, semester_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
@@ -69,11 +70,12 @@ CREATE TABLE IF NOT EXISTS users (
     major_id INT NULL,
     full_name VARCHAR(150) NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL,
+    google_id VARCHAR(255) NULL,
     password VARCHAR(255) NOT NULL,
     phone VARCHAR(20),
     managed_level_id INT NULL,
     managed_major_id INT NULL,
-    role ENUM('admin', 'manager', 'guest') DEFAULT 'guest',
+    role ENUM('admin', 'manager', 'major_admin', 'guest') DEFAULT 'guest',
     is_active BOOLEAN DEFAULT TRUE,
     last_login TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -112,6 +114,7 @@ CREATE TABLE IF NOT EXISTS files (
     FOREIGN KEY (uploaded_by) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_course (course_id),
     INDEX idx_type (file_type),
+    INDEX idx_course_approved (course_id, is_approved),
     INDEX idx_downloads (download_count DESC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -198,6 +201,42 @@ CREATE TABLE IF NOT EXISTS settings (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_key (setting_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 12. جدول طلبات الانضمام (Join Requests)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS join_requests (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    account_type ENUM('representative', 'major_admin') NOT NULL DEFAULT 'representative',
+    major_id INT NOT NULL,
+    level_id INT NULL,
+    status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (major_id) REFERENCES majors(id) ON DELETE CASCADE,
+    FOREIGN KEY (level_id) REFERENCES levels(id) ON DELETE SET NULL,
+    INDEX idx_user (user_id),
+    INDEX idx_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 13. جدول الإشعارات (Notifications)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS notifications (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NULL,
+    title VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    type ENUM('info', 'success', 'warning', 'danger') DEFAULT 'info',
+    link VARCHAR(255) NULL,
+    is_read TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_user (user_id),
+    INDEX idx_read (is_read),
+    INDEX idx_created (created_at DESC)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================

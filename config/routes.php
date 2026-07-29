@@ -92,4 +92,8 @@ return [
     '/admin/managers/{id}/edit' => ['controller' => 'ManagerController', 'action' => 'edit', 'method' => 'GET', 'middleware' => ['Auth']],
     '/admin/managers/update' => ['controller' => 'ManagerController', 'action' => 'update', 'method' => 'POST', 'middleware' => ['Auth']],
     '/admin/managers/{id}/delete' => ['controller' => 'ManagerController', 'action' => 'delete', 'method' => 'GET', 'middleware' => ['Auth']],
+
+    '/notifications/{id}/read' => ['controller' => 'NotificationController', 'action' => 'markRead', 'method' => 'POST', 'middleware' => ['Auth']],
+    '/notifications/read-all' => ['controller' => 'NotificationController', 'action' => 'readAll', 'method' => 'POST', 'middleware' => ['Auth']],
 ];
+
