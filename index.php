@@ -1,8 +1,11 @@
 <?php
-$requestUri = $_SERVER['REQUEST_URI'];
+$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $scriptName = $_SERVER['SCRIPT_NAME'];
-$basePath = dirname($scriptName);
-$relativePath = substr($requestUri, strlen($basePath));
+$basePath = rtrim(dirname($scriptName), '/\\');
+if ($basePath === '.' || $basePath === '/' || $basePath === '\\') {
+    $basePath = '';
+}
+$relativePath = '/' . ltrim(substr($requestUri, strlen($basePath)), '/\\');
 $publicFile = __DIR__ . '/public' . $relativePath;
 
 if (file_exists($publicFile) && !is_dir($publicFile)) {
