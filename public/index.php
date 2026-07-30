@@ -1,24 +1,31 @@
 <?php
 
-session_start();
-
 require_once __DIR__ . '/../vendor/autoload.php';
-
 require_once __DIR__ . '/../app/Config/Helpers.php';
 
 $dotenv = __DIR__ . '/../.env';
 if (file_exists($dotenv)) {
     $lines = file($dotenv, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($lines as $line) {
-        if (str_starts_with(trim($line), '#')) continue;
+        $trimmedLine = trim($line);
+        if (str_starts_with($trimmedLine, '#') || empty($trimmedLine)) continue;
         if (str_contains($line, '=')) {
             [$key, $value] = explode('=', $line, 2);
             $key = trim($key);
-            $value = trim($value);
+            $value = trim(trim($value), "\"'");
             putenv("$key=$value");
             $_ENV[$key] = $value;
+            $_SERVER[$key] = $value;
         }
     }
+}
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start([
+        'cookie_httponly' => true,
+        'cookie_samesite' => 'Lax',
+        'use_strict_mode' => true,
+    ]);
 }
 
 error_reporting(E_ALL);
