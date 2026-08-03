@@ -240,6 +240,56 @@ CREATE TABLE IF NOT EXISTS notifications (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
+-- 14. جدول المفضلة (User Bookmarks)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS user_bookmarks (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    file_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (file_id) REFERENCES files(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_user_file (user_id, file_id),
+    INDEX idx_user (user_id),
+    INDEX idx_file (file_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- 15. جدول جداول المحاضرات والامتحانات (Schedules)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS schedules (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    major_id INT NULL,
+    level_id INT NULL,
+    group_name VARCHAR(100) NULL,
+    sub_group_name VARCHAR(100) NULL,
+    section_code VARCHAR(100) NULL,
+    semester_id INT NULL,
+    title VARCHAR(200) NOT NULL,
+    type ENUM('lecture', 'exam', 'pdf_file') DEFAULT 'lecture',
+    file_path VARCHAR(500) NULL,
+    subject_name VARCHAR(150) NULL,
+    doctor_name VARCHAR(150) NULL,
+    day_of_week ENUM('Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday') NULL,
+    start_time TIME NULL,
+    end_time TIME NULL,
+    exam_date DATETIME NULL,
+    location_hall VARCHAR(150) NULL,
+    notes TEXT NULL,
+    created_by INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (major_id) REFERENCES majors(id) ON DELETE CASCADE,
+    FOREIGN KEY (level_id) REFERENCES levels(id) ON DELETE CASCADE,
+    FOREIGN KEY (semester_id) REFERENCES semesters(id) ON DELETE SET NULL,
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_major_level (major_id, level_id),
+    INDEX idx_major_level_group (major_id, level_id, group_name),
+    INDEX idx_type (type),
+    INDEX idx_exam_date (exam_date)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================================
 -- إدخال إعدادات افتراضية
 -- ============================================================
 INSERT INTO settings (setting_key, setting_value, setting_type, setting_group) VALUES

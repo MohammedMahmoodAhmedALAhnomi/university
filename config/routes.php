@@ -17,9 +17,21 @@ return [
 
     '/login' => ['controller' => 'AuthController', 'action' => 'loginForm', 'method' => 'GET'],
     '/login/post' => ['controller' => 'AuthController', 'action' => 'login', 'method' => 'POST'],
+    '/register' => ['controller' => 'AuthController', 'action' => 'registerForm', 'method' => 'GET'],
+    '/register/post' => ['controller' => 'AuthController', 'action' => 'register', 'method' => 'POST'],
+    '/auth/google' => ['controller' => 'AuthController', 'action' => 'googleRedirect', 'method' => 'GET'],
+    '/auth/google/callback' => ['controller' => 'AuthController', 'action' => 'googleCallback', 'method' => 'GET'],
     '/logout' => ['controller' => 'AuthController', 'action' => 'logout', 'method' => 'GET'],
 
-    '/admin' => ['controller' => 'DashboardController', 'action' => 'index', 'method' => 'GET', 'middleware' => ['Auth', 'Admin']],
+    '/request-role' => ['controller' => 'JoinRequestController', 'action' => 'requestForm', 'method' => 'GET'],
+    '/request-role/post' => ['controller' => 'JoinRequestController', 'action' => 'submitRequest', 'method' => 'POST'],
+    '/pending-approval' => ['controller' => 'JoinRequestController', 'action' => 'pendingApproval', 'method' => 'GET'],
+
+    '/admin/requests' => ['controller' => 'JoinRequestController', 'action' => 'adminIndex', 'method' => 'GET', 'middleware' => ['Auth', 'Admin']],
+    '/admin/requests/{id}/approve' => ['controller' => 'JoinRequestController', 'action' => 'approve', 'method' => 'GET', 'middleware' => ['Auth', 'Admin']],
+    '/admin/requests/{id}/reject' => ['controller' => 'JoinRequestController', 'action' => 'reject', 'method' => 'GET', 'middleware' => ['Auth', 'Admin']],
+
+    '/admin' => ['controller' => 'DashboardController', 'action' => 'index', 'method' => 'GET', 'middleware' => ['Auth']],
     '/admin/dashboard' => ['controller' => 'DashboardController', 'action' => 'index', 'method' => 'GET', 'middleware' => ['Auth']],
 
     '/admin/majors' => ['controller' => 'MajorController', 'action' => 'index', 'method' => 'GET', 'middleware' => ['Auth']],
@@ -57,12 +69,12 @@ return [
     '/admin/files/{id}/delete' => ['controller' => 'FileController', 'action' => 'delete', 'method' => 'GET', 'middleware' => ['Auth']],
     '/admin/files/{id}/toggle' => ['controller' => 'FileController', 'action' => 'toggleApproval', 'method' => 'GET', 'middleware' => ['Auth']],
 
-    '/admin/users' => ['controller' => 'UserController', 'action' => 'index', 'method' => 'GET', 'middleware' => ['Auth', 'Admin']],
-    '/admin/users/create' => ['controller' => 'UserController', 'action' => 'create', 'method' => 'GET', 'middleware' => ['Auth', 'Admin']],
-    '/admin/users/store' => ['controller' => 'UserController', 'action' => 'store', 'method' => 'POST', 'middleware' => ['Auth', 'Admin']],
-    '/admin/users/{id}/edit' => ['controller' => 'UserController', 'action' => 'edit', 'method' => 'GET', 'middleware' => ['Auth', 'Admin']],
-    '/admin/users/{id}/update' => ['controller' => 'UserController', 'action' => 'update', 'method' => 'POST', 'middleware' => ['Auth', 'Admin']],
-    '/admin/users/{id}/delete' => ['controller' => 'UserController', 'action' => 'delete', 'method' => 'GET', 'middleware' => ['Auth', 'Admin']],
+    '/admin/users' => ['controller' => 'UserController', 'action' => 'index', 'method' => 'GET', 'middleware' => ['Auth']],
+    '/admin/users/create' => ['controller' => 'UserController', 'action' => 'create', 'method' => 'GET', 'middleware' => ['Auth']],
+    '/admin/users/store' => ['controller' => 'UserController', 'action' => 'store', 'method' => 'POST', 'middleware' => ['Auth']],
+    '/admin/users/{id}/edit' => ['controller' => 'UserController', 'action' => 'edit', 'method' => 'GET', 'middleware' => ['Auth']],
+    '/admin/users/{id}/update' => ['controller' => 'UserController', 'action' => 'update', 'method' => 'POST', 'middleware' => ['Auth']],
+    '/admin/users/{id}/delete' => ['controller' => 'UserController', 'action' => 'delete', 'method' => 'GET', 'middleware' => ['Auth']],
 
     '/admin/announcements' => ['controller' => 'AnnouncementController', 'action' => 'adminIndex', 'method' => 'GET', 'middleware' => ['Auth']],
     '/admin/announcements/create' => ['controller' => 'AnnouncementController', 'action' => 'create', 'method' => 'GET', 'middleware' => ['Auth']],
@@ -81,17 +93,22 @@ return [
     '/admin/managers/update' => ['controller' => 'ManagerController', 'action' => 'update', 'method' => 'POST', 'middleware' => ['Auth']],
     '/admin/managers/{id}/delete' => ['controller' => 'ManagerController', 'action' => 'delete', 'method' => 'GET', 'middleware' => ['Auth']],
 
-    // API Routes for Flutter App
-    '/api/login' => ['controller' => 'ApiController', 'action' => 'login', 'method' => 'POST'],
-    '/api/register' => ['controller' => 'ApiController', 'action' => 'register', 'method' => 'POST'],
-    '/api/home' => ['controller' => 'ApiController', 'action' => 'home', 'method' => 'GET'],
-    '/api/majors' => ['controller' => 'ApiController', 'action' => 'majors', 'method' => 'GET'],
-    '/api/majors/{id}' => ['controller' => 'ApiController', 'action' => 'majorDetails', 'method' => 'GET'],
-    '/api/courses/{id}' => ['controller' => 'ApiController', 'action' => 'courseDetails', 'method' => 'GET'],
-    '/api/courses/{id}/rate' => ['controller' => 'ApiController', 'action' => 'rateCourse', 'method' => 'POST'],
-    '/api/announcements' => ['controller' => 'ApiController', 'action' => 'announcements', 'method' => 'GET'],
-    '/api/announcements/{id}' => ['controller' => 'ApiController', 'action' => 'announcementDetails', 'method' => 'GET'],
-    '/api/search' => ['controller' => 'ApiController', 'action' => 'search', 'method' => 'GET'],
-    '/api/files/{id}/download' => ['controller' => 'ApiController', 'action' => 'downloadFile', 'method' => 'GET'],
-    '/api/settings' => ['controller' => 'ApiController', 'action' => 'settings', 'method' => 'GET'],
+    '/notifications/{id}/read' => ['controller' => 'NotificationController', 'action' => 'markRead', 'method' => 'POST', 'middleware' => ['Auth']],
+    '/notifications/read-all' => ['controller' => 'NotificationController', 'action' => 'readAll', 'method' => 'POST', 'middleware' => ['Auth']],
+
+    // أدوات الطالب (Student Tools)
+    '/student/gpa-calculator' => ['controller' => 'StudentController', 'action' => 'gpaCalculator', 'method' => 'GET'],
+    '/student/bookmarks' => ['controller' => 'StudentController', 'action' => 'bookmarks', 'method' => 'GET'],
+    '/student/bookmarks/toggle' => ['controller' => 'StudentController', 'action' => 'toggleBookmark', 'method' => 'POST'],
+    '/student/schedule' => ['controller' => 'StudentController', 'action' => 'schedule', 'method' => 'GET'],
+
+    // إدارة الجداول الدراسية في لوحة التحكم
+    '/admin/schedule' => ['controller' => 'ScheduleController', 'action' => 'index', 'method' => 'GET', 'middleware' => ['Auth']],
+    '/admin/schedule/create' => ['controller' => 'ScheduleController', 'action' => 'create', 'method' => 'GET', 'middleware' => ['Auth']],
+    '/admin/schedule/store' => ['controller' => 'ScheduleController', 'action' => 'store', 'method' => 'POST', 'middleware' => ['Auth']],
+    '/admin/schedule/import' => ['controller' => 'ScheduleController', 'action' => 'importForm', 'method' => 'GET', 'middleware' => ['Auth']],
+    '/admin/schedule/import/upload' => ['controller' => 'ScheduleController', 'action' => 'processImport', 'method' => 'POST', 'middleware' => ['Auth']],
+    '/admin/schedule/template' => ['controller' => 'ScheduleController', 'action' => 'downloadTemplate', 'method' => 'GET', 'middleware' => ['Auth']],
+    '/admin/schedule/{id}/delete' => ['controller' => 'ScheduleController', 'action' => 'delete', 'method' => 'GET', 'middleware' => ['Auth']],
 ];
+

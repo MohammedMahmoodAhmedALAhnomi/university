@@ -1,24 +1,40 @@
 <?php
 
-session_start();
-
 require_once __DIR__ . '/../vendor/autoload.php';
-
 require_once __DIR__ . '/../app/Config/Helpers.php';
+
+spl_autoload_register(function ($class) {
+    if (str_starts_with($class, 'App\\')) {
+        $file = __DIR__ . '/../app/' . str_replace('\\', '/', substr($class, 4)) . '.php';
+        if (file_exists($file)) {
+            require_once $file;
+        }
+    }
+});
 
 $dotenv = __DIR__ . '/../.env';
 if (file_exists($dotenv)) {
     $lines = file($dotenv, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($lines as $line) {
-        if (str_starts_with(trim($line), '#')) continue;
+        $trimmedLine = trim($line);
+        if (str_starts_with($trimmedLine, '#') || empty($trimmedLine)) continue;
         if (str_contains($line, '=')) {
             [$key, $value] = explode('=', $line, 2);
             $key = trim($key);
-            $value = trim($value);
+            $value = trim(trim($value), "\"'");
             putenv("$key=$value");
             $_ENV[$key] = $value;
+            $_SERVER[$key] = $value;
         }
     }
+}
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start([
+        'cookie_httponly' => true,
+        'cookie_samesite' => 'Lax',
+        'use_strict_mode' => true,
+    ]);
 }
 
 error_reporting(E_ALL);
@@ -28,19 +44,6 @@ if ($debug) {
     ini_set('display_startup_errors', 1);
 } else {
     ini_set('display_errors', 0);
-}
-
-// Global CORS handling for Flutter Web / Edge / Browsers
-$requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '';
-if (str_contains($requestPath, '/api')) {
-    header("Access-Control-Allow-Origin: *");
-    header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-    header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
-
-    if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
-        http_response_code(200);
-        exit;
-    }
 }
 
 $router = new \App\Config\Router();
