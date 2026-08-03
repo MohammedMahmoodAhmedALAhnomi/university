@@ -62,41 +62,15 @@ document.addEventListener('DOMContentLoaded', function () {
   if (backToTopBtn) {
     window.addEventListener('scroll', function () {
       if (window.pageYOffset > 300) {
-        backToTopBtn.classList.add('show');
+        backToTopBtn.classList.add('visible');
       } else {
-        backToTopBtn.classList.remove('show');
+        backToTopBtn.classList.remove('visible');
       }
-    }, { passive: true });
+    });
     backToTopBtn.addEventListener('click', function () {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   }
-
-  // Close offcanvas on swipe right (for RTL)
-  var offcanvasEl = document.getElementById('mainNavbar');
-  if (offcanvasEl) {
-    var touchStartX2 = 0;
-    offcanvasEl.addEventListener('touchstart', function (e) {
-      touchStartX2 = e.changedTouches[0].screenX;
-    }, { passive: true });
-    offcanvasEl.addEventListener('touchend', function (e) {
-      var diff = touchStartX2 - e.changedTouches[0].screenX;
-      if (diff < -60) {
-        var bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvasEl);
-        if (bsOffcanvas) bsOffcanvas.hide();
-      }
-    }, { passive: true });
-  }
-
-  // Smooth dismiss for alerts
-  document.querySelectorAll('.alert-dismissible').forEach(function (alert) {
-    setTimeout(function () {
-      if (alert && alert.parentNode) {
-        var bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
-        bsAlert.close();
-      }
-    }, 6000);
-  });
 
   var fileIcons = document.querySelectorAll('.file-icon');
   fileIcons.forEach(function (icon) {
