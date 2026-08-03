@@ -47,4 +47,14 @@ class Setting extends Model
         }
         return $result;
     }
+
+    public static function getAll(): array
+    {
+        $rows = Database::fetchAll("SELECT setting_key, setting_value FROM settings");
+        $result = [];
+        foreach ($rows as $row) {
+            $result[$row->setting_key] = $row->setting_value;
+        }
+        return $result;
+    }
 }
