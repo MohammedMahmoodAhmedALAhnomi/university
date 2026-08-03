@@ -12,7 +12,8 @@ class Course extends Model
 
     public static function getAllWithDetails(?string $where = null, array $params = []): array
     {
-        $sql = "SELECT c.*, m.name as major_name, l.name as level_name, s.name as semester_name
+        $sql = "SELECT c.*, m.name as major_name, l.name as level_name, s.name as semester_name,
+                       (SELECT COUNT(*) FROM files f WHERE f.course_id = c.id) as files_count
                 FROM courses c
                 JOIN majors m ON m.id = c.major_id
                 JOIN levels l ON l.id = c.level_id
@@ -110,8 +111,10 @@ class Course extends Model
         $rows = Database::fetchAll(
             "SELECT c.id, c.name, c.description, c.is_active, c.created_at, c.updated_at,
                     c.major_id, c.level_id, c.semester_id,
+                    m.name as major_name,
                     l.name as level_name, l.level_number, s.name as semester_name, s.semester_number
              FROM courses c
+             JOIN majors m ON m.id = c.major_id
              JOIN levels l ON l.id = c.level_id
              JOIN semesters s ON s.id = c.semester_id
              WHERE c.major_id = ? AND c.is_active = 1{$levelFilter}

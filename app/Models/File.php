@@ -19,6 +19,8 @@ class File extends Model
             "SELECT COUNT(*) FROM files f WHERE f.course_id = ? AND f.is_approved = 1",
             [$courseId]
         )->fetchColumn();
+        $page = max(1, $page);
+        $perPage = max(1, $perPage);
         $offset = ($page - 1) * $perPage;
         $rows = Database::fetchAll(
             "SELECT f.*, u.full_name as uploader_name
@@ -26,8 +28,8 @@ class File extends Model
              JOIN users u ON u.id = f.uploaded_by
              WHERE f.course_id = ? AND f.is_approved = 1
              ORDER BY $orderBy
-             LIMIT ? OFFSET ?",
-            [$courseId, $perPage, $offset]
+             LIMIT {$perPage} OFFSET {$offset}",
+            [$courseId]
         );
         return ['files' => $rows, 'total' => (int)$total, 'pages' => max(1, (int)ceil($total / $perPage))];
     }
@@ -82,6 +84,7 @@ class File extends Model
 
     public static function getRecent(int $limit = 10, ?int $levelId = null, ?int $majorId = null): array
     {
+        $limit = max(1, (int)$limit);
         $sql = "SELECT f.*, c.name as course_name
                 FROM files f
                 JOIN courses c ON c.id = f.course_id
@@ -95,13 +98,13 @@ class File extends Model
             $sql .= " AND c.major_id = ?";
             $params[] = $majorId;
         }
-        $sql .= " ORDER BY f.created_at DESC LIMIT ?";
-        $params[] = $limit;
+        $sql .= " ORDER BY f.created_at DESC LIMIT {$limit}";
         return Database::fetchAll($sql, $params);
     }
 
     public static function getByType(string $type, int $limit = 20, ?int $levelId = null, ?int $majorId = null): array
     {
+        $limit = max(1, (int)$limit);
         $sql = "SELECT f.*, c.name as course_name
                 FROM files f
                 JOIN courses c ON c.id = f.course_id
@@ -115,8 +118,7 @@ class File extends Model
             $sql .= " AND c.major_id = ?";
             $params[] = $majorId;
         }
-        $sql .= " ORDER BY f.created_at DESC LIMIT ?";
-        $params[] = $limit;
+        $sql .= " ORDER BY f.created_at DESC LIMIT {$limit}";
         return Database::fetchAll($sql, $params);
     }
 
@@ -134,4 +136,11 @@ class File extends Model
         $result = Database::fetch($sql, $params);
         return (int) ($result->total ?? 0);
     }
+
+    public static function getTotalDownloads(): int
+    {
+        $result = Database::fetch("SELECT COALESCE(SUM(download_count), 0) as total FROM files");
+        return (int) ($result->total ?? 0);
+    }
 }
+

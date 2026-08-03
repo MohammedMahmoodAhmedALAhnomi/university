@@ -1,10 +1,23 @@
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb mb-3">
-        <li class="breadcrumb-item"><a href="<?php echo url('/'); ?>"><i class="fas fa-home ms-1"></i>الرئيسية</a></li>
-        <li class="breadcrumb-item"><a href="<?php echo url('/majors/' . escape($course->major_id)); ?>"><?php echo escape($course->major_name ?? ''); ?></a></li>
-        <li class="breadcrumb-item active"><?php echo escape($course->name); ?></li>
-    </ol>
-</nav>
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="<?php echo url('/?home=1'); ?>"><i class="fas fa-home ms-1"></i>الرئيسية</a></li>
+            <li class="breadcrumb-item"><a href="<?php echo url('/majors/' . escape($course->major_id)); ?>"><?php echo escape($course->major_name ?? ''); ?></a></li>
+            <?php if (!empty($course->level_name)): ?>
+                <li class="breadcrumb-item active"><?php echo escape($course->level_name); ?></li>
+            <?php endif; ?>
+            <li class="breadcrumb-item active"><?php echo escape($course->name); ?></li>
+        </ol>
+    </nav>
+    <div class="d-flex gap-2">
+        <a href="<?php echo url('/majors/' . escape($course->major_id) . ($course->level_id ? '?level=' . escape($course->level_id) : '')); ?>" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+            <i class="fas fa-layer-group ms-1"></i>الرجوع للمستويات والمواد
+        </a>
+        <a href="<?php echo url('/?home=1'); ?>" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <i class="fas fa-home ms-1"></i>الرئيسية
+        </a>
+    </div>
+</div>
 
 <div class="card shadow-sm border-0 mb-4">
     <div class="card-body">
@@ -13,15 +26,15 @@
                 <i class="fas fa-info-circle ms-2 text-primary"></i>
                 <?php echo escape($course->name); ?>
             </h4>
-            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">
-                <i class="fas fa-graduation-cap ms-1"></i>
-                <?php echo escape($course->major_name ?? ''); ?>
+            <span class="badge rounded-pill px-3 py-2" style="background: rgba(79, 70, 229, 0.15) !important; color: #4f46e5 !important; font-weight: 700 !important;">
+                <i class="<?php echo get_major_icon($course->major_name ?? ''); ?> ms-1"></i>
+                <?php echo escape($course->major_name ?? 'عام'); ?>
             </span>
-            <span class="badge bg-teal bg-opacity-10 text-teal rounded-pill px-3 py-2">
+            <span class="badge rounded-pill px-3 py-2" style="background: rgba(6, 182, 212, 0.15) !important; color: #0891b2 !important; font-weight: 700 !important;">
                 <i class="fas fa-layer-group ms-1"></i>
                 <?php echo escape($course->level_name ?? ''); ?>
             </span>
-            <span class="badge bg-purple bg-opacity-10 text-purple rounded-pill px-3 py-2">
+            <span class="badge rounded-pill px-3 py-2" style="background: rgba(168, 85, 247, 0.15) !important; color: #9333ea !important; font-weight: 700 !important;">
                 <i class="fas fa-calendar-alt ms-1"></i>
                 <?php echo escape($course->semester_name ?? ''); ?>
             </span>
@@ -82,12 +95,12 @@
 
 <div>
         <?php
-        $typeLabels = ['lecture' => 'محاضرات', 'summary' => 'ملخصات', 'model' => 'نماذج اختبار', 'exam' => 'اختبارات', 'other' => 'أخرى'];
-        $typeIcons = ['lecture' => 'fa-book', 'summary' => 'fa-file-lines', 'model' => 'fa-clipboard', 'exam' => 'fa-pen-to-square', 'other' => 'fa-folder'];
-        $typeColors = ['lecture' => 'primary', 'summary' => 'success', 'model' => 'warning', 'exam' => 'danger', 'other' => 'secondary'];
+        $typeLabels = ['lecture' => 'محاضرات', 'summary' => 'ملخصات', 'model' => 'نماذج', 'reference' => 'مراجع'];
+        $typeIcons = ['lecture' => 'fa-book', 'summary' => 'fa-file-lines', 'model' => 'fa-clipboard', 'reference' => 'fa-bookmark'];
+        $typeColors = ['lecture' => 'primary', 'summary' => 'success', 'model' => 'warning', 'reference' => 'secondary'];
         $grouped = [];
         foreach ($files as $file) {
-            $t = $file->file_type ?? 'other';
+            $t = $file->file_type ?? 'lecture';
             $grouped[$t][] = $file;
         }
         ?>
@@ -127,6 +140,7 @@
                                         <thead class="table-<?php echo $typeColors[$key]; ?>">
                                             <tr>
                                                 <th>الملف</th>
+                                                <th>الدكتور</th>
                                                 <th>النوع</th>
                                                 <th>تاريخ الرفع</th>
                                                 <th>التحميلات</th>
@@ -139,6 +153,9 @@
                                                     <td>
                                                         <i class="fas fa-file-<?php echo $file->file_extension === 'pdf' ? 'pdf text-danger' : ($file->file_extension === 'image' ? 'image text-success' : ($file->file_extension === 'doc' || $file->file_extension === 'docx' ? 'word text-primary' : 'alt text-secondary')); ?> ms-1"></i>
                                                         <?php echo escape($file->title); ?>
+                                                    </td>
+                                                    <td>
+                                                        <small class="text-muted"><?php echo escape($file->doctor_name ?? '-'); ?></small>
                                                     </td>
                                                     <td>
                                                         <span class="badge bg-info"><?php echo escape(strtoupper($file->file_extension ?? '')); ?></span>
@@ -177,6 +194,9 @@
                                                             <a href="<?php echo url('/files/' . escape($file->id) . '/download'); ?>" class="btn btn-success btn-sm" data-confirm-download="1" data-title="<?php echo escape($file->title); ?>">
                                                                 <i class="fas fa-download ms-1"></i>تحميل
                                                             </a>
+                                                            <button type="button" class="btn btn-outline-warning btn-sm toggle-bookmark-btn" data-file-id="<?php echo escape($file->id); ?>" title="حفظ للمفضلة">
+                                                                <i class="fas fa-bookmark"></i>
+                                                            </button>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -300,6 +320,37 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(function() {
                 showToast('حدث خطأ أثناء تسجيل التقييم');
+            });
+    // Bookmark toggle handler
+    document.querySelectorAll('.toggle-bookmark-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var fileId = this.getAttribute('data-file-id');
+            var buttonEl = this;
+            var formData = new FormData();
+            formData.append('file_id', fileId);
+
+            fetch('<?php echo url('/student/bookmarks/toggle'); ?>', {
+                method: 'POST',
+                body: formData
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    if (data.bookmarked) {
+                        buttonEl.classList.remove('btn-outline-warning');
+                        buttonEl.classList.add('btn-warning', 'text-dark');
+                        showToast(data.message || 'تم حفظ الملف للمفضلة ⭐');
+                    } else {
+                        buttonEl.classList.remove('btn-warning', 'text-dark');
+                        buttonEl.classList.add('btn-outline-warning');
+                        showToast(data.message || 'تم إزالة الملف من المفضلة');
+                    }
+                } else {
+                    showToast(data.message || 'يرجى تسجيل الدخول أولاً لإضافة الملف للمفضلة');
+                }
+            })
+            .catch(function() {
+                showToast('حدث خطأ أثناء الاتصال بالخادم');
             });
         });
     });

@@ -17,6 +17,11 @@ class DashboardController extends Controller
 {
     public function index(): void
     {
+        if (($_SESSION['user_role'] ?? '') !== 'admin') {
+            redirect(url('/admin/courses'));
+            return;
+        }
+
         $managedLevelId = get_managed_level_id();
         $managedMajorId = get_managed_major_id();
         $totalSize = File::getTotalSize($managedLevelId, $managedMajorId);
@@ -43,26 +48,47 @@ class DashboardController extends Controller
             'newFilesCount' => File::getRecentCount(48, $managedLevelId, $managedMajorId),
             'userRoles' => User::getCountByRole(),
             'courseCountsByMajor' => Course::getCountByMajor($managedLevelId, $managedMajorId),
-            'storageLimit' => 500 * 1024 * 1024,
+            'storageLimit' => 10 * 1024 * 1024 * 1024,
+            'totalDownloads' => File::getTotalDownloads(),
+            'activeUsersCount' => User::countActive(),
         ]);
     }
 
     private function getFileTypeStats(?int $levelId = null, ?int $majorId = null): array
     {
-        $types = ['lecture', 'summary', 'model', 'exam', 'other'];
-        $stats = [];
-        $labels = ['lecture' => 'محاضرة', 'summary' => 'ملخص', 'model' => 'نموذج', 'exam' => 'اختبار', 'other' => 'أخرى'];
-        $icons = ['lecture' => 'fa-book', 'summary' => 'fa-file-lines', 'model' => 'fa-clipboard', 'exam' => 'fa-pen-to-square', 'other' => 'fa-folder'];
-        $colors = ['lecture' => '#1a73e8', 'summary' => '#34a853', 'model' => '#f59e0b', 'exam' => '#dc3545', 'other' => '#6b7280'];
+        $sql = "SELECT f.file_type, COUNT(*) as cnt
+                FROM files f
+                JOIN courses c ON c.id = f.course_id
+                WHERE f.is_approved = 1";
+        $params = [];
+        if ($levelId) {
+            $sql .= " AND c.level_id = ?";
+            $params[] = $levelId;
+        }
+        if ($majorId) {
+            $sql .= " AND c.major_id = ?";
+            $params[] = $majorId;
+        }
+        $sql .= " GROUP BY f.file_type";
+        $rows = Database::fetchAll($sql, $params);
+        $countsMap = [];
+        foreach ($rows as $row) {
+            $countsMap[$row->file_type] = (int)$row->cnt;
+        }
 
+        $types = ['lecture', 'summary', 'model', 'reference'];
+        $labels = ['lecture' => 'محاضرة', 'summary' => 'ملخص', 'model' => 'نماذج', 'reference' => 'مرجع'];
+        $icons = ['lecture' => 'fa-book', 'summary' => 'fa-file-lines', 'model' => 'fa-clipboard', 'reference' => 'fa-bookmark'];
+        $colors = ['lecture' => '#1a73e8', 'summary' => '#34a853', 'model' => '#f59e0b', 'reference' => '#6b7280'];
+
+        $stats = [];
         foreach ($types as $type) {
-            $count = count(File::getByType($type, 9999, $levelId, $majorId));
             $stats[] = [
                 'type' => $type,
                 'label' => $labels[$type],
                 'icon' => $icons[$type],
                 'color' => $colors[$type],
-                'count' => $count,
+                'count' => $countsMap[$type] ?? 0,
             ];
         }
         return $stats;

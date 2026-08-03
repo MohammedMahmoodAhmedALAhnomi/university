@@ -33,13 +33,21 @@ class Router
     public function dispatch(string $uri, string $method): void
     {
         $uri = parse_url($uri, PHP_URL_PATH);
+        $uri = str_replace('\\', '/', $uri);
         $uri = rtrim($uri, '/') ?: '/';
 
-        $basePath = dirname($_SERVER['SCRIPT_NAME']);
-        if ($basePath !== '/' && str_starts_with($uri, $basePath)) {
-            $uri = substr($uri, strlen($basePath));
+        $basePath = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+        if ($basePath !== '/' && $basePath !== '.') {
+            if (str_starts_with($uri, $basePath)) {
+                $uri = substr($uri, strlen($basePath));
+            } else {
+                $basePathNoPublic = preg_replace('#/public$#i', '', $basePath);
+                if ($basePathNoPublic !== '' && $basePathNoPublic !== '/' && str_starts_with($uri, $basePathNoPublic)) {
+                    $uri = substr($uri, strlen($basePathNoPublic));
+                }
+            }
         }
-        $uri = $uri ?: '/';
+        $uri = '/' . ltrim($uri, '/');
 
         foreach ($this->routes as $route) {
             if (!preg_match($route['pattern'], $uri, $matches)) {

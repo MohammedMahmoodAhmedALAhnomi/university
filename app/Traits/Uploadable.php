@@ -10,17 +10,22 @@ trait Uploadable
             return null;
         }
 
-        $uploadDir = public_path('assets/uploads/' . $subDir);
+        $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $forbidden = ['php', 'phtml', 'php3', 'php4', 'php5', 'phar', 'exe', 'sh', 'bat', 'cmd', 'pl', 'py', 'cgi', 'js', 'html', 'htm'];
+        if (in_array($extension, $forbidden, true)) {
+            return null;
+        }
+
+        $uploadDir = public_path('uploads/' . $subDir);
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
 
-        $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
         $newName = uniqid('file_', true) . '.' . $extension;
         $destPath = $uploadDir . DIRECTORY_SEPARATOR . $newName;
 
         if (move_uploaded_file($file['tmp_name'], $destPath)) {
-            return 'assets/uploads/' . $subDir . '/' . $newName;
+            return 'uploads/' . $subDir . '/' . $newName;
         }
 
         return null;

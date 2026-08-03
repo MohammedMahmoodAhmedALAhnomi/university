@@ -8,20 +8,38 @@ use App\Models\Major;
 
 class UserController extends Controller
 {
+    private function canManage(): bool
+    {
+        $role = $_SESSION['user_role'] ?? '';
+        return $role === 'admin';
+    }
+
     public function index(): void
     {
+        if (!$this->canManage()) {
+            flash('error', 'لا تملك صلاحية الوصول');
+            redirect(url('/admin/courses'));
+        }
         $users = User::getAllWithMajor();
         $this->view('admin/users/index', ['users' => $users]);
     }
 
     public function create(): void
     {
+        if (!$this->canManage()) {
+            flash('error', 'لا تملك صلاحية الوصول');
+            redirect(url('/admin/courses'));
+        }
         $majors = Major::getActive();
         $this->view('admin/users/create', ['majors' => $majors]);
     }
 
     public function store(): void
     {
+        if (!$this->canManage()) {
+            flash('error', 'لا تملك صلاحية الوصول');
+            redirect(url('/admin/courses'));
+        }
         if (!$this->isPost() || !verify_csrf()) {
             redirect(url('/admin/users'));
         }
@@ -30,7 +48,7 @@ class UserController extends Controller
             'full_name' => trim($this->postParam('full_name', '')),
             'email' => trim($this->postParam('email', '')),
             'password' => $this->postParam('password', ''),
-            'role' => $this->postParam('role', 'user'),
+            'role' => $this->postParam('role', 'manager'),
             'major_id' => $this->postParam('major_id', ''),
         ];
 
@@ -80,6 +98,10 @@ class UserController extends Controller
 
     public function edit(): void
     {
+        if (!$this->canManage()) {
+            flash('error', 'لا تملك صلاحية الوصول');
+            redirect(url('/admin/courses'));
+        }
         $id = $this->getParam('id');
         $user = User::find($id);
 
@@ -94,6 +116,10 @@ class UserController extends Controller
 
     public function update(): void
     {
+        if (!$this->canManage()) {
+            flash('error', 'لا تملك صلاحية الوصول');
+            redirect(url('/admin/courses'));
+        }
         if (!$this->isPost() || !verify_csrf()) {
             redirect(url('/admin/users'));
         }
@@ -106,14 +132,15 @@ class UserController extends Controller
             redirect(url('/admin/users'));
         }
 
+        $majorId = $this->postParam('major_id', $user->major_id);
+
         $data = [
             'full_name' => trim($this->postParam('full_name', '')),
             'email' => trim($this->postParam('email', '')),
             'role' => $this->postParam('role', $user->role),
-            'major_id' => $this->postParam('major_id', $user->major_id),
+            'major_id' => !empty($majorId) ? (int)$majorId : null,
         ];
 
-        $majorId = $this->postParam('major_id', $user->major_id);
         if (!empty($majorId)) {
             $data['managed_major_id'] = (int)$majorId;
             if ($data['role'] !== 'admin') {
@@ -172,6 +199,14 @@ class UserController extends Controller
 
     public function delete(): void
     {
+        if (!$this->canManage()) {
+            flash('error', 'لا تملك صلاحية الوصول');
+            redirect(url('/admin/courses'));
+        }
+        if (!verify_csrf()) {
+            flash('error', 'طلب غير صالح أو انتهت مهلة الجلسة');
+            redirect(url('/admin/users'));
+        }
         $id = $this->getParam('id');
 
         if ($id == $_SESSION['user_id']) {

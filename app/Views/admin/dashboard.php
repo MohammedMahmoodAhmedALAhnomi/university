@@ -131,6 +131,65 @@
 </div>
 
 <div class="row g-3 mb-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm text-white p-3 rounded-4 h-100" style="background: linear-gradient(135deg, #312e81 0%, #1e1b4b 100%) !important; color: #ffffff !important;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="small fw-bold text-white mb-1">إجمالي مستخدمي النظام</div>
+                    <h2 class="fw-bold my-1 text-white"><?php echo escape($usersCount ?? 0); ?></h2>
+                    <small class="text-white fw-semibold"><i class="fas fa-user-check me-1"></i><?php echo escape($activeUsersCount ?? $usersCount); ?> حساب نشط</small>
+                </div>
+                <div class="rounded-circle bg-white bg-opacity-20 p-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+                    <i class="fas fa-users fs-3 text-white"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm text-white p-3 rounded-4 h-100" style="background: linear-gradient(135deg, #831843 0%, #500724 100%) !important; color: #ffffff !important;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="small fw-bold text-white mb-1">إجمالي عمليات التنزيل</div>
+                    <h2 class="fw-bold my-1 text-white"><?php echo escape($totalDownloads ?? 0); ?></h2>
+                    <small class="text-white fw-semibold"><i class="fas fa-chart-line me-1"></i>تحميل واستفادة علمية</small>
+                </div>
+                <div class="rounded-circle bg-white bg-opacity-20 p-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+                    <i class="fas fa-download fs-3 text-white"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm text-white p-3 rounded-4 h-100" style="background: linear-gradient(135deg, #064e3b 0%, #022c22 100%) !important; color: #ffffff !important;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="small fw-bold text-white mb-1">إجمالي الملفات المرفوعة</div>
+                    <h2 class="fw-bold my-1 text-white"><?php echo escape($filesCount ?? 0); ?></h2>
+                    <small class="text-white fw-semibold"><i class="fas fa-hdd me-1"></i>الحجم: <?php echo escape($totalFileSize ?? '0 B'); ?></small>
+                </div>
+                <div class="rounded-circle bg-white bg-opacity-20 p-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+                    <i class="fas fa-folder-open fs-3 text-white"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card border-0 shadow-sm text-white p-3 rounded-4 h-100" style="background: linear-gradient(135deg, #78350f 0%, #451a03 100%) !important; color: #ffffff !important;">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="small fw-bold text-white mb-1">المواد والتخصصات</div>
+                    <h2 class="fw-bold my-1 text-white"><?php echo escape($coursesCount ?? 0); ?></h2>
+                    <small class="text-white fw-semibold"><i class="fas fa-university me-1"></i>في <?php echo escape($majorsCount ?? 0); ?> تخصصات معتمدة</small>
+                </div>
+                <div class="rounded-circle bg-white bg-opacity-20 p-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+                    <i class="fas fa-book-open fs-3 text-white"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
     <div class="col-12">
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white border-bottom d-flex align-items-center justify-content-between py-3">
@@ -205,13 +264,14 @@
                             <tr>
                                 <th class="ps-3">العنوان</th>
                                 <th>المادة</th>
+                                <th>الدكتور</th>
                                 <th>النوع</th>
                                 <th class="pe-3">التاريخ</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($recentFiles)): ?>
-                                <tr><td colspan="4" class="text-center text-muted py-4">لا توجد ملفات حديثة</td></tr>
+                                <tr><td colspan="5" class="text-center text-muted py-4">لا توجد ملفات حديثة</td></tr>
                             <?php else: ?>
                                 <?php foreach ($recentFiles as $file): ?>
                                     <tr>
@@ -222,11 +282,12 @@
                                             </div>
                                         </td>
                                         <td><small class="text-muted"><?php echo escape($file->course_name ?? '-'); ?></small></td>
+                                        <td><small class="text-muted"><?php echo escape($file->doctor_name ?? '-'); ?></small></td>
                                         <td>
                                             <span class="badge rounded-pill px-3 <?php
                                                 $t = $file->file_type ?? '';
-                                                $lbls = ['lecture' => 'محاضرة', 'summary' => 'ملخص', 'model' => 'نموذج', 'exam' => 'اختبار', 'other' => 'أخرى'];
-                                                $cls = $t === 'exam' ? 'bg-danger bg-opacity-10 text-danger' : ($t === 'summary' ? 'bg-success bg-opacity-10 text-success' : ($t === 'model' ? 'bg-warning bg-opacity-10 text-warning' : ($t === 'lecture' ? 'bg-info bg-opacity-10 text-info' : 'bg-secondary bg-opacity-10 text-secondary')));
+                                                $lbls = ['lecture' => 'محاضرة', 'summary' => 'ملخص', 'model' => 'نماذج', 'reference' => 'مرجع'];
+                                                $cls = $t === 'summary' ? 'bg-success bg-opacity-10 text-success' : ($t === 'model' ? 'bg-warning bg-opacity-10 text-warning' : ($t === 'reference' ? 'bg-secondary bg-opacity-10 text-secondary' : 'bg-info bg-opacity-10 text-info'));
                                             ?>"><?php echo escape($lbls[$t] ?? $t); ?></span>
                                         </td>
                                         <td class="pe-3"><small class="text-muted"><?php echo escape(format_date($file->created_at ?? '', 'Y-m-d')); ?></small></td>
@@ -303,7 +364,7 @@
     <div class="col-lg-4">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-header bg-white border-bottom py-3">
-                <h6 class="fw-bold mb-0"><i class="fas fa-users text-warning ms-1"></i>المستخدمين</h6>
+                <h6 class="fw-bold mb-0"><i class="fas fa-users text-warning ms-1"></i>المسؤولين</h6>
             </div>
             <div class="card-body">
                 <?php if (empty($userRoles)): ?>
@@ -331,13 +392,13 @@
                 <div class="position-relative mb-3" style="width: 120px; height: 120px;">
                     <canvas id="storageChart" width="120" height="120"></canvas>
                     <div class="position-absolute top-50 start-50 translate-middle">
-                        <h4 class="fw-bold mb-0"><?php echo round(($totalSizeBytes > 0 ? min(100, ($totalSizeBytes / $storageLimit) * 100) : 0)); ?>%</h4>
+                        <h4 class="fw-bold mb-0"><?php echo (!empty($storageLimit) && $storageLimit > 0 && $totalSizeBytes > 0) ? round(min(100, ($totalSizeBytes / $storageLimit) * 100)) : 0; ?>%</h4>
                     </div>
                 </div>
                 <h6 class="fw-bold mb-1"><?php echo escape($totalFileSize ?? '0 B'); ?></h6>
-                <small class="text-muted">من <?php echo $storageLimit > 1048576 ? round($storageLimit / 1048576) . ' MB' : '500 MB'; ?></small>
+                <small class="text-muted">من <?php echo (!empty($storageLimit) && $storageLimit >= 1073741824) ? round($storageLimit / 1073741824) . ' GB' : ((!empty($storageLimit) && $storageLimit >= 1048576) ? round($storageLimit / 1048576) . ' MB' : '500 MB'); ?></small>
                 <div class="progress w-100 mt-2" style="height: 4px;">
-                    <div class="progress-bar rounded-pill <?php echo ($totalSizeBytes / $storageLimit) > 0.8 ? 'bg-danger' : (($totalSizeBytes / $storageLimit) > 0.5 ? 'bg-warning' : 'bg-success'); ?>" style="width: <?php echo round(min(100, ($totalSizeBytes / $storageLimit) * 100)); ?>%"></div>
+                    <div class="progress-bar rounded-pill <?php echo (!empty($storageLimit) && $storageLimit > 0 && ($totalSizeBytes / $storageLimit) > 0.8) ? 'bg-danger' : ((!empty($storageLimit) && $storageLimit > 0 && ($totalSizeBytes / $storageLimit) > 0.5) ? 'bg-warning' : 'bg-success'); ?>" style="width: <?php echo (!empty($storageLimit) && $storageLimit > 0) ? round(min(100, ($totalSizeBytes / $storageLimit) * 100)) : 0; ?>%"></div>
                 </div>
             </div>
         </div>
@@ -362,7 +423,7 @@
     var c = document.getElementById('storageChart');
     if (!c) return;
     var ctx = c.getContext('2d');
-    var pct = <?php echo $totalSizeBytes > 0 ? round(min(100, ($totalSizeBytes / $storageLimit) * 100)) : 0; ?> / 100;
+    var pct = <?php echo (!empty($storageLimit) && $storageLimit > 0 && $totalSizeBytes > 0) ? round(min(100, ($totalSizeBytes / $storageLimit) * 100)) : 0; ?> / 100;
     var cx = 60, cy = 60, r = 50;
     ctx.clearRect(0, 0, 120, 120);
     ctx.beginPath();

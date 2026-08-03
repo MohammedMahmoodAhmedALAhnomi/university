@@ -1,8 +1,13 @@
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h3><i class="fas fa-edit ms-2"></i>تعديل الإعلان</h3>
-    <a href="<?php echo url('/admin/announcements'); ?>" class="btn btn-secondary">
-        <i class="fas fa-arrow-right ms-1"></i>عودة
-    </a>
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+    <div>
+        <h4 class="fw-bold mb-1"><i class="fas fa-edit ms-2 text-warning"></i>تعديل الإعلان</h4>
+        <p class="text-muted small mb-0">تعديل بيانات الإعلان</p>
+    </div>
+    <div>
+        <a href="<?php echo url('/admin/announcements'); ?>" class="btn btn-outline-secondary rounded-pill px-3">
+            <i class="fas fa-arrow-right ms-1"></i>عودة
+        </a>
+    </div>
 </div>
 
 <div class="card shadow-sm">
@@ -24,7 +29,7 @@
                     <input type="file" class="form-control" id="image" name="image" accept="image/*">
                     <?php if (!empty($announcement->image)): ?>
                         <div class="mt-2">
-                            <img src="<?php echo asset('uploads/' . escape($announcement->image)); ?>" class="img-thumbnail" style="max-height: 100px;">
+                            <img src="<?php echo asset(str_starts_with($announcement->image, 'uploads/') ? $announcement->image : 'uploads/announcements/' . escape($announcement->image)); ?>" class="img-thumbnail" style="max-height: 100px;">
                         </div>
                     <?php endif; ?>
                 </div>

@@ -12,13 +12,14 @@ class ManagerController extends Controller
     private function canManage(): bool
     {
         $role = $_SESSION['user_role'] ?? '';
-        return $role === 'admin' || ($role === 'manager' && !empty($_SESSION['managed_major_id']));
+        return $role === 'admin' || $role === 'major_admin';
     }
 
     private function getManagedMajor(): ?int
     {
-        if ($_SESSION['user_role'] === 'admin') return null;
-        return isset($_SESSION['managed_major_id']) ? (int)$_SESSION['managed_major_id'] : null;
+        if (($_SESSION['user_role'] ?? '') === 'admin') return null;
+        $id = $_SESSION['managed_major_id'] ?? ($_SESSION['major_id'] ?? null);
+        return $id ? (int)$id : null;
     }
 
     public function index(): void
@@ -101,6 +102,7 @@ class ManagerController extends Controller
             'email' => $data['email'],
             'password' => password_hash($data['password'], PASSWORD_DEFAULT),
             'role' => 'manager',
+            'major_id' => (int)$data['managed_major_id'],
             'managed_level_id' => (int)$data['managed_level_id'],
             'managed_major_id' => (int)$data['managed_major_id'],
             'is_active' => 1,
@@ -206,6 +208,10 @@ class ManagerController extends Controller
         if (!$this->canManage()) {
             flash('error', 'لا تملك صلاحية الوصول');
             redirect(url('/admin/dashboard'));
+        }
+        if (!verify_csrf()) {
+            flash('error', 'طلب غير صالح أو انتهت مهلة الجلسة');
+            redirect(url('/admin/managers'));
         }
         $id = $this->getParam('id');
         $manager = User::find($id);

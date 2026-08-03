@@ -44,12 +44,24 @@
             <?php else: ?>
                 <?php foreach ($courses as $course): ?>
                     <tr>
-                        <td class="fw-bold"><?php echo escape($course->name); ?></td>
-                        <td><?php echo escape($course->major_name ?? ''); ?></td>
-                        <td><?php echo escape($course->level_name ?? ''); ?></td>
-                        <td><?php echo escape($course->semester_name ?? ''); ?></td>
+                        <td class="fw-bold text-dark"><i class="fas fa-book-open text-primary ms-2"></i><?php echo escape($course->name); ?></td>
                         <td>
-                            <a href="<?php echo url('/courses/' . escape($course->id)); ?>" class="btn btn-primary btn-sm">
+                            <span class="badge rounded-pill px-3 py-2" style="background: rgba(79, 70, 229, 0.12) !important; color: #4f46e5 !important; font-weight: 600;">
+                                <i class="<?php echo get_major_icon($course->major_name ?? ''); ?> ms-1"></i><?php echo escape($course->major_name ?? 'عام'); ?>
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge rounded-pill px-3 py-2" style="background: rgba(6, 182, 212, 0.12) !important; color: #0891b2 !important; font-weight: 600;">
+                                <i class="fas fa-layer-group ms-1"></i><?php echo escape($course->level_name ?? '-'); ?>
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge rounded-pill px-3 py-2" style="background: rgba(168, 85, 247, 0.12) !important; color: #9333ea !important; font-weight: 600;">
+                                <i class="fas fa-calendar-alt ms-1"></i><?php echo escape($course->semester_name ?? '-'); ?>
+                            </span>
+                        </td>
+                        <td>
+                            <a href="<?php echo url('/courses/' . escape($course->id)); ?>" class="btn btn-primary btn-sm rounded-pill px-3">
                                 <i class="fas fa-eye ms-1"></i>تفاصيل
                             </a>
                         </td>
