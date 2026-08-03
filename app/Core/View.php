@@ -65,20 +65,13 @@ class View
         }
     }
 
-    private static ?array $cachedSettings = null;
-
     public static function getSettings(): array
     {
-        if (self::$cachedSettings !== null) {
-            return self::$cachedSettings;
-        }
-
         $rows = Database::fetchAll("SELECT setting_key, setting_value FROM settings");
         $settings = [];
         foreach ($rows as $row) {
             $settings[$row->setting_key] = $row->setting_value;
         }
-        self::$cachedSettings = $settings;
         return $settings;
     }
 }

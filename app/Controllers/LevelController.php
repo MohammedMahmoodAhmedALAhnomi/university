@@ -92,11 +92,6 @@ class LevelController extends Controller
 
     public function delete(): void
     {
-        if (!verify_csrf()) {
-            flash('error', 'طلب غير صالح أو انتهت مهلة الجلسة');
-            redirect(url('/admin/levels'));
-        }
-
         $id = $this->getParam('id');
         $level = Level::find($id);
 

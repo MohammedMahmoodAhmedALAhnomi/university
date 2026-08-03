@@ -47,34 +47,13 @@ class AnnouncementController extends Controller
             'title' => trim($this->postParam('title', '')),
             'content' => trim($this->postParam('content', '')),
             'is_active' => $this->postParam('is_active') ? 1 : 0,
-            'is_pinned' => $this->postParam('is_pinned') ? 1 : 0,
-            'starts_at' => $this->postParam('starts_at') ?: null,
-            'expires_at' => $this->postParam('expires_at') ?: null,
-            'created_by' => $_SESSION['user_id'] ?? 0,
+            'created_by' => $_SESSION['user_id'],
         ];
 
         $errors = $this->validate($data, [
             'title' => 'required',
             'content' => 'required',
         ]);
-
-        $image = $this->fileParam('image');
-        if ($image && $image['error'] === UPLOAD_ERR_OK) {
-            $ext = strtolower(pathinfo($image['name'], PATHINFO_EXTENSION));
-            $allowedImages = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-            if (!in_array($ext, $allowedImages, true)) {
-                $errors['image'][] = 'نوع الملف المرفوع غير مسموح به كصورة إعلان';
-            } else {
-                $uploadDir = __DIR__ . '/../../public/uploads/announcements/';
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0755, true);
-                }
-                $imgName = uniqid('announcement_') . '.' . $ext;
-                if (move_uploaded_file($image['tmp_name'], $uploadDir . $imgName)) {
-                    $data['image_path'] = 'uploads/announcements/' . $imgName;
-                }
-            }
-        }
 
         if (!empty($errors)) {
             flash('error', 'يرجى التحقق من الحقول المطلوبة');
@@ -113,28 +92,7 @@ class AnnouncementController extends Controller
             'title' => trim($this->postParam('title', '')),
             'content' => trim($this->postParam('content', '')),
             'is_active' => $this->postParam('is_active') ? 1 : 0,
-            'is_pinned' => $this->postParam('is_pinned') ? 1 : 0,
-            'starts_at' => $this->postParam('starts_at') ?: null,
-            'expires_at' => $this->postParam('expires_at') ?: null,
         ];
-
-        $image = $this->fileParam('image');
-        if ($image && $image['error'] === UPLOAD_ERR_OK) {
-            $ext = strtolower(pathinfo($image['name'], PATHINFO_EXTENSION));
-            $allowedImages = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-            if (!in_array($ext, $allowedImages, true)) {
-                $errors['image'][] = 'نوع الملف المرفوع غير مسموح به كصورة إعلان';
-            } else {
-                $uploadDir = __DIR__ . '/../../public/uploads/announcements/';
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0755, true);
-                }
-                $imgName = uniqid('announcement_') . '.' . $ext;
-                if (move_uploaded_file($image['tmp_name'], $uploadDir . $imgName)) {
-                    $data['image_path'] = 'uploads/announcements/' . $imgName;
-                }
-            }
-        }
 
         $errors = $this->validate($data, [
             'title' => 'required',
@@ -159,11 +117,6 @@ class AnnouncementController extends Controller
 
     public function delete(): void
     {
-        if (!verify_csrf()) {
-            flash('error', 'طلب غير صالح أو انتهت مهلة الجلسة');
-            redirect(url('/admin/announcements'));
-        }
-
         $id = $this->getParam('id');
         $announcement = Announcement::find($id);
 

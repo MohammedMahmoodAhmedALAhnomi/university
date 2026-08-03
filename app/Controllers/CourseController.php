@@ -74,8 +74,6 @@ class CourseController extends Controller
             $courses = Course::getAllWithDetails("WHERE c.level_id = ? AND c.major_id = ?", [$managedLevelId, $managedMajorId]);
         } elseif ($managedLevelId) {
             $courses = Course::getAllWithDetails("WHERE c.level_id = ?", [$managedLevelId]);
-        } elseif ($managedMajorId) {
-            $courses = Course::getAllWithDetails("WHERE c.major_id = ?", [$managedMajorId]);
         } elseif ($majorId) {
             $courses = Course::getAllWithDetails("WHERE c.major_id = ?", [$majorId]);
         } else {
@@ -244,11 +242,6 @@ class CourseController extends Controller
 
     public function delete(): void
     {
-        if (!verify_csrf()) {
-            flash('error', 'طلب غير صالح أو انتهت مهلة الجلسة');
-            redirect(url('/admin/courses'));
-        }
-
         $id = $this->getParam('id');
         $course = Course::find($id);
 

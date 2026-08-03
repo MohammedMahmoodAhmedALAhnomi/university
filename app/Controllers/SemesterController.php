@@ -84,11 +84,6 @@ class SemesterController extends Controller
 
     public function delete(): void
     {
-        if (!verify_csrf()) {
-            flash('error', 'طلب غير صالح أو انتهت مهلة الجلسة');
-            redirect(url('/admin/semesters'));
-        }
-
         $id = $this->getParam('id');
         $semester = Semester::find($id);
 

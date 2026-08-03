@@ -36,16 +36,6 @@ class FileController extends Controller
             } else {
                 $files = File::getAllWithDetails("WHERE c.level_id = ?", [$managedLevelId]);
             }
-        } elseif ($managedMajorId) {
-            $courses = Database::fetchAll(
-                "SELECT id, name FROM courses WHERE major_id = ? ORDER BY name",
-                [$managedMajorId]
-            );
-            if ($courseId) {
-                $files = File::getAllWithDetails("WHERE f.course_id = ? AND c.major_id = ?", [$courseId, $managedMajorId]);
-            } else {
-                $files = File::getAllWithDetails("WHERE c.major_id = ?", [$managedMajorId]);
-            }
         } else {
             $courses = \App\Models\Course::all();
             if ($courseId) {
@@ -71,11 +61,6 @@ class FileController extends Controller
                 "SELECT id, name FROM courses WHERE level_id = ? ORDER BY name",
                 [$managedLevelId]
             );
-        } elseif ($managedMajorId) {
-            $courses = Database::fetchAll(
-                "SELECT id, name FROM courses WHERE major_id = ? ORDER BY name",
-                [$managedMajorId]
-            );
         } else {
             $courses = Course::all();
         }
@@ -95,7 +80,6 @@ class FileController extends Controller
             'title' => trim($this->postParam('title', '')),
             'course_id' => $this->postParam('course_id', ''),
             'description' => trim($this->postParam('description', '')),
-            'doctor_name' => trim($this->postParam('doctor_name', '')),
             'uploaded_by' => $_SESSION['user_id'] ?? 0,
         ];
 
@@ -117,12 +101,6 @@ class FileController extends Controller
 
         if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
             $errors['file'][] = 'يرجى رفع ملف صالح';
-        } else {
-            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-            $forbiddenExts = ['php', 'phtml', 'php3', 'php4', 'php5', 'phar', 'exe', 'sh', 'bat', 'cmd', 'pl', 'py', 'cgi', 'js', 'html', 'htm'];
-            if (in_array($ext, $forbiddenExts, true)) {
-                $errors['file'][] = 'امتداد الملف المرفوع غير مسموح به لأسباب أمنية';
-            }
         }
 
         if (!empty($errors)) {
@@ -145,10 +123,10 @@ class FileController extends Controller
 
         $uploadDir = __DIR__ . '/../../public/uploads/files/';
         if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
+            mkdir($uploadDir, 0777, true);
         }
 
-        $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
         $fileName = uniqid('file_') . '.' . $extension;
         $filePath = $uploadDir . $fileName;
 
@@ -160,7 +138,7 @@ class FileController extends Controller
         $data['file_name'] = $fileName;
         $data['file_path'] = 'uploads/files/' . $fileName;
         $data['file_extension'] = $extension;
-        $data['file_type'] = $this->postParam('file_type', 'lecture');
+        $data['file_type'] = $this->postParam('file_type', 'other');
         $data['file_size'] = $file['size'];
         $data['is_approved'] = $this->postParam('is_approved', 0) ? 1 : 0;
 
@@ -234,8 +212,7 @@ class FileController extends Controller
             'title' => trim($this->postParam('title', '')),
             'course_id' => $this->postParam('course_id', ''),
             'description' => trim($this->postParam('description', '')),
-            'doctor_name' => trim($this->postParam('doctor_name', '')),
-            'file_type' => $this->postParam('file_type', 'lecture'),
+            'file_type' => $this->postParam('file_type', 'other'),
             'is_approved' => $this->postParam('is_approved', 0) ? 1 : 0,
         ];
 
@@ -247,32 +224,27 @@ class FileController extends Controller
         $uploadedFile = $this->fileParam('file');
 
         if ($uploadedFile && $uploadedFile['error'] === UPLOAD_ERR_OK) {
-            $extension = strtolower(pathinfo($uploadedFile['name'], PATHINFO_EXTENSION));
-            $forbiddenExts = ['php', 'phtml', 'php3', 'php4', 'php5', 'phar', 'exe', 'sh', 'bat', 'cmd', 'pl', 'py', 'cgi', 'js', 'html', 'htm'];
-            if (in_array($extension, $forbiddenExts, true)) {
-                $errors['file'][] = 'امتداد الملف المرفوع غير مسموح به لأسباب أمنية';
+            $uploadDir = __DIR__ . '/../../public/uploads/files/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+
+            $extension = pathinfo($uploadedFile['name'], PATHINFO_EXTENSION);
+            $fileName = uniqid('file_') . '.' . $extension;
+            $filePath = $uploadDir . $fileName;
+
+            if (!move_uploaded_file($uploadedFile['tmp_name'], $filePath)) {
+                $errors['file'][] = 'فشل رفع الملف';
             } else {
-                $uploadDir = __DIR__ . '/../../public/uploads/files/';
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0755, true);
+                $oldPath = __DIR__ . '/../../public/' . $file->file_path;
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
                 }
 
-                $fileName = uniqid('file_') . '.' . $extension;
-                $filePath = $uploadDir . $fileName;
-
-                if (!move_uploaded_file($uploadedFile['tmp_name'], $filePath)) {
-                    $errors['file'][] = 'فشل رفع الملف';
-                } else {
-                    $oldPath = __DIR__ . '/../../public/' . $file->file_path;
-                    if (file_exists($oldPath)) {
-                        unlink($oldPath);
-                    }
-
-                    $data['file_name'] = $fileName;
-                    $data['file_path'] = 'uploads/files/' . $fileName;
-                    $data['file_extension'] = $extension;
-                    $data['file_size'] = $uploadedFile['size'];
-                }
+                $data['file_name'] = $fileName;
+                $data['file_path'] = 'uploads/files/' . $fileName;
+                $data['file_extension'] = $extension;
+                $data['file_size'] = $uploadedFile['size'];
             }
         }
 
@@ -303,11 +275,6 @@ class FileController extends Controller
 
     public function delete(): void
     {
-        if (!verify_csrf()) {
-            flash('error', 'طلب غير صالح أو انتهت مهلة الجلسة');
-            redirect(url('/admin/files'));
-        }
-
         $id = $this->getParam('id');
         $file = File::find($id);
 
@@ -342,11 +309,6 @@ class FileController extends Controller
 
     public function toggleApproval(): void
     {
-        if (!verify_csrf()) {
-            flash('error', 'طلب غير صالح أو انتهت مهلة الجلسة');
-            redirect(url('/admin/files'));
-        }
-
         $id = $this->getParam('id');
         $file = File::find($id);
 

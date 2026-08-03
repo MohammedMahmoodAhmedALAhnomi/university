@@ -8,24 +8,18 @@ use App\Config\Database;
 class User extends Model
 {
     protected static string $table = 'users';
+
     public static function findByEmail(string $email)
     {
         return Database::fetch("SELECT * FROM users WHERE email = ? LIMIT 1", [$email]);
     }
 
-    public static function findByGoogleId(string $googleId)
-    {
-        return Database::fetch("SELECT * FROM users WHERE google_id = ? LIMIT 1", [$googleId]);
-    }
-
     public static function getAllWithMajor(): array
     {
         return Database::fetchAll(
-            "SELECT u.*, m.name as major_name, l.name as level_name
+            "SELECT u.*, m.name as major_name
              FROM users u
-             LEFT JOIN majors m ON m.id = COALESCE(u.managed_major_id, u.major_id)
-             LEFT JOIN levels l ON l.id = u.managed_level_id
-             WHERE u.role IN ('admin', 'major_admin')
+             LEFT JOIN majors m ON m.id = u.major_id
              ORDER BY u.created_at DESC"
         );
     }
@@ -58,7 +52,7 @@ class User extends Model
             "SELECT u.*, l.name as level_name, m.name as major_name
              FROM users u
              LEFT JOIN levels l ON l.id = u.managed_level_id
-             LEFT JOIN majors m ON m.id = COALESCE(u.managed_major_id, u.major_id)
+             LEFT JOIN majors m ON m.id = u.managed_major_id
              WHERE u.role = 'manager'
              ORDER BY u.created_at DESC"
         );
@@ -70,17 +64,10 @@ class User extends Model
             "SELECT u.*, l.name as level_name, m.name as major_name
              FROM users u
              LEFT JOIN levels l ON l.id = u.managed_level_id
-             LEFT JOIN majors m ON m.id = COALESCE(u.managed_major_id, u.major_id)
-             WHERE u.role = 'manager' AND (u.managed_major_id = ? OR u.major_id = ?)
+             LEFT JOIN majors m ON m.id = u.managed_major_id
+             WHERE u.role = 'manager' AND u.managed_major_id = ?
              ORDER BY u.created_at DESC",
-            [$majorId, $majorId]
+            [$majorId]
         );
     }
-
-    public static function countActive(): int
-    {
-        $row = Database::fetch("SELECT COUNT(*) as cnt FROM users WHERE is_active = 1");
-        return (int)($row->cnt ?? 0);
-    }
 }
-

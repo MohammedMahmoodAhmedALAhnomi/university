@@ -113,11 +113,6 @@ class MajorController extends Controller
 
     public function delete(): void
     {
-        if (!verify_csrf()) {
-            flash('error', 'طلب غير صالح أو انتهت مهلة الجلسة');
-            redirect(url('/admin/majors'));
-        }
-
         $id = $this->getParam('id');
         $major = Major::find($id);
 

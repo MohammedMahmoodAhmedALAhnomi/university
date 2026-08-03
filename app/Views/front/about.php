@@ -61,7 +61,7 @@
                     <div class="col-md-6">
                         <div class="d-flex align-items-center gap-2 p-2">
                             <i class="fas fa-check text-success"></i>
-                            <span>تصنيف الملفات (محاضرات، ملخصات، نماذج، مراجع)</span>
+                            <span>تصنيف الملفات (محاضرات، ملخصات، نماذج)</span>
                         </div>
                     </div>
                     <div class="col-md-6">

@@ -1,19 +1,14 @@
-<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-    <div>
-        <h4 class="fw-bold mb-1"><i class="fas fa-cogs ms-2 text-primary"></i>الإعدادات العامة</h4>
-        <p class="text-muted small mb-0">ضبط إعدادات الكلية والنظام والألوان</p>
-    </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3><i class="fas fa-cogs ms-2"></i>الإعدادات</h3>
 </div>
 
 <form action="<?php echo url('/admin/settings/update'); ?>" method="POST" enctype="multipart/form-data">
     <?php echo csrf_field(); ?>
     <?php foreach ($settings as $group => $items): ?>
-        <div class="card border-0 shadow-sm mb-4">
-            <div class="card-header bg-white border-bottom py-3">
-                <h6 class="fw-bold mb-0 text-primary">
-                    <i class="fas fa-sliders-h ms-2"></i>
-                    <?php echo escape($group); ?>
-                </h6>
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white fw-bold">
+                <i class="fas fa-folder ms-1"></i>
+                <?php echo escape($group); ?>
             </div>
             <div class="card-body">
                 <?php foreach ($items as $setting): ?>
@@ -26,7 +21,9 @@
                                 'university_name' => 'اسم الجامعة',
                                 'primary_color' => 'اللون الأساسي',
                                 'secondary_color' => 'اللون الثانوي',
+                                'logo_path' => 'الشعار (قديم)',
                                 'college_logo' => 'شعار الكلية',
+                                'university_logo' => 'شعار الجامعة',
                                 'facebook_url' => 'رابط فيسبوك',
                                 'twitter_url' => 'رابط تويتر',
                                 'instagram_url' => 'رابط انستغرام',
@@ -34,8 +31,6 @@
                                 'max_file_size' => 'الحد الأقصى للملفات (بايت)',
                                 'allowed_extensions' => 'امتدادات الملفات المسموحة',
                                 'maintenance_mode' => 'وضع الصيانة',
-                                'google_client_id' => 'Google Client ID (معرف التطبيق)',
-                                'google_client_secret' => 'Google Client Secret (المفتاح السري)',
                             ];
                             echo escape($labels[$setting->setting_key] ?? $setting->setting_key);
                             ?>
@@ -57,7 +52,7 @@
 
                             <?php elseif ($setting->setting_type === 'color'): ?>
                                 <div class="input-group">
-                                    <input type="color" class="form-control form-control-color" name="settings[<?php echo escape($setting->id); ?>]" value="<?php echo escape($setting->setting_value ?? '#0d6efd'); ?>" oninput="this.nextElementSibling.value=this.value">
+                                    <input type="color" class="form-control form-control-color" name="settings[<?php echo escape($setting->id); ?>]" value="<?php echo escape($setting->setting_value ?? '#0d6efd'); ?>">
                                     <input type="text" class="form-control" name="settings_display[<?php echo escape($setting->id); ?>]" value="<?php echo escape($setting->setting_value ?? '#0d6efd'); ?>" oninput="this.previousElementSibling.value=this.value">
                                 </div>
 
@@ -77,8 +72,8 @@
             </div>
         </div>
     <?php endforeach; ?>
-    <div class="text-center pb-4">
-        <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm">
+    <div class="text-center">
+        <button type="submit" class="btn btn-primary btn-lg">
             <i class="fas fa-save ms-1"></i>حفظ الإعدادات
         </button>
     </div>

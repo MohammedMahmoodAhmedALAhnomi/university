@@ -8,7 +8,6 @@ use App\Models\Course;
 use App\Models\Level;
 use App\Models\Announcement;
 use App\Models\File;
-use App\Models\User;
 
 class HomeController extends Controller
 {
@@ -21,9 +20,6 @@ class HomeController extends Controller
         $majorCount = Major::count();
         $newFilesCount = File::getRecentCount(48);
         $levels = Level::getActive();
-        $userCount = User::count();
-        $activeUserCount = User::countActive();
-        $totalDownloads = File::getTotalDownloads();
 
         $this->view('front/home', [
             'majors' => $majors,
@@ -33,10 +29,6 @@ class HomeController extends Controller
             'majorCount' => $majorCount,
             'newFilesCount' => $newFilesCount,
             'levels' => $levels,
-            'userCount' => $userCount,
-            'activeUserCount' => $activeUserCount,
-            'totalDownloads' => $totalDownloads,
         ]);
     }
 }
-

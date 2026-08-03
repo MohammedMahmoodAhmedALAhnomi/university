@@ -45,32 +45,16 @@ if (!function_exists('public_path')) {
 if (!function_exists('asset')) {
     function asset(string $path): string
     {
-        $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
-        $basePath = rtrim(dirname($scriptName), '/\\');
-        if ($basePath === '.' || $basePath === '/' || $basePath === '\\') {
-            $basePath = '';
-        }
-        $url = $basePath . '/' . ltrim($path, '/\\');
-        $filePath = public_path($path);
-        if (file_exists($filePath)) {
-            $mtime = @filemtime($filePath);
-            if ($mtime) {
-                $url .= '?v=' . $mtime;
-            }
-        }
-        return $url;
+        $appUrl = env('APP_URL', 'http://localhost/university_system');
+        return rtrim($appUrl, '/') . '/' . ltrim($path, '/');
     }
 }
 
 if (!function_exists('url')) {
     function url(string $path = ''): string
     {
-        $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
-        $basePath = rtrim(dirname($scriptName), '/\\');
-        if ($basePath === '.' || $basePath === '/' || $basePath === '\\') {
-            $basePath = '';
-        }
-        return $basePath . '/' . ltrim($path, '/\\');
+        $appUrl = env('APP_URL', 'http://localhost/university_system');
+        return rtrim($appUrl, '/') . '/' . ltrim($path, '/');
     }
 }
 
@@ -109,9 +93,8 @@ if (!function_exists('csrf_field')) {
 if (!function_exists('verify_csrf')) {
     function verify_csrf(): bool
     {
-        $token = $_POST['_csrf_token'] ?? ($_GET['_csrf_token'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? ''));
-        $sessionToken = $_SESSION['_csrf_token'] ?? '';
-        return !empty($sessionToken) && !empty($token) && hash_equals($sessionToken, $token);
+        $token = $_POST['_csrf_token'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
+        return hash_equals($_SESSION['_csrf_token'] ?? '', $token);
     }
 }
 
@@ -176,17 +159,9 @@ if (!function_exists('is_active_route')) {
     function is_active_route(string $path): string
     {
         $currentPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
-        $basePath = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+        $basePath = dirname($_SERVER['SCRIPT_NAME']);
         $normalized = str_replace($basePath, '', $currentPath);
-        $normalized = '/' . trim($normalized, '/');
-
-        if ($path === '/admin' || $path === '/admin/dashboard') {
-            return ($normalized === '/admin' || $normalized === '/admin/dashboard') ? 'active' : '';
-        }
-
-        if ($normalized === $path) return 'active';
-        if ($path !== '/' && str_starts_with($normalized, $path . '/')) return 'active';
-        return '';
+        return $normalized === $path ? 'active' : '';
     }
 }
 
@@ -212,8 +187,7 @@ if (!function_exists('log_activity')) {
 if (!function_exists('get_managed_level_id')) {
     function get_managed_level_id(): ?int
     {
-        $role = $_SESSION['user_role'] ?? '';
-        if ($role === 'manager' && isset($_SESSION['managed_level_id'])) {
+        if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'manager' && isset($_SESSION['managed_level_id'])) {
             return (int)$_SESSION['managed_level_id'];
         }
         return null;
@@ -223,8 +197,7 @@ if (!function_exists('get_managed_level_id')) {
 if (!function_exists('get_managed_major_id')) {
     function get_managed_major_id(): ?int
     {
-        $role = $_SESSION['user_role'] ?? '';
-        if (in_array($role, ['manager', 'major_admin']) && isset($_SESSION['managed_major_id'])) {
+        if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'manager' && isset($_SESSION['managed_major_id'])) {
             return (int)$_SESSION['managed_major_id'];
         }
         return null;
@@ -235,55 +208,5 @@ if (!function_exists('is_manager')) {
     function is_manager(): bool
     {
         return isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'manager';
-    }
-}
-
-if (!function_exists('get_major_icon')) {
-    function get_major_icon(?string $majorName, string $defaultIcon = 'fas fa-university'): string
-    {
-        if (empty($majorName)) return $defaultIcon;
-        $name = mb_strtolower($majorName);
-        if (str_contains($name, 'بيانات') || str_contains($name, 'data') || str_contains($name, 'ds')) {
-            return 'fas fa-database';
-        }
-        if (str_contains($name, 'جراف') || str_contains($name, 'غراف') || str_contains($name, 'تصميم') || str_contains($name, 'graphics') || str_contains($name, 'gr') || str_contains($name, 'وسائط')) {
-            return 'fas fa-palette';
-        }
-        if (str_contains($name, 'نظم') || str_contains($name, 'is') || str_contains($name, 'إدارية')) {
-            return 'fas fa-network-wired';
-        }
-        if (str_contains($name, 'تقنية') || str_contains($name, 'it') || str_contains($name, 'تكنولوجيا')) {
-            return 'fas fa-laptop-code';
-        }
-        if (str_contains($name, 'علوم') || str_contains($name, 'cs') || str_contains($name, 'حاسوب')) {
-            return 'fas fa-code';
-        }
-        if (str_contains($name, 'أمن') || str_contains($name, 'سيبراني') || str_contains($name, 'cyber')) {
-            return 'fas fa-shield-alt';
-        }
-        if (str_contains($name, 'برمجيات') || str_contains($name, 'se') || str_contains($name, 'هندسة')) {
-            return 'fas fa-drafting-compass';
-        }
-        if (str_contains($name, 'ذكاء') || str_contains($name, 'ai')) {
-            return 'fas fa-brain';
-        }
-        return $defaultIcon;
-    }
-}
-
-if (!function_exists('get_major_badge_code')) {
-    function get_major_badge_code(?string $majorName): string
-    {
-        if (empty($majorName)) return '';
-        $name = mb_strtolower($majorName);
-        if (str_contains($name, 'بيانات') || str_contains($name, 'data') || str_contains($name, 'ds')) return 'DS';
-        if (str_contains($name, 'جراف') || str_contains($name, 'غراف') || str_contains($name, 'تصميم') || str_contains($name, 'graphics') || str_contains($name, 'gr') || str_contains($name, 'وسائط')) return 'GR';
-        if (str_contains($name, 'نظم') || str_contains($name, 'is')) return 'IS';
-        if (str_contains($name, 'تقنية') || str_contains($name, 'it')) return 'IT';
-        if (str_contains($name, 'علوم') || str_contains($name, 'cs')) return 'CS';
-        if (str_contains($name, 'أمن') || str_contains($name, 'سيبراني') || str_contains($name, 'cyber')) return 'CYBER';
-        if (str_contains($name, 'برمجيات') || str_contains($name, 'se')) return 'SE';
-        if (str_contains($name, 'ذكاء') || str_contains($name, 'ai')) return 'AI';
-        return '';
     }
 }

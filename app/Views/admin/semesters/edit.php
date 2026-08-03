@@ -1,13 +1,8 @@
-<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-    <div>
-        <h4 class="fw-bold mb-1"><i class="fas fa-edit ms-2 text-warning"></i>تعديل الفصل الدراسي</h4>
-        <p class="text-muted small mb-0">تعديل بيانات الفصل الدراسي</p>
-    </div>
-    <div>
-        <a href="<?php echo url('/admin/semesters'); ?>" class="btn btn-outline-secondary rounded-pill px-3">
-            <i class="fas fa-arrow-right ms-1"></i>عودة
-        </a>
-    </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3><i class="fas fa-edit ms-2"></i>تعديل الفصل الدراسي</h3>
+    <a href="<?php echo url('/admin/semesters'); ?>" class="btn btn-secondary">
+        <i class="fas fa-arrow-right ms-1"></i>عودة
+    </a>
 </div>
 
 <div class="card shadow-sm">
@@ -34,8 +29,8 @@
                         <label class="form-check-label" for="is_active">نشط</label>
                     </div>
                 </div>
-                <div class="col-12 pt-2 border-top">
-                    <button type="submit" class="btn btn-primary px-4">
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
                         <i class="fas fa-save ms-1"></i>حفظ التغييرات
                     </button>
                 </div>

@@ -1,13 +1,8 @@
-<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
-    <div>
-        <h4 class="fw-bold mb-1"><i class="fas fa-user-edit ms-2 text-warning"></i>تعديل المندوب</h4>
-        <p class="text-muted small mb-0">تعديل بيانات حساب المندوب</p>
-    </div>
-    <div>
-        <a href="<?php echo url('/admin/managers'); ?>" class="btn btn-outline-secondary rounded-pill px-3">
-            <i class="fas fa-arrow-right ms-1"></i>عودة
-        </a>
-    </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3><i class="fas fa-user-edit ms-2"></i>تعديل المندوب</h3>
+    <a href="<?php echo url('/admin/managers'); ?>" class="btn btn-secondary">
+        <i class="fas fa-arrow-right ms-1"></i>عودة
+    </a>
 </div>
 
 <div class="card shadow-sm">
@@ -18,27 +13,22 @@
             <div class="row g-3">
                 <div class="col-md-6">
                     <label for="full_name" class="form-label">الاسم <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="full_name" name="full_name" value="<?php echo escape(old('full_name', $manager->full_name)); ?>" required>
+                    <input type="text" class="form-control" id="full_name" name="full_name" value="<?php echo escape($manager->full_name); ?>" required>
                 </div>
                 <div class="col-md-6">
                     <label for="email" class="form-label">البريد الإلكتروني <span class="text-danger">*</span></label>
-                    <input type="email" class="form-control" id="email" name="email" value="<?php echo escape(old('email', $manager->email)); ?>" required>
+                    <input type="email" class="form-control" id="email" name="email" value="<?php echo escape($manager->email); ?>" required>
                 </div>
                 <div class="col-md-6">
                     <label for="password" class="form-label">كلمة المرور (اتركه فارغاً إذا لا تريد التغيير)</label>
-                    <div class="input-group">
-                        <input type="password" class="form-control" id="password" name="password">
-                        <button type="button" class="btn btn-outline-secondary" id="toggleEditManagerPassword" tabindex="-1">
-                            <i class="fas fa-eye" id="editManagerPasswordIcon"></i>
-                        </button>
-                    </div>
+                    <input type="password" class="form-control" id="password" name="password">
                 </div>
                 <?php if (empty($managedMajor)): ?>
                 <div class="col-md-6">
                     <label for="managed_major_id" class="form-label">التخصص المسؤول عنه <span class="text-danger">*</span></label>
                     <select class="form-select" id="managed_major_id" name="managed_major_id" required>
                         <?php foreach ($majors as $major): ?>
-                            <option value="<?php echo $major->id; ?>" <?php echo old('managed_major_id', $manager->managed_major_id) == $major->id ? 'selected' : ''; ?>>
+                            <option value="<?php echo $major->id; ?>" <?php echo $manager->managed_major_id == $major->id ? 'selected' : ''; ?>>
                                 <?php echo escape($major->name); ?>
                             </option>
                         <?php endforeach; ?>
@@ -51,7 +41,7 @@
                     <label for="managed_level_id" class="form-label">المستوى المسؤول عنه <span class="text-danger">*</span></label>
                     <select class="form-select" id="managed_level_id" name="managed_level_id" required>
                         <?php foreach ($levels as $level): ?>
-                            <option value="<?php echo $level->id; ?>" <?php echo old('managed_level_id', $manager->managed_level_id) == $level->id ? 'selected' : ''; ?>>
+                            <option value="<?php echo $level->id; ?>" <?php echo $manager->managed_level_id == $level->id ? 'selected' : ''; ?>>
                                 <?php echo escape($level->name); ?>
                             </option>
                         <?php endforeach; ?>
@@ -66,12 +56,3 @@
         </form>
     </div>
 </div>
-
-<script>
-document.getElementById('toggleEditManagerPassword')?.addEventListener('click', function() {
-    const p = document.getElementById('password');
-    const i = document.getElementById('editManagerPasswordIcon');
-    if (p.type === 'password') { p.type = 'text'; i.classList.replace('fa-eye', 'fa-eye-slash'); }
-    else { p.type = 'password'; i.classList.replace('fa-eye-slash', 'fa-eye'); }
-});
-</script>

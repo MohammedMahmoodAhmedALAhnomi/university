@@ -30,23 +30,6 @@ class Setting extends Model
 
     public static function getAllGrouped(): array
     {
-        // Auto-seed Google OAuth keys if not in database yet
-        $checkGoogle = Database::fetch("SELECT id FROM settings WHERE setting_key = 'google_client_id'");
-        if (!$checkGoogle) {
-            Database::insert(static::$table, [
-                'setting_key' => 'google_client_id',
-                'setting_value' => '',
-                'setting_type' => 'text',
-                'setting_group' => 'Google OAuth (تسجيل الدخول بقوقل)',
-            ]);
-            Database::insert(static::$table, [
-                'setting_key' => 'google_client_secret',
-                'setting_value' => '',
-                'setting_type' => 'text',
-                'setting_group' => 'Google OAuth (تسجيل الدخول بقوقل)',
-            ]);
-        }
-
         $rows = Database::fetchAll("SELECT * FROM settings ORDER BY setting_group, id");
         $grouped = [];
         foreach ($rows as $row) {
