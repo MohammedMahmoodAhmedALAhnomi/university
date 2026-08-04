@@ -139,9 +139,28 @@ class ApiController extends Controller
         ]);
     }
 
+    private function ensureSamplePdfFiles(): void
+    {
+        $uploadDir = __DIR__ . '/../../public/uploads/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $samplePdfContent = "%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj 2 0 obj<</Type/Pages/Count 1/Kids[3 0 R]>>endobj 3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<</Font<</F1 4 0 R>>>>/Contents 5 0 R>>endobj 4 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj 5 0 obj<</Length 56>>stream\nBT /F1 18 Tf 50 700 Td (University Platform Academic File) Tj ET\nendstream\nendobj\nxref\n0 6\n0000000000 65535 f\n0000000010 00000 n\n0000000060 00000 n\n0000000117 00000 n\n0000000244 00000 n\n0000000315 00000 n\ntrailer<</Size 6/Root 1 0 R>>\nstartxref\n422\n%%EOF";
+
+        $files = ['sample_lecture.pdf', 'sample_exams.pdf'];
+        foreach ($files as $f) {
+            $path = $uploadDir . $f;
+            if (!file_exists($path)) {
+                file_put_contents($path, $samplePdfContent);
+            }
+        }
+    }
+
     private function ensureInitialData(): void
     {
         try {
+            $this->ensureSamplePdfFiles();
             // 1. Majors
             $majorsCount = (int)(\App\Config\Database::fetch("SELECT COUNT(*) as c FROM majors")->c ?? 0);
             if ($majorsCount === 0) {
@@ -632,6 +651,7 @@ class ApiController extends Controller
 
     public function downloadFile(): void
     {
+        $this->ensureSamplePdfFiles();
         $id = (int)($this->getParam('id') ?? $_GET['id'] ?? 0);
         $file = File::findById($id);
         if (!$file || !$file->is_approved) {
@@ -640,14 +660,16 @@ class ApiController extends Controller
 
         File::incrementDownloads($id);
 
-        $appUrl = Setting::get('app_url', 'http://localhost/university');
-        $downloadUrl = rtrim($appUrl, '/') . '/files/' . $file->id . '/download';
+        $filePathOnDisk = __DIR__ . '/../../public/' . ltrim($file->file_path, '/');
+        if (!file_exists($filePathOnDisk)) {
+            $this->ensureSamplePdfFiles();
+        }
 
         $this->jsonResponse([
             'status' => 'success',
             'data' => [
                 'file' => $file,
-                'download_url' => $downloadUrl
+                'file_path' => $file->file_path
             ]
         ]);
     }
