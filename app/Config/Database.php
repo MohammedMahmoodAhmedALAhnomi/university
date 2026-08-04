@@ -62,6 +62,11 @@ class Database
                 self::raw("ALTER TABLE files ADD COLUMN doctor_name VARCHAR(255) DEFAULT NULL AFTER description");
             } catch (\Throwable $t) {}
         }
+        if ($table === 'join_requests' && isset($data['reason'])) {
+            try {
+                self::raw("ALTER TABLE join_requests ADD COLUMN reason TEXT DEFAULT NULL AFTER level_id");
+            } catch (\Throwable $t) {}
+        }
 
         try {
             $columns = implode(', ', array_keys($data));
@@ -78,6 +83,14 @@ class Database
                 self::raw($sql, $data);
                 return (int) self::getInstance()->getConnection()->lastInsertId();
             }
+            if ($table === 'join_requests' && isset($data['reason']) && str_contains($e->getMessage(), 'reason')) {
+                unset($data['reason']);
+                $columns = implode(', ', array_keys($data));
+                $placeholders = ':' . implode(', :', array_keys($data));
+                $sql = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
+                self::raw($sql, $data);
+                return (int) self::getInstance()->getConnection()->lastInsertId();
+            }
             throw $e;
         }
     }
@@ -87,6 +100,11 @@ class Database
         if ($table === 'files' && isset($data['doctor_name'])) {
             try {
                 self::raw("ALTER TABLE files ADD COLUMN doctor_name VARCHAR(255) DEFAULT NULL AFTER description");
+            } catch (\Throwable $t) {}
+        }
+        if ($table === 'join_requests' && isset($data['reason'])) {
+            try {
+                self::raw("ALTER TABLE join_requests ADD COLUMN reason TEXT DEFAULT NULL AFTER level_id");
             } catch (\Throwable $t) {}
         }
 

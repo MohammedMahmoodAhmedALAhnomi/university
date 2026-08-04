@@ -794,38 +794,49 @@ class ApiController extends Controller
     public function requestRole(): void
     {
         $input = $this->getJsonInput();
-        $userId = (int)($input['user_id'] ?? 0);
-        $majorId = (int)($input['major_id'] ?? 0);
-        $levelId = !empty($input['level_id']) ? (int)$input['level_id'] : null;
-        $accountType = $input['account_type'] ?? 'representative';
-        $reason = trim($input['reason'] ?? '');
+        $userId = (int)($input['user_id'] ?? $_POST['user_id'] ?? 0);
+        $majorId = (int)($input['major_id'] ?? $_POST['major_id'] ?? 0);
+        $levelId = !empty($input['level_id']) ? (int)$input['level_id'] : (!empty($_POST['level_id']) ? (int)$_POST['level_id'] : null);
+        $accountType = $input['account_type'] ?? $_POST['account_type'] ?? 'representative';
+        $reason = trim($input['reason'] ?? $_POST['reason'] ?? '');
 
         if (!$userId || !$majorId) {
             $this->jsonResponse(['status' => 'error', 'message' => 'يرجى إكمال بيانات الطلب والتخصص'], 400);
+            return;
         }
 
-        $existing = \App\Models\JoinRequest::findPendingByUserId($userId);
-        if ($existing) {
-            $this->jsonResponse(['status' => 'error', 'message' => 'لديك طلب انضمام معلق بالفعل قيد المراجعة'], 409);
+        try {
+            $existing = \App\Models\JoinRequest::findPendingByUserId($userId);
+            if ($existing) {
+                $this->jsonResponse(['status' => 'error', 'message' => 'لديك طلب انضمام معلق بالفعل قيد المراجعة'], 409);
+                return;
+            }
+
+            \App\Config\Database::insert('join_requests', [
+                'user_id' => $userId,
+                'major_id' => $majorId,
+                'level_id' => $levelId,
+                'account_type' => $accountType,
+                'reason' => $reason,
+                'status' => 'pending'
+            ]);
+
+            $user = \App\Models\User::findById($userId);
+            $userName = $user ? $user->full_name : 'مستخدم جديد';
+            try {
+                \App\Models\Notification::send(null, 'طلب ترقية مندوب جديد 📩', 'قام ' . $userName . ' بتقديم طلب ترقية كمندوب دفعة قيد المراجعة', 'warning', '/admin/requests');
+            } catch (\Throwable $t) {}
+
+            $this->jsonResponse([
+                'status' => 'success',
+                'message' => 'تم إرسال طلب الترقية بنجاح وهو قيد المراجعة'
+            ]);
+        } catch (\Throwable $e) {
+            $this->jsonResponse([
+                'status' => 'error',
+                'message' => 'حدث خطأ أثناء حفظ الطلب: ' . $e->getMessage()
+            ], 500);
         }
-
-        \App\Models\JoinRequest::create([
-            'user_id' => $userId,
-            'major_id' => $majorId,
-            'level_id' => $levelId,
-            'account_type' => $accountType,
-            'reason' => $reason,
-            'status' => 'pending'
-        ]);
-
-        $user = \App\Models\User::findById($userId);
-        $userName = $user ? $user->full_name : 'مستخدم جديد';
-        \App\Models\Notification::send(null, 'طلب ترقية مندوب جديد 📩', 'قام ' . $userName . ' بتقديم طلب ترقية كمندوب دفعة قيد المراجعة', 'warning', '/admin/requests');
-
-        $this->jsonResponse([
-            'status' => 'success',
-            'message' => 'تم إرسال طلب الترقية بنجاح وهو قيد المراجعة'
-        ]);
     }
 
 
