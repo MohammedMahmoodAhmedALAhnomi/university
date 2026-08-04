@@ -125,6 +125,19 @@ return [
     '/api/notifications/read-all' => ['controller' => 'ApiController', 'action' => 'markAllNotificationsRead', 'method' => 'POST'],
     '/api/bookmarks' => ['controller' => 'ApiController', 'action' => 'bookmarks', 'method' => 'GET'],
     '/api/bookmarks/toggle' => ['controller' => 'ApiController', 'action' => 'toggleBookmark', 'method' => 'POST'],
+
+    // File upload & Admin management routes for Mobile App
+    '/api/files/upload' => ['controller' => 'ApiController', 'action' => 'uploadFile', 'method' => 'POST'],
+    '/api/admin/files' => ['controller' => 'ApiController', 'action' => 'adminFiles', 'method' => 'GET'],
+    '/api/admin/files/{id}/approve' => ['controller' => 'ApiController', 'action' => 'approveFile', 'method' => 'POST'],
+    '/api/admin/files/{id}/delete' => ['controller' => 'ApiController', 'action' => 'deleteFile', 'method' => 'POST'],
+    '/api/admin/majors/create' => ['controller' => 'ApiController', 'action' => 'createMajor', 'method' => 'POST'],
+    '/api/admin/majors/{id}/delete' => ['controller' => 'ApiController', 'action' => 'deleteMajor', 'method' => 'POST'],
+    '/api/admin/courses/create' => ['controller' => 'ApiController', 'action' => 'createCourse', 'method' => 'POST'],
+    '/api/admin/courses/{id}/delete' => ['controller' => 'ApiController', 'action' => 'deleteCourse', 'method' => 'POST'],
+    '/api/admin/announcements/{id}/delete' => ['controller' => 'ApiController', 'action' => 'deleteAnnouncement', 'method' => 'POST'],
+    '/api/admin/users' => ['controller' => 'ApiController', 'action' => 'adminUsers', 'method' => 'GET'],
+    '/api/admin/users/{id}/role' => ['controller' => 'ApiController', 'action' => 'updateUserRole', 'method' => 'POST'],
 ];
 
 

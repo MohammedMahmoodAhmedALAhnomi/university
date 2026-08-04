@@ -689,6 +689,13 @@ class ApiController extends Controller
         $description = trim($input['description'] ?? $_POST['description'] ?? '');
         $userId = (int)($input['user_id'] ?? $_POST['user_id'] ?? 0);
 
+        if ($userId > 0) {
+            $user = \App\Models\User::findById($userId);
+            if (!$user || $user->role === 'guest') {
+                $this->jsonResponse(['status' => 'error', 'message' => 'عذراً، رفع الملفات والملخصات متاح فقط لمندوبي الدفعات والمشرفين'], 403);
+            }
+        }
+
         if (empty($title) || !$courseId) {
             $this->jsonResponse(['status' => 'error', 'message' => 'اسم الملف والمادة الدراسية مطلوبان'], 400);
         }
@@ -1086,6 +1093,132 @@ class ApiController extends Controller
         $userId = $userId > 0 ? $userId : null;
         $success = \App\Models\Notification::markAllAsRead($userId);
         $this->jsonResponse(['status' => 'success', 'message' => 'تم تعيين جميع الإشعارات كـ مقروءة']);
+    }
+
+    public function adminFiles(): void
+    {
+        $files = \App\Config\Database::fetchAll(
+            "SELECT f.*, c.name as course_name, m.name as major_name, u.full_name as uploader_name
+             FROM files f
+             LEFT JOIN courses c ON c.id = f.course_id
+             LEFT JOIN majors m ON m.id = c.major_id
+             LEFT JOIN users u ON u.id = f.uploaded_by
+             ORDER BY f.id DESC"
+        );
+        $this->jsonResponse(['status' => 'success', 'data' => $files]);
+    }
+
+    public function approveFile(): void
+    {
+        $id = (int)($this->getParam('id', $_GET['id'] ?? 0));
+        \App\Config\Database::raw("UPDATE files SET is_approved = 1 WHERE id = ?", [$id]);
+        $this->jsonResponse(['status' => 'success', 'message' => 'تم القبول بنجاح']);
+    }
+
+    public function deleteFile(): void
+    {
+        $id = (int)($this->getParam('id', $_GET['id'] ?? 0));
+        \App\Config\Database::raw("DELETE FROM files WHERE id = ?", [$id]);
+        $this->jsonResponse(['status' => 'success', 'message' => 'تم حذف الملف بنجاح']);
+    }
+
+    public function createMajor(): void
+    {
+        $input = $this->getJsonInput();
+        $name = trim($input['name'] ?? '');
+        $code = trim($input['code'] ?? '');
+        $description = trim($input['description'] ?? '');
+
+        if (empty($name)) {
+            $this->jsonResponse(['status' => 'error', 'message' => 'اسم التخصص مطلوب'], 400);
+        }
+
+        $id = \App\Models\Major::create(['name' => $name, 'code' => $code, 'description' => $description]);
+        $this->jsonResponse(['status' => 'success', 'message' => 'تم إضافة التخصص بنجاح', 'data' => ['id' => $id]]);
+    }
+
+    public function deleteMajor(): void
+    {
+        $id = (int)($this->getParam('id', $_GET['id'] ?? 0));
+        \App\Config\Database::raw("DELETE FROM majors WHERE id = ?", [$id]);
+        $this->jsonResponse(['status' => 'success', 'message' => 'تم حذف التخصص بنجاح']);
+    }
+
+    public function createCourse(): void
+    {
+        $input = $this->getJsonInput();
+        $name = trim($input['name'] ?? '');
+        $code = trim($input['code'] ?? '');
+        $majorId = (int)($input['major_id'] ?? 0);
+        $levelId = !empty($input['level_id']) ? (int)$input['level_id'] : 1;
+        $semesterId = !empty($input['semester_id']) ? (int)$input['semester_id'] : 1;
+        $description = trim($input['description'] ?? '');
+
+        if (empty($name) || !$majorId) {
+            $this->jsonResponse(['status' => 'error', 'message' => 'اسم المادة والتخصص مطلوبان'], 400);
+        }
+
+        $id = \App\Models\Course::create([
+            'name' => $name,
+            'code' => $code,
+            'major_id' => $majorId,
+            'level_id' => $levelId,
+            'semester_id' => $semesterId,
+            'description' => $description,
+            'is_active' => 1
+        ]);
+        $this->jsonResponse(['status' => 'success', 'message' => 'تم إضافة المادة الدراسية بنجاح', 'data' => ['id' => $id]]);
+    }
+
+    public function deleteCourse(): void
+    {
+        $id = (int)($this->getParam('id', $_GET['id'] ?? 0));
+        \App\Config\Database::raw("DELETE FROM courses WHERE id = ?", [$id]);
+        $this->jsonResponse(['status' => 'success', 'message' => 'تم حذف المادة الدراسية بنجاح']);
+    }
+
+    public function deleteAnnouncement(): void
+    {
+        $id = (int)($this->getParam('id', $_GET['id'] ?? 0));
+        \App\Config\Database::raw("DELETE FROM announcements WHERE id = ?", [$id]);
+        $this->jsonResponse(['status' => 'success', 'message' => 'تم حذف الإعلان بنجاح']);
+    }
+
+    public function adminUsers(): void
+    {
+        $users = \App\Config\Database::fetchAll(
+            "SELECT u.*, m.name as major_name
+             FROM users u
+             LEFT JOIN majors m ON m.id = u.major_id
+             ORDER BY u.id DESC"
+        );
+        $data = array_map(function($u) {
+            return [
+                'id' => (int)$u->id,
+                'full_name' => $u->full_name,
+                'email' => $u->email,
+                'phone' => $u->phone ?? '',
+                'role' => $u->role,
+                'major_name' => $u->major_name ?? 'غير محدد',
+                'is_active' => (int)$u->is_active === 1,
+                'created_at' => $u->created_at,
+            ];
+        }, $users);
+        $this->jsonResponse(['status' => 'success', 'data' => $data]);
+    }
+
+    public function updateUserRole(): void
+    {
+        $id = (int)($this->getParam('id', $_GET['id'] ?? 0));
+        $input = $this->getJsonInput();
+        $role = trim($input['role'] ?? '');
+
+        if (!$id || empty($role)) {
+            $this->jsonResponse(['status' => 'error', 'message' => 'بيانات التحديث غير مكتملة'], 400);
+        }
+
+        \App\Config\Database::raw("UPDATE users SET role = ? WHERE id = ?", [$role, $id]);
+        $this->jsonResponse(['status' => 'success', 'message' => 'تم تحديث دور المستخدم بنجاح']);
     }
 }
 
