@@ -8,7 +8,6 @@ import 'package:open_filex/open_filex.dart';
 import '../core/constants/api_endpoints.dart';
 import '../core/constants/app_colors.dart';
 import '../core/utils/ui_helpers.dart';
-import 'api_service.dart';
 
 class DownloadService {
   static Future<void> downloadFileInApp(
@@ -61,14 +60,7 @@ class DownloadService {
     String? localPath;
 
     try {
-      // 2. Notify backend server download endpoint
-      try {
-        await ApiService.get('${ApiEndpoints.downloadFile}$fileId/download');
-      } catch (e) {
-        debugPrint('Download counter update log: $e');
-      }
-
-      // 3. Prepare candidate URLs targeting the actual server download endpoint
+      // 2. Prepare candidate URLs targeting the actual server download endpoint
       final List<String> candidateUrls = [
         '${ApiEndpoints.serverHost}/files/$fileId/download',
         'https://university-production-102b.up.railway.app/files/$fileId/download',
