@@ -44,26 +44,43 @@ class JoinRequest extends Model
 
     public static function approve(int $requestId): bool
     {
-        $req = Database::fetch("SELECT * FROM join_requests WHERE id = ?", [$requestId]);
-        if (!$req) return false;
+        try {
+            $req = Database::fetch("SELECT * FROM join_requests WHERE id = ?", [$requestId]);
+            if (!$req) return false;
 
-        $targetRole = ($req->account_type === 'major_admin') ? 'major_admin' : 'manager';
+            $targetRole = ($req->account_type === 'major_admin') ? 'major_admin' : 'manager';
 
-        // Update User Account Role & Scope
-        Database::update('users', [
-            'role' => $targetRole,
-            'major_id' => $req->major_id,
-            'managed_major_id' => $req->major_id,
-            'managed_level_id' => $req->account_type === 'representative' ? $req->level_id : null,
-            'is_active' => 1
-        ], 'id = :id', ['id' => $req->user_id]);
+            // Update User Account Role & Scope safely
+            try {
+                Database::update('users', [
+                    'role' => $targetRole,
+                    'major_id' => $req->major_id,
+                    'managed_major_id' => $req->major_id,
+                    'managed_level_id' => $req->account_type === 'representative' ? $req->level_id : null,
+                    'is_active' => 1
+                ], 'id = :id', ['id' => $req->user_id]);
+            } catch (\Throwable $t) {
+                try {
+                    Database::update('users', [
+                        'role' => $targetRole,
+                        'major_id' => $req->major_id,
+                        'is_active' => 1
+                    ], 'id = :id', ['id' => $req->user_id]);
+                } catch (\Throwable $t2) {
+                    Database::raw("UPDATE users SET role = ?, is_active = 1 WHERE id = ?", [$targetRole, $req->user_id]);
+                }
+            }
 
-        // Update Join Request Status
-        Database::update('join_requests', [
-            'status' => 'approved'
-        ], 'id = :id', ['id' => $requestId]);
+            // Update Join Request Status
+            Database::update('join_requests', [
+                'status' => 'approved'
+            ], 'id = :id', ['id' => $requestId]);
 
-        return true;
+            return true;
+        } catch (\Throwable $e) {
+            error_log("Error approving request #{$requestId}: " . $e->getMessage());
+            return false;
+        }
     }
 
     public static function reject(int $requestId): bool

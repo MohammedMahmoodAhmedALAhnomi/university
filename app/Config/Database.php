@@ -107,6 +107,14 @@ class Database
                 self::raw("ALTER TABLE join_requests ADD COLUMN reason TEXT DEFAULT NULL AFTER level_id");
             } catch (\Throwable $t) {}
         }
+        if ($table === 'users') {
+            try {
+                self::raw("ALTER TABLE users ADD COLUMN managed_major_id INT DEFAULT NULL");
+            } catch (\Throwable $t) {}
+            try {
+                self::raw("ALTER TABLE users ADD COLUMN managed_level_id INT DEFAULT NULL");
+            } catch (\Throwable $t) {}
+        }
 
         try {
             $sets = '';
@@ -118,6 +126,21 @@ class Database
             $params = array_merge($data, $whereParams);
             return self::raw($sql, $params)->rowCount();
         } catch (\PDOException $e) {
+            if ($table === 'users') {
+                $cleanData = $data;
+                if (str_contains($e->getMessage(), 'managed_major_id')) unset($cleanData['managed_major_id']);
+                if (str_contains($e->getMessage(), 'managed_level_id')) unset($cleanData['managed_level_id']);
+                if (!empty($cleanData)) {
+                    $sets = '';
+                    foreach (array_keys($cleanData) as $col) {
+                        $sets .= "{$col} = :{$col}, ";
+                    }
+                    $sets = rtrim($sets, ', ');
+                    $sql = "UPDATE {$table} SET {$sets} WHERE {$where}";
+                    $params = array_merge($cleanData, $whereParams);
+                    return self::raw($sql, $params)->rowCount();
+                }
+            }
             if ($table === 'files' && isset($data['doctor_name']) && str_contains($e->getMessage(), 'doctor_name')) {
                 unset($data['doctor_name']);
                 $sets = '';
