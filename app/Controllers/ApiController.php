@@ -989,31 +989,65 @@ class ApiController extends Controller
         ]);
     }
 
-    public function approveRequest(int $id): void
+    public function approveRequest(int $id = 0): void
     {
-        $req = \App\Config\Database::fetch("SELECT user_id FROM join_requests WHERE id = ?", [$id]);
-        $success = \App\Models\JoinRequest::approve($id);
-        if ($success) {
-            if ($req && !empty($req->user_id)) {
-                \App\Models\Notification::send((int)$req->user_id, 'تمت الموافقة على طلبك! 🎉', 'مبروك! تم قبول طلب ترقيتك وتفعيل صلاحيات المندوب لحسابك بنجاح.', 'success', '/profile');
+        $id = (int)($id ?: ($this->getParam('id') ?? $_GET['id'] ?? $_REQUEST['id'] ?? 0));
+        if (!$id) {
+            $input = $this->getJsonInput();
+            $id = (int)($input['id'] ?? 0);
+        }
+
+        if (!$id) {
+            $this->jsonResponse(['status' => 'error', 'message' => 'معرف الطلب غير موجود'], 400);
+            return;
+        }
+
+        try {
+            $req = \App\Config\Database::fetch("SELECT user_id FROM join_requests WHERE id = ?", [$id]);
+            $success = \App\Models\JoinRequest::approve($id);
+            if ($success) {
+                if ($req && !empty($req->user_id)) {
+                    try {
+                        \App\Models\Notification::send((int)$req->user_id, 'تمت الموافقة على طلبك! 🎉', 'مبروك! تم قبول طلب ترقيتك وتفعيل صلاحيات المندوب لحسابك بنجاح.', 'success', '/profile');
+                    } catch (\Throwable $t) {}
+                }
+                $this->jsonResponse(['status' => 'success', 'message' => 'تم قبول الطلب وترقية المستخدم بنجاح']);
+            } else {
+                $this->jsonResponse(['status' => 'error', 'message' => 'تعذر قبول الطلب'], 400);
             }
-            $this->jsonResponse(['status' => 'success', 'message' => 'تم قبول الطلب وترقية المستخدم بنجاح']);
-        } else {
-            $this->jsonResponse(['status' => 'error', 'message' => 'تعذر قبول الطلب'], 400);
+        } catch (\Throwable $e) {
+            $this->jsonResponse(['status' => 'error', 'message' => 'خطأ في معالجة القبول: ' . $e->getMessage()], 500);
         }
     }
 
-    public function rejectRequest(int $id): void
+    public function rejectRequest(int $id = 0): void
     {
-        $req = \App\Config\Database::fetch("SELECT user_id FROM join_requests WHERE id = ?", [$id]);
-        $success = \App\Models\JoinRequest::reject($id);
-        if ($success) {
-            if ($req && !empty($req->user_id)) {
-                \App\Models\Notification::send((int)$req->user_id, 'نتيجة طلب الترقية ❌', 'نأسف، تم رفض طلب الترقية كمندوب حالياً.', 'error', '/profile');
+        $id = (int)($id ?: ($this->getParam('id') ?? $_GET['id'] ?? $_REQUEST['id'] ?? 0));
+        if (!$id) {
+            $input = $this->getJsonInput();
+            $id = (int)($input['id'] ?? 0);
+        }
+
+        if (!$id) {
+            $this->jsonResponse(['status' => 'error', 'message' => 'معرف الطلب غير موجود'], 400);
+            return;
+        }
+
+        try {
+            $req = \App\Config\Database::fetch("SELECT user_id FROM join_requests WHERE id = ?", [$id]);
+            $success = \App\Models\JoinRequest::reject($id);
+            if ($success) {
+                if ($req && !empty($req->user_id)) {
+                    try {
+                        \App\Models\Notification::send((int)$req->user_id, 'نتيجة طلب الترقية ❌', 'نأسف، تم رفض طلب الترقية كمندوب حالياً.', 'error', '/profile');
+                    } catch (\Throwable $t) {}
+                }
+                $this->jsonResponse(['status' => 'success', 'message' => 'تم رفض الطلب بنجاح']);
+            } else {
+                $this->jsonResponse(['status' => 'error', 'message' => 'تعذر رفض الطلب'], 400);
             }
-            $this->jsonResponse(['status' => 'success', 'message' => 'تم رفض الطلب بنجاح']);
-        } else {
-            $this->jsonResponse(['status' => 'error', 'message' => 'تعذر رفض الطلب'], 400);
+        } catch (\Throwable $e) {
+            $this->jsonResponse(['status' => 'error', 'message' => 'خطأ في معالجة الرفض: ' . $e->getMessage()], 500);
         }
     }
 

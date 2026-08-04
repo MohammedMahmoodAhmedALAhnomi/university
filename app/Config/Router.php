@@ -93,7 +93,11 @@ class Router
                 return;
             }
 
-            $controller->$action();
+            if (!empty($params)) {
+                $controller->$action(...array_values($params));
+            } else {
+                $controller->$action();
+            }
             return;
         }
 
