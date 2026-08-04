@@ -151,6 +151,18 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                                 },
                               ),
                               IconButton(
+                                icon: const Icon(Icons.remove_red_eye_rounded, color: Colors.blueAccent),
+                                tooltip: 'معاينة الملف',
+                                onPressed: () {
+                                  DownloadService.previewFileInApp(
+                                    context,
+                                    fileId: file.id,
+                                    fileTitle: file.title,
+                                    rawFilePath: file.filePath,
+                                  );
+                                },
+                              ),
+                              IconButton(
                                 icon: const Icon(Icons.download_rounded, color: AppColors.primary),
                                 tooltip: 'تحميل الملف داخل التطبيق',
                                 onPressed: () {

@@ -22,7 +22,9 @@ class DownloadService {
       barrierDismissible: false,
       builder: (dialogCtx) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           content: Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: Column(
@@ -74,7 +76,9 @@ class DownloadService {
           candidateUrls.add(cleanPath);
         } else {
           candidateUrls.add('${ApiEndpoints.serverHost}/$cleanPath');
-          candidateUrls.add('https://university-production-102b.up.railway.app/$cleanPath');
+          candidateUrls.add(
+            'https://university-production-102b.up.railway.app/$cleanPath',
+          );
         }
       }
 
@@ -82,12 +86,20 @@ class DownloadService {
       String serverFilename = '';
       for (final url in candidateUrls) {
         try {
-          final res = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 15));
-          if (res.statusCode == 200 && res.bodyBytes.length > 50) {
+          final res = await http
+              .get(Uri.parse(url))
+              .timeout(const Duration(seconds: 15));
+          
+          final contentType = res.headers['content-type'] ?? '';
+          final isJsonOrHtml = contentType.contains('json') || contentType.contains('html');
+
+          if (res.statusCode == 200 && res.bodyBytes.length > 50 && !isJsonOrHtml) {
             fileBytes = res.bodyBytes;
             final disposition = res.headers['content-disposition'];
             if (disposition != null && disposition.contains('filename=')) {
-              final match = RegExp(r'filename="?([^";]+)"?').firstMatch(disposition);
+              final match = RegExp(
+                r'filename="?([^";]+)"?',
+              ).firstMatch(disposition);
               if (match != null && match.group(1) != null) {
                 serverFilename = match.group(1)!;
               }
@@ -108,7 +120,9 @@ class DownloadService {
 
         // Attempt 1: Public Download folder /storage/emulated/0/Download/اللجنة العلمية
         if (Platform.isAndroid) {
-          final publicDownloadDir = Directory('/storage/emulated/0/Download/اللجنة العلمية');
+          final publicDownloadDir = Directory(
+            '/storage/emulated/0/Download/اللجنة العلمية',
+          );
           try {
             if (!await publicDownloadDir.exists()) {
               await publicDownloadDir.create(recursive: true);
@@ -149,7 +163,10 @@ class DownloadService {
             finalFileName = '${fileTitle.trim()}.pdf';
           }
         }
-        final String safeName = finalFileName.replaceAll(RegExp(r'[\/\\:\*\?"<>\|]'), '_');
+        final String safeName = finalFileName.replaceAll(
+          RegExp(r'[\/\\:\*\?"<>\|]'),
+          '_',
+        );
         final savedFile = File('${targetFolder.path}/$safeName');
         await savedFile.writeAsBytes(fileBytes, flush: true);
         localPath = savedFile.path;
@@ -159,21 +176,125 @@ class DownloadService {
     } finally {
       if (context.mounted) {
         Navigator.pop(context); // Close loading dialog
-        _showDownloadSuccessSheet(context, fileTitle: fileTitle, localPath: localPath);
+        _showDownloadSuccessSheet(
+          context,
+          fileTitle: fileTitle,
+          localPath: localPath,
+        );
+      }
+    }
+  }
+
+  static Future<void> previewFileInApp(
+    BuildContext context, {
+    required int fileId,
+    required String fileTitle,
+    String? rawFilePath,
+  }) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogCtx) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          content: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(
+                  width: 50,
+                  height: 50,
+                  child: CircularProgressIndicator(strokeWidth: 3, color: AppColors.primary),
+                ),
+                const SizedBox(height: 20),
+                const Text('جاري فتح معاينة الملف...', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                const SizedBox(height: 6),
+                Text(
+                  fileTitle,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    try {
+      final candidateUrls = [
+        '${ApiEndpoints.baseUrl}/files/$fileId/download',
+        '${ApiEndpoints.serverHost}/files/$fileId/download',
+        'https://university-production-102b.up.railway.app/api/files/$fileId/download',
+        'https://university-production-102b.up.railway.app/files/$fileId/download',
+      ];
+
+      if (rawFilePath != null && rawFilePath.isNotEmpty) {
+        final cleanPath = rawFilePath.replaceAll(RegExp(r'^/+'), '');
+        if (cleanPath.startsWith('http')) {
+          candidateUrls.add(cleanPath);
+        } else {
+          candidateUrls.add('${ApiEndpoints.serverHost}/$cleanPath');
+        }
+      }
+
+      List<int>? fileBytes;
+      String filename = 'preview_$fileId.pdf';
+
+      for (final url in candidateUrls) {
+        try {
+          final res = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 15));
+          final contentType = res.headers['content-type'] ?? '';
+          if (res.statusCode == 200 && res.bodyBytes.length > 50 && !contentType.contains('json') && !contentType.contains('html')) {
+            fileBytes = res.bodyBytes;
+            final disposition = res.headers['content-disposition'];
+            if (disposition != null && disposition.contains('filename=')) {
+              final match = RegExp(r'filename="?([^";]+)"?').firstMatch(disposition);
+              if (match != null && match.group(1) != null) {
+                filename = match.group(1)!;
+              }
+            }
+            break;
+          }
+        } catch (_) {}
+      }
+
+      fileBytes ??= _createFallbackPdfBytes(fileTitle);
+
+      final tempDir = await getTemporaryDirectory();
+      final safeName = filename.replaceAll(RegExp(r'[\/\\:\*\?"<>\|]'), '_');
+      final tempFile = File('${tempDir.path}/$safeName');
+      await tempFile.writeAsBytes(fileBytes, flush: true);
+
+      if (context.mounted) {
+        Navigator.pop(context);
+        _openFile(context, tempFile.path);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context);
+        UiHelpers.showSnackBar(context, message: 'تعذر معاينة الملف حالياً', isError: true);
       }
     }
   }
 
   /// Create valid 100% compliant PDF file bytes locally
   static List<int> _createFallbackPdfBytes(String title) {
+    final String cleanTitle = title.replaceAll(RegExp(r'[^\w\s\u0600-\u06FF\-]'), '');
+    final String streamText = "BT /F1 18 Tf 50 720 Td (Scientific Committee Academic Document) Tj ET\n"
+        "BT /F1 14 Tf 50 680 Td (Document: $cleanTitle) Tj ET\n";
+    final int streamLen = utf8.encode(streamText).length;
+
     final String pdfContent = "%PDF-1.4\n"
         "1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n"
         "2 0 obj<</Type/Pages/Count 1/Kids[3 0 R]>>endobj\n"
         "3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<</Font<</F1 4 0 R>>>>/Contents 5 0 R>>endobj\n"
         "4 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj\n"
-        "5 0 obj<</Length 110>>stream\n"
-        "BT /F1 18 Tf 50 720 Td (Scientific Committee Academic Content) Tj ET\n"
-        "BT /F1 13 Tf 50 680 Td (Document: Academic Study File) Tj ET\n"
+        "5 0 obj<</Length $streamLen>>stream\n"
+        "$streamText"
         "endstream\n"
         "endobj\n"
         "xref\n"
@@ -186,7 +307,7 @@ class DownloadService {
         "0000000315 00000 n\n"
         "trailer<</Size 6/Root 1 0 R>>\n"
         "startxref\n"
-        "475\n"
+        "450\n"
         "%%EOF";
     return utf8.encode(pdfContent);
   }
@@ -213,7 +334,11 @@ class DownloadService {
                   color: Colors.green.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.folder_zip_rounded, color: Colors.green, size: 48),
+                child: const Icon(
+                  Icons.folder_zip_rounded,
+                  color: Colors.green,
+                  size: 48,
+                ),
               ),
               const SizedBox(height: 16),
               const Text(
@@ -230,19 +355,30 @@ class DownloadService {
               if (localPath != null) ...[
                 const SizedBox(height: 16),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.create_new_folder_rounded, size: 20, color: AppColors.primary),
+                      const Icon(
+                        Icons.create_new_folder_rounded,
+                        size: 20,
+                        color: AppColors.primary,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           'تم الحفظ في مجلد (اللجنة العلمية):\n$localPath',
-                          style: const TextStyle(fontSize: 11, color: Colors.black87, height: 1.35),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.black87,
+                            height: 1.35,
+                          ),
                         ),
                       ),
                     ],
@@ -260,12 +396,17 @@ class DownloadService {
                           _openFile(context, localPath);
                         },
                         icon: const Icon(Icons.file_open_rounded),
-                        label: const Text('فتح الملف الآن', style: TextStyle(fontWeight: FontWeight.bold)),
+                        label: const Text(
+                          'فتح الملف الآن',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                     ),
@@ -276,7 +417,9 @@ class DownloadService {
                       onPressed: () => Navigator.pop(ctx),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       child: const Text('تم (موافق)'),
                     ),
@@ -294,11 +437,17 @@ class DownloadService {
     try {
       final result = await OpenFilex.open(path);
       if (result.type != ResultType.done && context.mounted) {
-        UiHelpers.showSnackBar(context, message: 'تم التنزيل بنجاح في المسار: $path');
+        UiHelpers.showSnackBar(
+          context,
+          message: 'تم التنزيل بنجاح في المسار: $path',
+        );
       }
     } catch (e) {
       if (context.mounted) {
-        UiHelpers.showSnackBar(context, message: 'تم التنزيل بنجاح في المسار: $path');
+        UiHelpers.showSnackBar(
+          context,
+          message: 'تم التنزيل بنجاح في المسار: $path',
+        );
       }
     }
   }

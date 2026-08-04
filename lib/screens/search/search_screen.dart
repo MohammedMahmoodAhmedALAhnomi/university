@@ -201,16 +201,34 @@ class _SearchScreenState extends State<SearchScreen> {
                                             child: const Icon(Icons.picture_as_pdf, color: Colors.redAccent, size: 22),
                                           ),
                                           title: Text(file['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                                          trailing: IconButton(
-                                            icon: const Icon(Icons.download_rounded, color: AppColors.primary),
-                                            onPressed: () {
-                                              DownloadService.downloadFileInApp(
-                                                context,
-                                                fileId: file['id'] ?? 0,
-                                                fileTitle: file['title'] ?? '',
-                                                rawFilePath: file['file_path'],
-                                              );
-                                            },
+                                          trailing: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              IconButton(
+                                                icon: const Icon(Icons.remove_red_eye_rounded, color: Colors.blueAccent),
+                                                tooltip: 'معاينة الملف',
+                                                onPressed: () {
+                                                  DownloadService.previewFileInApp(
+                                                    context,
+                                                    fileId: file['id'] ?? 0,
+                                                    fileTitle: file['title'] ?? '',
+                                                    rawFilePath: file['file_path'],
+                                                  );
+                                                },
+                                              ),
+                                              IconButton(
+                                                icon: const Icon(Icons.download_rounded, color: AppColors.primary),
+                                                tooltip: 'تحميل الملف',
+                                                onPressed: () {
+                                                  DownloadService.downloadFileInApp(
+                                                    context,
+                                                    fileId: file['id'] ?? 0,
+                                                    fileTitle: file['title'] ?? '',
+                                                    rawFilePath: file['file_path'],
+                                                  );
+                                                },
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       );
