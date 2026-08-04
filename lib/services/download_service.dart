@@ -167,7 +167,7 @@ class DownloadService {
           RegExp(r'[\/\\:\*\?"<>\|]'),
           '_',
         );
-        final savedFile = File('${targetFolder.path}/$safeName');
+        final savedFile = _getUniqueSavedFile(targetFolder, safeName);
         await savedFile.writeAsBytes(fileBytes, flush: true);
         localPath = savedFile.path;
       }
@@ -278,6 +278,31 @@ class DownloadService {
         Navigator.pop(context);
         UiHelpers.showSnackBar(context, message: 'تعذر معاينة الملف حالياً', isError: true);
       }
+    }
+  }
+
+  /// Get a unique non-conflicting file path with (1), (2) index if file exists
+  static File _getUniqueSavedFile(Directory folder, String baseName) {
+    final file = File('${folder.path}/$baseName');
+    if (!file.existsSync()) {
+      return file;
+    }
+
+    String nameWithoutExt = baseName;
+    String ext = '';
+    final dotIndex = baseName.lastIndexOf('.');
+    if (dotIndex != -1) {
+      nameWithoutExt = baseName.substring(0, dotIndex);
+      ext = baseName.substring(dotIndex);
+    }
+
+    int counter = 1;
+    while (true) {
+      final candidateFile = File('${folder.path}/$nameWithoutExt($counter)$ext');
+      if (!candidateFile.existsSync()) {
+        return candidateFile;
+      }
+      counter++;
     }
   }
 
