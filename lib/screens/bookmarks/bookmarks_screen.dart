@@ -7,6 +7,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/api_endpoints.dart';
 import '../../core/utils/ui_helpers.dart';
 import '../../services/download_service.dart';
+import '../../widgets/download_button.dart';
 import '../auth/login_screen.dart';
 
 class BookmarksScreen extends StatefulWidget {
@@ -162,17 +163,10 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                                   );
                                 },
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.download_rounded, color: AppColors.primary),
-                                tooltip: 'تحميل الملف داخل التطبيق',
-                                onPressed: () {
-                                  DownloadService.downloadFileInApp(
-                                    context,
-                                    fileId: file.id,
-                                    fileTitle: file.title,
-                                    rawFilePath: file.filePath,
-                                  );
-                                },
+                              DownloadButton(
+                                fileId: file.id,
+                                fileTitle: file.title,
+                                rawFilePath: file.filePath,
                               ),
                             ],
                           ),

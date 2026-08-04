@@ -5,6 +5,7 @@ import '../../core/constants/api_endpoints.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/ui_helpers.dart';
 import '../../services/download_service.dart';
+import '../../widgets/download_button.dart';
 import '../majors/course_details_screen.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -216,17 +217,10 @@ class _SearchScreenState extends State<SearchScreen> {
                                                   );
                                                 },
                                               ),
-                                              IconButton(
-                                                icon: const Icon(Icons.download_rounded, color: AppColors.primary),
-                                                tooltip: 'تحميل الملف',
-                                                onPressed: () {
-                                                  DownloadService.downloadFileInApp(
-                                                    context,
-                                                    fileId: file['id'] ?? 0,
-                                                    fileTitle: file['title'] ?? '',
-                                                    rawFilePath: file['file_path'],
-                                                  );
-                                                },
+                                              DownloadButton(
+                                                fileId: file['id'] ?? 0,
+                                                fileTitle: file['title'] ?? '',
+                                                rawFilePath: file['file_path'],
                                               ),
                                             ],
                                           ),

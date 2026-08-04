@@ -6,6 +6,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/api_endpoints.dart';
 import '../../core/utils/ui_helpers.dart';
 import '../../services/download_service.dart';
+import '../../widgets/download_button.dart';
 import '../../widgets/major_card_widget.dart';
 import '../majors/major_details_screen.dart';
 import '../majors/majors_screen.dart';
@@ -394,22 +395,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       title: Text(file.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                       subtitle: Text('${file.courseName ?? ''} • ${file.fileTypeArabic}', style: const TextStyle(fontSize: 12)),
-                      trailing: Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          icon: const Icon(Icons.download_rounded, color: AppColors.primary, size: 20),
-                          onPressed: () {
-                            DownloadService.downloadFileInApp(
-                              context,
-                              fileId: file.id,
-                              fileTitle: file.title,
-                              rawFilePath: file.filePath,
-                            );
-                          },
-                        ),
+                      trailing: DownloadButton(
+                        fileId: file.id,
+                        fileTitle: file.title,
+                        rawFilePath: file.filePath,
                       ),
                     ),
                   );

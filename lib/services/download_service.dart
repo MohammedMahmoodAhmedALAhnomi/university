@@ -8,6 +8,7 @@ import 'package:open_filex/open_filex.dart';
 import '../core/constants/api_endpoints.dart';
 import '../core/constants/app_colors.dart';
 import '../core/utils/ui_helpers.dart';
+import 'download_manager.dart';
 
 class DownloadService {
   // ──────────────────────────────────────────────
@@ -83,6 +84,55 @@ class DownloadService {
     if (context.mounted) {
       Navigator.pop(context);
       _showDownloadSuccessSheet(context, fileTitle: fileTitle, localPath: localPath);
+    }
+  }
+
+  // ──────────────────────────────────────────────
+  // التحميل في الخلفية (بدون حجب الشاشة)
+  // ──────────────────────────────────────────────
+  static Future<void> downloadFileBackground(
+    BuildContext context, {
+    required int fileId,
+    required String fileTitle,
+    String? rawFilePath,
+  }) async {
+    final manager = DownloadManager();
+    if (manager.isDownloading(fileId)) return;
+    manager.setDownloading(fileId);
+
+    try {
+      final downloadResult = await _downloadBytes(fileId, rawFilePath);
+      final List<int> fileBytes = downloadResult.bytes;
+      final String serverFilename = downloadResult.filename;
+
+      String finalName = serverFilename;
+      if (finalName.isEmpty) {
+        if (rawFilePath != null && rawFilePath.contains('.')) {
+          finalName = rawFilePath.split('/').last;
+        } else {
+          finalName = '${fileTitle.trim()}.pdf';
+        }
+      }
+      finalName = finalName.replaceAll(RegExp(r'[\/\\:\*\?"<>\|]'), '_');
+
+      final Directory saveDir = await _getSaveDirectory();
+      final localPath = await _safeWriteBytes(saveDir, finalName, fileBytes);
+
+      manager.setDone(fileId);
+      debugPrint('✅ تحميل خلفي ناجح: $localPath');
+
+      if (context.mounted) {
+        UiHelpers.showSnackBar(
+          context,
+          message: 'تم تحميل "$fileTitle" بنجاح ✅',
+        );
+      }
+    } catch (e) {
+      debugPrint('❌ خطأ تحميل خلفي: $e');
+      manager.setError(fileId);
+      if (context.mounted) {
+        UiHelpers.showSnackBar(context, message: 'فشل تحميل الملف', isError: true);
+      }
     }
   }
 
