@@ -21,7 +21,13 @@ class Level extends Model
         if (self::$cacheActive !== null) {
             return self::$cacheActive;
         }
-        self::$cacheActive = Database::fetchAll("SELECT * FROM levels WHERE is_active = 1 ORDER BY sort_order");
+        self::$cacheActive = Database::fetchAll("SELECT * FROM levels ORDER BY sort_order");
         return self::$cacheActive;
     }
+
+    public static function getActiveSorted(): array
+    {
+        return static::getActive();
+    }
 }
+

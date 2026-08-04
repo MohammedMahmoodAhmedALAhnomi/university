@@ -350,8 +350,9 @@ class ApiController extends Controller
 
             $this->ensureCoursesForMajor($id);
 
-            $levels = Level::getActiveSorted();
-            $semesters = Semester::getActiveSorted();
+            $levels = Level::getActive();
+            $semesters = Semester::getActive();
+
 
             // Get courses for this major
             $courses = Database::fetchAll(
