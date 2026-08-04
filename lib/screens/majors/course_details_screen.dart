@@ -8,6 +8,8 @@ import '../../providers/bookmark_provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/api_endpoints.dart';
 import '../../core/utils/ui_helpers.dart';
+import '../../services/download_service.dart';
+import '../files/upload_file_screen.dart';
 
 
 class CourseDetailsScreen extends StatefulWidget {
@@ -256,21 +258,18 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> with SingleTi
                                       );
                                     },
                                   ),
-                                  IconButton(
-                                    icon: const Icon(Icons.download_rounded, color: AppColors.primary),
-                                    tooltip: 'تحميل الملف',
-                                    onPressed: () async {
-                                      final url = '${ApiEndpoints.serverHost}/${file.filePath}';
-                                      final uri = Uri.parse(url);
-                                      if (await canLaunchUrl(uri)) {
-                                        await launchUrl(uri, mode: LaunchMode.externalApplication);
-                                      } else {
-                                        if (context.mounted) {
-                                          UiHelpers.showSnackBar(context, message: 'تعذر فتح رابط التحميل', isError: true);
-                                        }
-                                      }
-                                    },
-                                  ),
+                                   IconButton(
+                                     icon: const Icon(Icons.download_rounded, color: AppColors.primary),
+                                     tooltip: 'تحميل الملف داخل التطبيق',
+                                     onPressed: () {
+                                       DownloadService.downloadFileInApp(
+                                         context,
+                                         fileId: file.id,
+                                         fileTitle: file.title,
+                                         rawFilePath: file.filePath,
+                                       );
+                                     },
+                                   ),
                                 ],
                               ),
 
@@ -283,6 +282,32 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> with SingleTi
                 ),
               ],
             ),
+      floatingActionButton: Consumer<AuthProvider>(
+        builder: (context, auth, _) {
+          final isDelegateOrAdmin = auth.isDelegate || auth.isAdmin || auth.isMajorAdmin;
+          if (!isDelegateOrAdmin) return const SizedBox.shrink();
+          return FloatingActionButton.extended(
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            icon: const Icon(Icons.cloud_upload_rounded),
+            label: const Text('رفع ملف لهذه المادة', style: TextStyle(fontWeight: FontWeight.bold)),
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => UploadFileScreen(
+                    initialCourseId: widget.courseId,
+                    initialCourseName: widget.courseName,
+                  ),
+                ),
+              );
+              if (result == true && context.mounted) {
+                Provider.of<AcademicProvider>(context, listen: false).fetchCourseDetails(widget.courseId);
+              }
+            },
+          );
+        },
+      ),
     );
   }
 }

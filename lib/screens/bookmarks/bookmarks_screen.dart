@@ -6,6 +6,7 @@ import '../../providers/auth_provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/api_endpoints.dart';
 import '../../core/utils/ui_helpers.dart';
+import '../../services/download_service.dart';
 import '../auth/login_screen.dart';
 
 class BookmarksScreen extends StatefulWidget {
@@ -151,17 +152,14 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                               ),
                               IconButton(
                                 icon: const Icon(Icons.download_rounded, color: AppColors.primary),
-                                tooltip: 'تحميل الملف',
-                                onPressed: () async {
-                                  final url = '${ApiEndpoints.serverHost}/${file.filePath}';
-                                  final uri = Uri.parse(url);
-                                  if (await canLaunchUrl(uri)) {
-                                    await launchUrl(uri, mode: LaunchMode.externalApplication);
-                                  } else {
-                                    if (context.mounted) {
-                                      UiHelpers.showSnackBar(context, message: 'تعذر فتح رابط الملف', isError: true);
-                                    }
-                                  }
+                                tooltip: 'تحميل الملف داخل التطبيق',
+                                onPressed: () {
+                                  DownloadService.downloadFileInApp(
+                                    context,
+                                    fileId: file.id,
+                                    fileTitle: file.title,
+                                    rawFilePath: file.filePath,
+                                  );
                                 },
                               ),
                             ],

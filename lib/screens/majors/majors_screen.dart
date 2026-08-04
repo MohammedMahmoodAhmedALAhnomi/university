@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/academic_provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/ui_helpers.dart';
+import '../../widgets/major_card_widget.dart';
 import 'major_details_screen.dart';
 
 class MajorsScreen extends StatefulWidget {
@@ -57,85 +58,23 @@ class _MajorsScreenState extends State<MajorsScreen> {
     }
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('التخصصات الأكاديمية'),
+      ),
       body: RefreshIndicator(
         onRefresh: () => academic.fetchMajors(),
-        child: ListView.builder(
+        child: GridView.builder(
           padding: const EdgeInsets.all(16),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 14,
+            mainAxisSpacing: 14,
+            childAspectRatio: 0.92,
+          ),
           itemCount: academic.majors.length,
           itemBuilder: (context, index) {
             final major = academic.majors[index];
-            return Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
-                ),
-                child: InkWell(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => MajorDetailsScreen(
-                          majorId: major.id,
-                          majorName: major.name,
-                        ),
-                      ),
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(16),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(Icons.school_rounded, color: AppColors.primary, size: 28),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                major.name,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                '${major.coursesCount} مادة دراسية متاحة',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Icon(Icons.arrow_forward_ios_rounded, color: Colors.grey, size: 18),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
+            return MajorGridCardWidget(major: major);
           },
         ),
       ),

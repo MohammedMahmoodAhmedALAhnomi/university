@@ -6,6 +6,7 @@ import '../../services/api_service.dart';
 import '../../core/constants/api_endpoints.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/ui_helpers.dart';
+import '../files/upload_file_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -208,8 +209,204 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
+  void _showAddMajorDialog() {
+    final nameController = TextEditingController();
+    final codeController = TextEditingController();
+    final descController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.add_business_rounded, color: AppColors.secondary),
+            SizedBox(width: 8),
+            Text('إضافة تخصص جديد', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'اسم التخصص *', hintText: 'مثال: الذكاء الاصطناعي'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: codeController,
+                decoration: const InputDecoration(labelText: 'ترميز التخصص (رمز الاختصار)', hintText: 'مثال: AI'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: descController,
+                maxLines: 2,
+                decoration: const InputDecoration(labelText: 'وصف التخصص', hintText: 'شرح مختصر عن التخصص...'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('إلغاء')),
+          ElevatedButton(
+            onPressed: () async {
+              if (nameController.text.trim().isEmpty) {
+                UiHelpers.showSnackBar(context, message: 'يرجى كتابة اسم التخصص', isError: true);
+                return;
+              }
+              Navigator.pop(ctx);
+              try {
+                final res = await ApiService.post(ApiEndpoints.createMajor, {
+                  'name': nameController.text.trim(),
+                  'code': codeController.text.trim(),
+                  'description': descController.text.trim(),
+                });
+                if (mounted) {
+                  if (res['status'] == 'success') {
+                    UiHelpers.showSnackBar(context, message: 'تم إضافة التخصص بنجاح 🎉');
+                    _fetchDashboardData();
+                  } else {
+                    UiHelpers.showSnackBar(context, message: res['message'] ?? 'تعذر إضافة التخصص', isError: true);
+                  }
+                }
+              } catch (e) {
+                if (mounted) UiHelpers.showSnackBar(context, message: 'خطأ أثناء الإضافة: $e', isError: true);
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.secondary, foregroundColor: Colors.white),
+            child: const Text('إضافة التخصص'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAddCourseDialog() async {
+    final nameController = TextEditingController();
+    final codeController = TextEditingController();
+    final descController = TextEditingController();
+    int? selectedMajorId;
+    List majorsList = [];
+
+    try {
+      final res = await ApiService.get(ApiEndpoints.majors);
+      if (res['status'] == 'success' && res['data'] != null) {
+        majorsList = res['data'] as List;
+        if (majorsList.isNotEmpty) selectedMajorId = majorsList.first['id'];
+      }
+    } catch (_) {}
+
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: const Row(
+              children: [
+                Icon(Icons.add_card_rounded, color: AppColors.primary),
+                SizedBox(width: 8),
+                Text('إضافة مادة دراسية جديدة', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: nameController,
+                    decoration: const InputDecoration(labelText: 'اسم المادة *', hintText: 'مثال: قواعد البيانات SQL'),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: codeController,
+                    decoration: const InputDecoration(labelText: 'رمز المادة', hintText: 'مثال: CS201'),
+                  ),
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<int>(
+                    value: selectedMajorId,
+                    decoration: const InputDecoration(labelText: 'التخصص التابع للمادة *'),
+                    items: majorsList.map((m) {
+                      return DropdownMenuItem<int>(
+                        value: m['id'],
+                        child: Text(m['name'] ?? ''),
+                      );
+                    }).toList(),
+                    onChanged: (val) => setDialogState(() => selectedMajorId = val),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: descController,
+                    maxLines: 2,
+                    decoration: const InputDecoration(labelText: 'وصف ومفردات المادة'),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('إلغاء')),
+              ElevatedButton(
+                onPressed: () async {
+                  if (nameController.text.trim().isEmpty || selectedMajorId == null) {
+                    UiHelpers.showSnackBar(context, message: 'يرجى كتابة اسم المادة واختيار التخصص', isError: true);
+                    return;
+                  }
+                  Navigator.pop(ctx);
+                  try {
+                    final res = await ApiService.post(ApiEndpoints.createCourse, {
+                      'name': nameController.text.trim(),
+                      'code': codeController.text.trim(),
+                      'major_id': selectedMajorId,
+                      'description': descController.text.trim(),
+                    });
+                    if (mounted) {
+                      if (res['status'] == 'success') {
+                        UiHelpers.showSnackBar(context, message: 'تم إضافة المادة بنجاح 🎉');
+                        _fetchDashboardData();
+                      } else {
+                        UiHelpers.showSnackBar(context, message: res['message'] ?? 'تعذر إضافة المادة', isError: true);
+                      }
+                    }
+                  } catch (e) {
+                    if (mounted) UiHelpers.showSnackBar(context, message: 'خطأ أثناء الإضافة: $e', isError: true);
+                  }
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
+                child: const Text('إضافة المادة'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _openAdminUrl(String path) async {
+    final url = '${ApiEndpoints.serverHost}$path';
+    final uri = Uri.parse(url);
+    try {
+      final bool ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!ok) {
+        await launchUrl(uri, mode: LaunchMode.platformDefault);
+      }
+    } catch (e) {
+      try {
+        await launchUrl(uri, mode: LaunchMode.inAppBrowserView);
+      } catch (_) {
+        if (mounted) {
+          UiHelpers.showSnackBar(context, message: 'تعذر فتح الرابط: $url', isError: true);
+        }
+      }
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
+
     final auth = Provider.of<AuthProvider>(context);
     final user = auth.user;
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -298,39 +495,81 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Quick Actions Row
-              const Text('أدوات الإدارة السريعة', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+              // Quick Actions Grid
+              const Text('أدوات وأزرار الإدارة السريعة', style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
-              Row(
+              Column(
                 children: [
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: _showCreateAnnouncementDialog,
-                      icon: const Icon(Icons.campaign_rounded, color: Colors.white, size: 20),
-                      label: const Text('نشر إعلان جديد', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _showCreateAnnouncementDialog,
+                          icon: const Icon(Icons.campaign_rounded, color: Colors.white, size: 18),
+                          label: const Text('نشر إعلان جديد', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            final res = await Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const UploadFileScreen()),
+                            );
+                            if (res == true) _fetchDashboardData();
+                          },
+                          icon: const Icon(Icons.upload_file_rounded, color: Colors.white, size: 18),
+                          label: const Text('رفع ملف / ملخص', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.accentAmber,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _showAddMajorDialog,
+                          icon: const Icon(Icons.add_business_rounded, size: 18, color: AppColors.secondary),
+                          label: const Text('إضافة تخصص', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: _showAddCourseDialog,
+                          icon: const Icon(Icons.add_card_rounded, size: 18, color: AppColors.primary),
+                          label: const Text('إضافة مادة', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: () async {
-                        final url = '${ApiEndpoints.serverHost}/admin/dashboard';
-                        final uri = Uri.parse(url);
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(uri, mode: LaunchMode.externalApplication);
-                        } else {
-                          if (context.mounted) {
-                            UiHelpers.showSnackBar(context, message: 'تعذر فتح اللوحة الكاملة', isError: true);
-                          }
-                        }
-                      },
+                      onPressed: () => _openAdminUrl('/admin/dashboard'),
                       icon: const Icon(Icons.open_in_browser_rounded, size: 20),
-                      label: const Text('اللوحة الكاملة', style: TextStyle(fontWeight: FontWeight.bold)),
+                      label: const Text('فتح لوحة التحكم الكاملة عبر الويب 🌐', style: TextStyle(fontWeight: FontWeight.bold)),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
@@ -339,6 +578,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   ),
                 ],
               ),
+
               const SizedBox(height: 28),
 
               // Pending Requests Section

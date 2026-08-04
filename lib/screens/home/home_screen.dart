@@ -5,6 +5,8 @@ import '../../providers/academic_provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/api_endpoints.dart';
 import '../../core/utils/ui_helpers.dart';
+import '../../services/download_service.dart';
+import '../../widgets/major_card_widget.dart';
 import '../majors/major_details_screen.dart';
 import '../majors/majors_screen.dart';
 import '../announcements/announcements_screen.dart';
@@ -302,48 +304,57 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
 
             // Majors Cards Preview
-            const Row(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Icon(Icons.category_rounded, color: AppColors.primary),
-                SizedBox(width: 8),
-                Text(
-                  'التخصصات المتاحة',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                const Row(
+                  children: [
+                    Icon(Icons.category_rounded, color: AppColors.primary),
+                    SizedBox(width: 8),
+                    Text(
+                      'التخصصات المتاحة',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const MajorsScreen()),
+                    );
+                  },
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'إظهار المزيد',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      SizedBox(width: 4),
+                      Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppColors.primary),
+                    ],
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-            ListView.builder(
+            GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: academic.majors.take(5).length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 0.95,
+              ),
+              itemCount: academic.majors.take(6).length,
               itemBuilder: (context, index) {
                 final major = academic.majors[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                    leading: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: const Icon(Icons.school_rounded, color: AppColors.primary, size: 26),
-                    ),
-                    title: Text(major.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                    subtitle: Text('${major.coursesCount} مادة دراسية متاحة'),
-                    trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey),
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => MajorDetailsScreen(majorId: major.id, majorName: major.name),
-                        ),
-                      );
-                    },
-                  ),
-                );
+                return MajorGridCardWidget(major: major);
               },
             ),
 
@@ -390,16 +401,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         child: IconButton(
                           icon: const Icon(Icons.download_rounded, color: AppColors.primary, size: 20),
-                          onPressed: () async {
-                            final url = '${ApiEndpoints.serverHost}/${file.filePath}';
-                            final uri = Uri.parse(url);
-                            if (await canLaunchUrl(uri)) {
-                              await launchUrl(uri, mode: LaunchMode.externalApplication);
-                            } else {
-                              if (context.mounted) {
-                                UiHelpers.showSnackBar(context, message: 'تعذر فتح رابط الملف', isError: true);
-                              }
-                            }
+                          onPressed: () {
+                            DownloadService.downloadFileInApp(
+                              context,
+                              fileId: file.id,
+                              fileTitle: file.title,
+                              rawFilePath: file.filePath,
+                            );
                           },
                         ),
                       ),

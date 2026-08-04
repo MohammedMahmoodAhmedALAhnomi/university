@@ -14,6 +14,11 @@ class AuthProvider extends ChangeNotifier {
   bool get isAuthenticated => _user != null;
   String? get errorMessage => _errorMessage;
 
+  bool get isAdmin => _user != null && _user!.role == 'admin';
+  bool get isMajorAdmin => _user != null && _user!.role == 'major_admin';
+  bool get isDelegate => _user != null && (_user!.role == 'representative' || _user!.role == 'manager');
+  bool get isManager => _user != null && (_user!.role == 'admin' || _user!.role == 'major_admin' || _user!.role == 'representative' || _user!.role == 'manager');
+
   AuthProvider() {
     initUser();
   }

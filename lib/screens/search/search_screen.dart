@@ -4,6 +4,7 @@ import '../../services/api_service.dart';
 import '../../core/constants/api_endpoints.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/ui_helpers.dart';
+import '../../services/download_service.dart';
 import '../majors/course_details_screen.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -34,6 +35,7 @@ class _SearchScreenState extends State<SearchScreen> {
       debugPrint('Search error: $e');
     }
 
+    if (!mounted) return;
     setState(() => _isSearching = false);
   }
 
@@ -201,16 +203,13 @@ class _SearchScreenState extends State<SearchScreen> {
                                           title: Text(file['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                                           trailing: IconButton(
                                             icon: const Icon(Icons.download_rounded, color: AppColors.primary),
-                                            onPressed: () async {
-                                              final url = '${ApiEndpoints.serverHost}/${file['file_path']}';
-                                              final uri = Uri.parse(url);
-                                              if (await canLaunchUrl(uri)) {
-                                                await launchUrl(uri, mode: LaunchMode.externalApplication);
-                                              } else {
-                                                if (context.mounted) {
-                                                  UiHelpers.showSnackBar(context, message: 'تعذر فتح رابط التحميل', isError: true);
-                                                }
-                                              }
+                                            onPressed: () {
+                                              DownloadService.downloadFileInApp(
+                                                context,
+                                                fileId: file['id'] ?? 0,
+                                                fileTitle: file['title'] ?? '',
+                                                rawFilePath: file['file_path'],
+                                              );
                                             },
                                           ),
                                         ),

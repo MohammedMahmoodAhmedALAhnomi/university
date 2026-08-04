@@ -51,6 +51,38 @@ class ApiService {
     }
   }
 
+  static Future<dynamic> uploadMultipart(
+    String endpoint, {
+    required Map<String, String> fields,
+    String? filePath,
+    List<int>? fileBytes,
+    String? filename,
+  }) async {
+    try {
+      final uri = Uri.parse('$_baseUrl$endpoint');
+      final request = http.MultipartRequest('POST', uri);
+      final token = await StorageService.getToken();
+      if (token != null && token.isNotEmpty) {
+        request.headers['Authorization'] = 'Bearer $token';
+      }
+      fields.forEach((key, value) {
+        request.fields[key] = value;
+      });
+
+      if (filePath != null && filePath.isNotEmpty && !kIsWeb) {
+        request.files.add(await http.MultipartFile.fromPath('file', filePath));
+      } else if (fileBytes != null && filename != null) {
+        request.files.add(http.MultipartFile.fromBytes('file', fileBytes, filename: filename));
+      }
+
+      final streamedResponse = await request.send().timeout(const Duration(seconds: 45));
+      final response = await http.Response.fromStream(streamedResponse);
+      return _processResponse(response);
+    } catch (e) {
+      throw Exception('تعذر رفع الملف: $e');
+    }
+  }
+
   static dynamic _processResponse(http.Response response) {
     final decoded = jsonDecode(utf8.decode(response.bodyBytes));
     if (response.statusCode >= 200 && response.statusCode < 300) {

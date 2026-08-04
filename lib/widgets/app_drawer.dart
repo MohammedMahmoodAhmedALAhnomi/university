@@ -10,6 +10,7 @@ import '../screens/contact/contact_screen.dart';
 import '../screens/admin/admin_dashboard_screen.dart';
 import '../screens/notifications/notifications_screen.dart';
 import '../screens/bookmarks/bookmarks_screen.dart';
+import '../screens/files/upload_file_screen.dart';
 
 
 
@@ -176,6 +177,16 @@ class AppDrawer extends StatelessWidget {
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(context, _createPageRoute(const BookmarksScreen()));
+                  },
+                ),
+                _buildDrawerTile(
+                  context,
+                  icon: Icons.cloud_upload_rounded,
+                  title: 'رفع ملف تعليمي (للمندوبين)',
+                  color: AppColors.secondary,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(context, _createPageRoute(const UploadFileScreen()));
                   },
                 ),
 

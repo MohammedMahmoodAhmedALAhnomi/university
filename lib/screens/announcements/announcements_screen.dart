@@ -23,9 +23,11 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
   }
 
   Future<void> _fetchAnnouncements() async {
+    if (!mounted) return;
     setState(() => _isLoading = true);
     try {
       final res = await ApiService.get(ApiEndpoints.announcements);
+      if (!mounted) return;
       if (res['status'] == 'success' && res['data'] != null) {
         _announcements = (res['data'] as List)
             .map((e) => AnnouncementModel.fromJson(e))
@@ -34,6 +36,7 @@ class _AnnouncementsScreenState extends State<AnnouncementsScreen> {
     } catch (e) {
       debugPrint('Error fetching announcements: $e');
     }
+    if (!mounted) return;
     setState(() => _isLoading = false);
   }
 

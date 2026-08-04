@@ -36,5 +36,22 @@ class ApiEndpoints {
   static const String rejectRequest = "/admin/requests/"; // /{id}/reject
   static const String adminStats = "/admin/stats";
   static const String createAnnouncement = "/admin/announcements/create";
+  static const String deleteAnnouncement = "/admin/announcements/"; // /{id}/delete
+
+  // File Upload & Content Management
+  static const String uploadFile = "/files/upload";
+  static const String adminFiles = "/admin/files";
+  static const String approveFile = "/admin/files/"; // /{id}/approve
+  static const String deleteFile = "/admin/files/"; // /{id}/delete
+
+  // Major & Course Management
+  static const String createMajor = "/admin/majors/create";
+  static const String deleteMajor = "/admin/majors/"; // /{id}/delete
+  static const String createCourse = "/admin/courses/create";
+  static const String deleteCourse = "/admin/courses/"; // /{id}/delete
+
+  // User Management
+  static const String adminUsers = "/admin/users";
+  static const String updateUserRole = "/admin/users/"; // /{id}/role
 }
 
