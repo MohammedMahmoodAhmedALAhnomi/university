@@ -12,14 +12,14 @@ class AuthController extends Controller
     {
         if (isset($_SESSION['user_id'])) {
             $role = $_SESSION['user_role'] ?? 'guest';
-            if ($role === 'guest') {
-                $req = JoinRequest::findPendingByUserId($_SESSION['user_id']);
-                redirect(url($req ? '/pending-approval' : '/request-role'));
+            if ($role === 'admin' || $role === 'major_admin' || $role === 'manager') {
+                redirect(url('/admin/dashboard'));
             }
-            redirect(url('/admin/dashboard'));
+            redirect(url('/'));
         }
         $this->view('auth/login');
     }
+
 
     public function login(): void
     {
@@ -52,28 +52,19 @@ class AuthController extends Controller
         $_SESSION['user_id'] = $user->id;
         $_SESSION['user_name'] = $user->full_name;
         $_SESSION['user_role'] = $user->role;
-        $_SESSION['managed_level_id'] = $user->managed_level_id;
         $_SESSION['managed_major_id'] = $user->managed_major_id;
+        $_SESSION['managed_level_id'] = $user->managed_level_id;
 
-        User::updateLastLogin($user->id);
-        log_activity('login', 'users', $user->id, 'تسجيل دخول');
-
-        if ($user->role === 'guest') {
-            $req = JoinRequest::findPendingByUserId($user->id);
-            if ($req) {
-                redirect(url('/pending-approval'));
-            } else {
-                redirect(url('/request-role'));
-            }
-        }
+        log_activity('login', 'users', $user->id, 'تسجيل دخول ناجح');
 
         flash('success', 'مرحبًا بعودتك، ' . $user->full_name);
-        if ($user->role === 'admin') {
+        if ($user->role === 'admin' || $user->role === 'major_admin' || $user->role === 'manager') {
             redirect(url('/admin/dashboard'));
         } else {
-            redirect(url('/admin/courses'));
+            redirect(url('/'));
         }
     }
+
 
     public function registerForm(): void
     {
@@ -119,9 +110,10 @@ class AuthController extends Controller
         $_SESSION['user_role'] = 'guest';
 
         log_activity('create', 'users', $userId, 'تسجيل حساب جديد كـ guest');
-        flash('success', 'تم إنشاء حسابك بنجاح! يرجى اختيار نوع الحساب الآن.');
-        redirect(url('/request-role'));
+        flash('success', 'تم إنشاء حسابك بنجاح! أهلاً بك في المنصة التعليمية.');
+        redirect(url('/'));
     }
+
 
     public function googleRedirect(): void
     {
@@ -190,8 +182,8 @@ class AuthController extends Controller
         log_activity('login', 'users', $user->id, 'تسجيل دخول عبر Google');
 
         if ($user->role === 'guest') {
-            $req = \App\Models\JoinRequest::findPendingByUserId($user->id);
-            redirect(url($req ? '/pending-approval' : '/request-role'));
+            flash('success', 'مرحباً بعودتك، ' . $user->full_name);
+            redirect(url('/'));
         }
 
         flash('success', 'مرحباً بعودتك، ' . $user->full_name);
@@ -200,6 +192,7 @@ class AuthController extends Controller
         } else {
             redirect(url('/admin/courses'));
         }
+
     }
 
     public function logout(): void

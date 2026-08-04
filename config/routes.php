@@ -96,19 +96,39 @@ return [
     '/notifications/{id}/read' => ['controller' => 'NotificationController', 'action' => 'markRead', 'method' => 'POST', 'middleware' => ['Auth']],
     '/notifications/read-all' => ['controller' => 'NotificationController', 'action' => 'readAll', 'method' => 'POST', 'middleware' => ['Auth']],
 
-    // أدوات الطالب (Student Tools)
-    '/student/gpa-calculator' => ['controller' => 'StudentController', 'action' => 'gpaCalculator', 'method' => 'GET'],
-    '/student/bookmarks' => ['controller' => 'StudentController', 'action' => 'bookmarks', 'method' => 'GET'],
-    '/student/bookmarks/toggle' => ['controller' => 'StudentController', 'action' => 'toggleBookmark', 'method' => 'POST'],
-    '/student/schedule' => ['controller' => 'StudentController', 'action' => 'schedule', 'method' => 'GET'],
+    // مسارات API للتطبيق المحمول (Mobile Application API Endpoints)
+    '/api/login' => ['controller' => 'ApiController', 'action' => 'login', 'method' => 'POST'],
+    '/api/register' => ['controller' => 'ApiController', 'action' => 'register', 'method' => 'POST'],
+    '/api/home' => ['controller' => 'ApiController', 'action' => 'home', 'method' => 'GET'],
+    '/api/majors' => ['controller' => 'ApiController', 'action' => 'majors', 'method' => 'GET'],
+    '/api/majors/{id}' => ['controller' => 'ApiController', 'action' => 'majorDetails', 'method' => 'GET'],
+    '/api/courses/{id}' => ['controller' => 'ApiController', 'action' => 'courseDetails', 'method' => 'GET'],
+    '/api/courses/{id}/rate' => ['controller' => 'ApiController', 'action' => 'rateCourse', 'method' => 'POST'],
+    '/api/announcements' => ['controller' => 'ApiController', 'action' => 'announcements', 'method' => 'GET'],
+    '/api/announcements/{id}' => ['controller' => 'ApiController', 'action' => 'announcementDetails', 'method' => 'GET'],
+    '/api/search' => ['controller' => 'ApiController', 'action' => 'search', 'method' => 'GET'],
+    '/api/files/{id}/download' => ['controller' => 'ApiController', 'action' => 'downloadFile', 'method' => 'GET'],
+    '/api/request-role' => ['controller' => 'ApiController', 'action' => 'requestRole', 'method' => 'POST'],
+    '/api/profile' => ['controller' => 'ApiController', 'action' => 'profile', 'method' => 'GET'],
+    '/api/profile/update' => ['controller' => 'ApiController', 'action' => 'updateProfile', 'method' => 'POST'],
+    '/api/settings' => ['controller' => 'ApiController', 'action' => 'settings', 'method' => 'GET'],
+    '/api/about' => ['controller' => 'ApiController', 'action' => 'about', 'method' => 'GET'],
+    '/api/contact' => ['controller' => 'ApiController', 'action' => 'contact', 'method' => 'GET'],
+    '/api/admin/requests' => ['controller' => 'ApiController', 'action' => 'adminRequests', 'method' => 'GET'],
+    '/api/admin/requests/{id}/approve' => ['controller' => 'ApiController', 'action' => 'approveRequest', 'method' => 'POST'],
+    '/api/admin/requests/{id}/reject' => ['controller' => 'ApiController', 'action' => 'rejectRequest', 'method' => 'POST'],
+    '/api/admin/stats' => ['controller' => 'ApiController', 'action' => 'adminStats', 'method' => 'GET'],
+    '/api/admin/announcements/create' => ['controller' => 'ApiController', 'action' => 'createAnnouncement', 'method' => 'POST'],
+    '/api/notifications' => ['controller' => 'ApiController', 'action' => 'notifications', 'method' => 'GET'],
 
-    // إدارة الجداول الدراسية في لوحة التحكم
-    '/admin/schedule' => ['controller' => 'ScheduleController', 'action' => 'index', 'method' => 'GET', 'middleware' => ['Auth']],
-    '/admin/schedule/create' => ['controller' => 'ScheduleController', 'action' => 'create', 'method' => 'GET', 'middleware' => ['Auth']],
-    '/admin/schedule/store' => ['controller' => 'ScheduleController', 'action' => 'store', 'method' => 'POST', 'middleware' => ['Auth']],
-    '/admin/schedule/import' => ['controller' => 'ScheduleController', 'action' => 'importForm', 'method' => 'GET', 'middleware' => ['Auth']],
-    '/admin/schedule/import/upload' => ['controller' => 'ScheduleController', 'action' => 'processImport', 'method' => 'POST', 'middleware' => ['Auth']],
-    '/admin/schedule/template' => ['controller' => 'ScheduleController', 'action' => 'downloadTemplate', 'method' => 'GET', 'middleware' => ['Auth']],
-    '/admin/schedule/{id}/delete' => ['controller' => 'ScheduleController', 'action' => 'delete', 'method' => 'GET', 'middleware' => ['Auth']],
+    '/api/notifications/{id}/read' => ['controller' => 'ApiController', 'action' => 'markNotificationRead', 'method' => 'POST'],
+    '/api/notifications/read-all' => ['controller' => 'ApiController', 'action' => 'markAllNotificationsRead', 'method' => 'POST'],
+    '/api/bookmarks' => ['controller' => 'ApiController', 'action' => 'bookmarks', 'method' => 'GET'],
+    '/api/bookmarks/toggle' => ['controller' => 'ApiController', 'action' => 'toggleBookmark', 'method' => 'POST'],
 ];
+
+
+
+
+
 

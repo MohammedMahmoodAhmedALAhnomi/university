@@ -9,8 +9,23 @@ class Bookmark extends Model
 {
     protected static string $table = 'user_bookmarks';
 
+    public static function ensureTable(): void
+    {
+        Database::execute("
+            CREATE TABLE IF NOT EXISTS user_bookmarks (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                file_id INT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY user_file (user_id, file_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        ");
+    }
+
     public static function toggle(int $userId, int $fileId): array
     {
+        self::ensureTable();
+
         $existing = Database::fetch(
             "SELECT id FROM user_bookmarks WHERE user_id = ? AND file_id = ?",
             [$userId, $fileId]
@@ -33,6 +48,7 @@ class Bookmark extends Model
 
     public static function isBookmarked(int $userId, int $fileId): bool
     {
+        self::ensureTable();
         $row = Database::fetch(
             "SELECT id FROM user_bookmarks WHERE user_id = ? AND file_id = ?",
             [$userId, $fileId]
@@ -42,6 +58,7 @@ class Bookmark extends Model
 
     public static function getUserBookmarkedFileIds(int $userId): array
     {
+        self::ensureTable();
         $rows = Database::fetchAll(
             "SELECT file_id FROM user_bookmarks WHERE user_id = ?",
             [$userId]
@@ -51,6 +68,7 @@ class Bookmark extends Model
 
     public static function getByUser(int $userId): array
     {
+        self::ensureTable();
         return Database::fetchAll(
             "SELECT f.*, c.name as course_name, m.name as major_name, l.name as level_number, b.created_at as bookmarked_at
              FROM user_bookmarks b
@@ -63,4 +81,5 @@ class Bookmark extends Model
             [$userId]
         );
     }
+
 }

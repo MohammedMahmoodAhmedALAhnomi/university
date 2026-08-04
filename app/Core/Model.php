@@ -19,6 +19,12 @@ abstract class Model
         return Database::fetch("SELECT * FROM " . static::$table . " WHERE id = ?", [$id]);
     }
 
+    public static function findById(int $id)
+    {
+        return static::find($id);
+    }
+
+
     public static function where(string $column, $value, string $operator = '=')
     {
         return Database::fetchAll("SELECT * FROM " . static::$table . " WHERE {$column} {$operator} ?", [$value]);

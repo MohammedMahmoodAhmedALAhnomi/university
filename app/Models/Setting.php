@@ -87,5 +87,11 @@ class Setting extends Model
         }
         return $result;
     }
+
+    public static function getAll(): array
+    {
+        return static::getAllPublic();
+    }
 }
+
 

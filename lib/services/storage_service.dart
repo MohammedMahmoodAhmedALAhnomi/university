@@ -1,59 +1,51 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/user.dart';
-import '../utils/constants.dart';
+import '../models/user_model.dart';
 
 class StorageService {
-  static SharedPreferences? _prefs;
+  static const String keyToken = 'user_token';
+  static const String keyUser = 'user_data';
+  static const String keyTheme = 'app_theme_dark';
 
-  static Future<void> init() async {
-    _prefs = await SharedPreferences.getInstance();
+  static Future<void> saveToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(keyToken, token);
   }
 
-  static String getBaseUrl() {
-    return _prefs?.getString(AppConstants.keyBaseUrl) ?? AppConstants.defaultBaseUrl;
+  static Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(keyToken);
   }
 
-  static Future<bool> setBaseUrl(String url) async {
-    // Remove trailing slash if present
-    final cleanUrl = url.trim().endsWith('/') ? url.trim().substring(0, url.trim().length - 1) : url.trim();
-    return await _prefs?.setString(AppConstants.keyBaseUrl, cleanUrl) ?? false;
+  static Future<void> saveUser(UserModel user) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(keyUser, jsonEncode(user.toJson()));
   }
 
-  static String? getToken() {
-    return _prefs?.getString(AppConstants.keyAuthToken);
-  }
-
-  static Future<bool> saveToken(String token) async {
-    return await _prefs?.setString(AppConstants.keyAuthToken, token) ?? false;
-  }
-
-  static UserModel? getUser() {
-    final raw = _prefs?.getString(AppConstants.keyUserData);
-    if (raw != null && raw.isNotEmpty) {
-      try {
-        return UserModel.fromJson(jsonDecode(raw));
-      } catch (e) {
-        return null;
-      }
+  static Future<UserModel?> getUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final data = prefs.getString(keyUser);
+    if (data == null || data.isEmpty) return null;
+    try {
+      return UserModel.fromJson(jsonDecode(data));
+    } catch (_) {
+      return null;
     }
-    return null;
   }
 
-  static Future<bool> saveUser(UserModel user) async {
-    return await _prefs?.setString(AppConstants.keyUserData, jsonEncode(user.toJson())) ?? false;
+  static Future<void> clearAll() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(keyToken);
+    await prefs.remove(keyUser);
   }
 
-  static Future<void> clearAuth() async {
-    await _prefs?.remove(AppConstants.keyAuthToken);
-    await _prefs?.remove(AppConstants.keyUserData);
+  static Future<void> saveThemeMode(bool isDark) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(keyTheme, isDark);
   }
 
-  static bool isDarkMode() {
-    return _prefs?.getBool(AppConstants.keyDarkMode) ?? false;
-  }
-
-  static Future<bool> setDarkMode(bool value) async {
-    return await _prefs?.setBool(AppConstants.keyDarkMode, value) ?? false;
+  static Future<bool> isDarkMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(keyTheme) ?? false;
   }
 }

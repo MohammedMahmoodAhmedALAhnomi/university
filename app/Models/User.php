@@ -8,13 +8,29 @@ use App\Config\Database;
 class User extends Model
 {
     protected static string $table = 'users';
+    private static bool $migrated = false;
+
+    public static function ensureColumns(): void
+    {
+        if (self::$migrated) return;
+        try {
+            Database::raw("ALTER TABLE users ADD COLUMN google_id VARCHAR(255) NULL AFTER email");
+        } catch (\Throwable $e) {}
+        try {
+            Database::raw("ALTER TABLE users ADD COLUMN avatar VARCHAR(500) NULL AFTER google_id");
+        } catch (\Throwable $e) {}
+        self::$migrated = true;
+    }
+
     public static function findByEmail(string $email)
     {
+        self::ensureColumns();
         return Database::fetch("SELECT * FROM users WHERE email = ? LIMIT 1", [$email]);
     }
 
     public static function findByGoogleId(string $googleId)
     {
+        self::ensureColumns();
         return Database::fetch("SELECT * FROM users WHERE google_id = ? LIMIT 1", [$googleId]);
     }
 

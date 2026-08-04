@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import '../models/user.dart';
+import '../models/user_model.dart';
 import '../services/api_service.dart';
 import '../services/storage_service.dart';
+import '../core/constants/api_endpoints.dart';
 
 class AuthProvider extends ChangeNotifier {
   UserModel? _user;
@@ -9,13 +10,36 @@ class AuthProvider extends ChangeNotifier {
   String? _errorMessage;
 
   UserModel? get user => _user;
-  bool get isAuthenticated => _user != null;
   bool get isLoading => _isLoading;
+  bool get isAuthenticated => _user != null;
   String? get errorMessage => _errorMessage;
 
   AuthProvider() {
-    _user = StorageService.getUser();
+    initUser();
   }
+
+  Future<void> initUser() async {
+    _user = await StorageService.getUser();
+    notifyListeners();
+    if (_user != null) {
+      refreshProfile();
+    }
+  }
+
+  Future<void> refreshProfile() async {
+    if (_user == null) return;
+    try {
+      final res = await ApiService.get(ApiEndpoints.profile, queryParams: {'id': _user!.id.toString()});
+      if (res['status'] == 'success' && res['data']?['user'] != null) {
+        _user = UserModel.fromJson(res['data']['user']);
+        await StorageService.saveUser(_user!);
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('Error refreshing profile: $e');
+    }
+  }
+
 
   Future<bool> login(String email, String password) async {
     _isLoading = true;
@@ -23,7 +47,7 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final res = await ApiService.post('/login', {
+      final res = await ApiService.post(ApiEndpoints.login, {
         'email': email,
         'password': password,
       });
@@ -40,7 +64,7 @@ class AuthProvider extends ChangeNotifier {
         _errorMessage = res['message'] ?? 'فشل تسجيل الدخول';
       }
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
     }
 
     _isLoading = false;
@@ -60,7 +84,7 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final res = await ApiService.post('/register', {
+      final res = await ApiService.post(ApiEndpoints.register, {
         'full_name': fullName,
         'email': email,
         'password': password,
@@ -80,7 +104,7 @@ class AuthProvider extends ChangeNotifier {
         _errorMessage = res['message'] ?? 'فشل إنشاء الحساب';
       }
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
     }
 
     _isLoading = false;
@@ -90,7 +114,38 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> logout() async {
     _user = null;
-    await StorageService.clearAuth();
+    await StorageService.clearAll();
     notifyListeners();
+  }
+
+  Future<bool> updateProfile(String fullName, String phone, int? majorId, {String? password}) async {
+    if (_user == null) return false;
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final res = await ApiService.post(ApiEndpoints.updateProfile, {
+        'user_id': _user!.id,
+        'full_name': fullName,
+        'phone': phone,
+        'major_id': majorId,
+        if (password != null && password.isNotEmpty) 'password': password,
+      });
+
+      if (res['status'] == 'success' && res['data']?['user'] != null) {
+        _user = UserModel.fromJson(res['data']['user']);
+        await StorageService.saveUser(_user!);
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return false;
   }
 }

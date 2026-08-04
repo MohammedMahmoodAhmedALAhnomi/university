@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/university_provider.dart';
-import '../utils/constants.dart';
-import 'home_screen.dart';
+import '../providers/auth_provider.dart';
+import '../core/constants/app_colors.dart';
+import 'main_layout.dart';
+import 'auth/login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -15,18 +16,23 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadData();
-    });
+    _checkAuth();
   }
 
-  Future<void> _loadData() async {
-    final uniProvider = Provider.of<UniversityProvider>(context, listen: false);
-    await uniProvider.fetchHomeData();
-    if (mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+  Future<void> _checkAuth() async {
+    await Future.delayed(const Duration(seconds: 2));
+    if (!mounted) return;
+
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    if (auth.isAuthenticated) {
+      // User is already logged in -> Go straight to Main App
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const MainLayout()),
+      );
+    } else {
+      // First time or logged out -> Show Login Screen
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
       );
     }
   }
@@ -34,50 +40,43 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [AppConstants.primaryColor, AppConstants.primaryDarkColor],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
+      backgroundColor: AppColors.primary,
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
               padding: const EdgeInsets.all(24),
-              decoration: const BoxDecoration(
-                color: Colors.white,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.school,
-                size: 64,
-                color: AppConstants.primaryColor,
+                Icons.school_rounded,
+                size: 80,
+                color: Colors.white,
               ),
             ),
             const SizedBox(height: 24),
             const Text(
-              AppConstants.appName,
+              'تطبيق الجامعة الذكي',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 28,
+                fontSize: 26,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              AppConstants.appSubTitle,
+            Text(
+              'منصتك التعليمية الشاملة للمواد والجداول',
               style: TextStyle(
-                color: Colors.white70,
+                color: Colors.white.withValues(alpha: 0.8),
                 fontSize: 14,
               ),
             ),
             const SizedBox(height: 48),
             const CircularProgressIndicator(
-              color: Colors.white,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
             ),
           ],
         ),

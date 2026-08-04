@@ -2,17 +2,21 @@ import 'package:flutter/material.dart';
 import '../services/storage_service.dart';
 
 class ThemeProvider extends ChangeNotifier {
-  bool _isDarkMode = false;
-
-  bool get isDarkMode => _isDarkMode;
+  bool _isDark = false;
+  bool get isDark => _isDark;
 
   ThemeProvider() {
-    _isDarkMode = StorageService.isDarkMode();
+    _loadTheme();
   }
 
-  void toggleTheme() {
-    _isDarkMode = !_isDarkMode;
-    StorageService.setDarkMode(_isDarkMode);
+  Future<void> _loadTheme() async {
+    _isDark = await StorageService.isDarkMode();
+    notifyListeners();
+  }
+
+  Future<void> toggleTheme() async {
+    _isDark = !_isDark;
+    await StorageService.saveThemeMode(_isDark);
     notifyListeners();
   }
 }
