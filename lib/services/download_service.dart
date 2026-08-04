@@ -144,7 +144,7 @@ class DownloadService {
   //  الدوال المساعدة الداخلية
   // ══════════════════════════════════════════════
 
-  /// تحميل بايتات الملف من السيرفر
+  /// تحميل بايتات الملف من السيرفر (جميع الروابط بالتوازي - أسرع رد يفوز)
   static Future<_DownloadResult> _downloadBytes(int fileId, String? rawFilePath) async {
     final urls = <String>[
       '${ApiEndpoints.baseUrl}/files/$fileId/download',
@@ -163,30 +163,36 @@ class DownloadService {
       }
     }
 
-    for (final url in urls) {
-      try {
-        debugPrint('🔗 محاولة تحميل: $url');
-        final res = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 15));
-        final ct = res.headers['content-type'] ?? '';
+    // تشغيل جميع الروابط بالتوازي - أول رد ناجح يفوز فوراً
+    debugPrint('🚀 تحميل متوازي من ${urls.length} روابط...');
+    try {
+      final result = await Future.any(
+        urls.map((url) => _tryDownloadUrl(url)),
+      ).timeout(const Duration(seconds: 12));
+      return result;
+    } catch (_) {
+      debugPrint('⚠️ فشلت جميع الروابط، استخدام fallback PDF');
+      return _DownloadResult(_createFallbackPdfBytes('Academic Document'), '');
+    }
+  }
 
-        if (res.statusCode == 200 && res.bodyBytes.length > 50 && !ct.contains('json') && !ct.contains('html')) {
-          String filename = '';
-          final disp = res.headers['content-disposition'];
-          if (disp != null && disp.contains('filename=')) {
-            final m = RegExp(r'filename="?([^";]+)"?').firstMatch(disp);
-            if (m != null) filename = m.group(1) ?? '';
-          }
-          debugPrint('✅ تم تحميل ${res.bodyBytes.length} bytes من $url');
-          return _DownloadResult(res.bodyBytes, filename);
-        }
-      } catch (e) {
-        debugPrint('⚠️ فشل $url: $e');
+  /// محاولة تحميل من رابط واحد
+  static Future<_DownloadResult> _tryDownloadUrl(String url) async {
+    final res = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 10));
+    final ct = res.headers['content-type'] ?? '';
+
+    if (res.statusCode == 200 && res.bodyBytes.length > 50 && !ct.contains('json') && !ct.contains('html')) {
+      String filename = '';
+      final disp = res.headers['content-disposition'];
+      if (disp != null && disp.contains('filename=')) {
+        final m = RegExp(r'filename="?([^";]+)"?').firstMatch(disp);
+        if (m != null) filename = m.group(1) ?? '';
       }
+      debugPrint('✅ تم تحميل ${res.bodyBytes.length} bytes من $url');
+      return _DownloadResult(res.bodyBytes, filename);
     }
 
-    // Fallback: إنشاء PDF محلي
-    debugPrint('⚠️ استخدام fallback PDF');
-    return _DownloadResult(_createFallbackPdfBytes('Academic Document'), '');
+    throw Exception('رد غير صالح من $url');
   }
 
   /// الحصول على مجلد الحفظ "اللجنة العلمية"
