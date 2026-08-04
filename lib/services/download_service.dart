@@ -116,44 +116,7 @@ class DownloadService {
 
       // 6. Save bytes into "اللجنة العلمية" folder on device
       if (!kIsWeb) {
-        Directory? targetFolder;
-
-        // Attempt 1: Public Download folder /storage/emulated/0/Download/اللجنة العلمية
-        if (Platform.isAndroid) {
-          final publicDownloadDir = Directory(
-            '/storage/emulated/0/Download/اللجنة العلمية',
-          );
-          try {
-            if (!await publicDownloadDir.exists()) {
-              await publicDownloadDir.create(recursive: true);
-            }
-            targetFolder = publicDownloadDir;
-          } catch (_) {}
-        }
-
-        // Attempt 2: External App Storage /اللجنة العلمية
-        if (targetFolder == null) {
-          try {
-            final extDir = await getExternalStorageDirectory();
-            if (extDir != null) {
-              final folder = Directory('${extDir.path}/اللجنة العلمية');
-              if (!await folder.exists()) {
-                await folder.create(recursive: true);
-              }
-              targetFolder = folder;
-            }
-          } catch (_) {}
-        }
-
-        // Attempt 3: Application Documents directory /اللجنة العلمية
-        if (targetFolder == null) {
-          final docDir = await getApplicationDocumentsDirectory();
-          final folder = Directory('${docDir.path}/اللجنة العلمية');
-          if (!await folder.exists()) {
-            await folder.create(recursive: true);
-          }
-          targetFolder = folder;
-        }
+        final targetFolder = await _getTargetFolder();
 
         String finalFileName = serverFilename;
         if (finalFileName.isEmpty) {
@@ -279,6 +242,43 @@ class DownloadService {
         UiHelpers.showSnackBar(context, message: 'تعذر معاينة الملف حالياً', isError: true);
       }
     }
+  }
+
+  /// Consistent target directory resolution under "اللجنة العلمية"
+  static Future<Directory> _getTargetFolder() async {
+    if (kIsWeb) {
+      return getApplicationDocumentsDirectory();
+    }
+
+    if (Platform.isAndroid) {
+      final publicDir = Directory('/storage/emulated/0/Download/اللجنة العلمية');
+      try {
+        if (!publicDir.existsSync()) {
+          publicDir.createSync(recursive: true);
+        }
+        return publicDir;
+      } catch (e) {
+        debugPrint('Public download dir create error: $e');
+      }
+
+      try {
+        final extDir = await getExternalStorageDirectory();
+        if (extDir != null) {
+          final folder = Directory('${extDir.path}/اللجنة العلمية');
+          if (!folder.existsSync()) {
+            folder.createSync(recursive: true);
+          }
+          return folder;
+        }
+      } catch (_) {}
+    }
+
+    final docDir = await getApplicationDocumentsDirectory();
+    final folder = Directory('${docDir.path}/اللجنة العلمية');
+    if (!folder.existsSync()) {
+      folder.createSync(recursive: true);
+    }
+    return folder;
   }
 
   /// Get a unique non-conflicting file path with (1), (2) index if file exists
