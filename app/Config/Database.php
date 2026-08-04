@@ -57,23 +57,62 @@ class Database
 
     public static function insert(string $table, array $data): int
     {
-        $columns = implode(', ', array_keys($data));
-        $placeholders = ':' . implode(', :', array_keys($data));
-        $sql = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
-        self::raw($sql, $data);
-        return (int) self::getInstance()->getConnection()->lastInsertId();
+        if ($table === 'files' && isset($data['doctor_name'])) {
+            try {
+                self::raw("ALTER TABLE files ADD COLUMN doctor_name VARCHAR(255) DEFAULT NULL AFTER description");
+            } catch (\Throwable $t) {}
+        }
+
+        try {
+            $columns = implode(', ', array_keys($data));
+            $placeholders = ':' . implode(', :', array_keys($data));
+            $sql = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
+            self::raw($sql, $data);
+            return (int) self::getInstance()->getConnection()->lastInsertId();
+        } catch (\PDOException $e) {
+            if ($table === 'files' && isset($data['doctor_name']) && str_contains($e->getMessage(), 'doctor_name')) {
+                unset($data['doctor_name']);
+                $columns = implode(', ', array_keys($data));
+                $placeholders = ':' . implode(', :', array_keys($data));
+                $sql = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
+                self::raw($sql, $data);
+                return (int) self::getInstance()->getConnection()->lastInsertId();
+            }
+            throw $e;
+        }
     }
 
     public static function update(string $table, array $data, string $where, array $whereParams = []): int
     {
-        $sets = '';
-        foreach (array_keys($data) as $col) {
-            $sets .= "{$col} = :{$col}, ";
+        if ($table === 'files' && isset($data['doctor_name'])) {
+            try {
+                self::raw("ALTER TABLE files ADD COLUMN doctor_name VARCHAR(255) DEFAULT NULL AFTER description");
+            } catch (\Throwable $t) {}
         }
-        $sets = rtrim($sets, ', ');
-        $sql = "UPDATE {$table} SET {$sets} WHERE {$where}";
-        $stmt = self::raw($sql, array_merge($data, $whereParams));
-        return $stmt->rowCount();
+
+        try {
+            $sets = '';
+            foreach (array_keys($data) as $col) {
+                $sets .= "{$col} = :{$col}, ";
+            }
+            $sets = rtrim($sets, ', ');
+            $sql = "UPDATE {$table} SET {$sets} WHERE {$where}";
+            $params = array_merge($data, $whereParams);
+            return self::raw($sql, $params)->rowCount();
+        } catch (\PDOException $e) {
+            if ($table === 'files' && isset($data['doctor_name']) && str_contains($e->getMessage(), 'doctor_name')) {
+                unset($data['doctor_name']);
+                $sets = '';
+                foreach (array_keys($data) as $col) {
+                    $sets .= "{$col} = :{$col}, ";
+                }
+                $sets = rtrim($sets, ', ');
+                $sql = "UPDATE {$table} SET {$sets} WHERE {$where}";
+                $params = array_merge($data, $whereParams);
+                return self::raw($sql, $params)->rowCount();
+            }
+            throw $e;
+        }
     }
 
     public static function delete(string $table, string $where, array $params = []): int
