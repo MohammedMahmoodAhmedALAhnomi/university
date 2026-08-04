@@ -62,7 +62,9 @@ class DownloadService {
     try {
       // 2. Prepare candidate URLs targeting the actual server download endpoint
       final List<String> candidateUrls = [
+        '${ApiEndpoints.baseUrl}/files/$fileId/download',
         '${ApiEndpoints.serverHost}/files/$fileId/download',
+        'https://university-production-102b.up.railway.app/api/files/$fileId/download',
         'https://university-production-102b.up.railway.app/files/$fileId/download',
       ];
 
