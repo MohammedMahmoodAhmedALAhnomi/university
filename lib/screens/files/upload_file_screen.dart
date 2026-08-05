@@ -67,13 +67,23 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
       if (res['status'] == 'success' && res['data'] != null) {
         if (mounted) {
           setState(() {
-            _majors = res['data'] as List;
+            final allMajors = res['data'] as List;
             final user = Provider.of<AuthProvider>(context, listen: false).user;
-            if (user != null && user.majorId != null) {
+
+            // Restrict dropdown list for Representatives and Major Admins to ONLY their assigned major
+            if (user != null && (user.role == 'manager' || user.role == 'major_admin') && user.majorId != null) {
+              _majors = allMajors.where((m) => m['id'] == user.majorId).toList();
+            } else {
+              _majors = allMajors;
+            }
+
+            if (user != null && user.majorId != null && _majors.any((m) => m['id'] == user.majorId)) {
               _selectedMajorId = user.majorId;
-              _fetchCoursesForMajor(_selectedMajorId!);
             } else if (_majors.isNotEmpty) {
               _selectedMajorId = _majors.first['id'];
+            }
+
+            if (_selectedMajorId != null) {
               _fetchCoursesForMajor(_selectedMajorId!);
             }
           });

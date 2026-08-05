@@ -398,8 +398,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     try {
       final res = await ApiService.get(ApiEndpoints.majors);
       if (res['status'] == 'success' && res['data'] != null) {
-        majorsList = res['data'] as List;
-        if (majorsList.isNotEmpty) selectedMajorId = majorsList.first['id'];
+        final allMajors = res['data'] as List;
+        final auth = Provider.of<AuthProvider>(context, listen: false);
+        final user = auth.user;
+
+        // Restrict dropdown for Representatives and Major Admins to ONLY their assigned major
+        if (user != null && (user.role == 'manager' || user.role == 'major_admin') && user.majorId != null) {
+          majorsList = allMajors.where((m) => m['id'] == user.majorId).toList();
+          selectedMajorId = user.majorId;
+        } else {
+          majorsList = allMajors;
+          if (majorsList.isNotEmpty) selectedMajorId = majorsList.first['id'];
+        }
       }
     } catch (_) {}
 
