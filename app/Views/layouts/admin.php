@@ -91,11 +91,11 @@
                         <span>الجداول والأمتحانات</span>
                     </a>
                 </li>
-                <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
+                <?php if (isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['admin', 'major_admin'])): ?>
                 <li class="sidebar-li">
                     <a class="sidebar-a <?php echo is_active_route('/admin/users') ? 'active' : ''; ?>" href="<?php echo url('/admin/users'); ?>">
-                        <i class="fa-solid fa-user-shield me-2 text-info"></i>
-                        <span>المسؤولين</span>
+                        <i class="fa-solid fa-users-cog me-2 text-info"></i>
+                        <span>إدارة المستخدمين والأدوار</span>
                     </a>
                 </li>
                 <?php endif; ?>
@@ -105,14 +105,6 @@
                         <span>الإعلانات</span>
                     </a>
                 </li>
-                <?php if (isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['admin', 'major_admin'])): ?>
-                <li class="sidebar-li">
-                    <a class="sidebar-a <?php echo is_active_route('/admin/managers') ? 'active' : ''; ?>" href="<?php echo url('/admin/managers'); ?>">
-                        <i class="fa-solid fa-user-tie me-2 text-success"></i>
-                        <span>المندوبين</span>
-                    </a>
-                </li>
-                <?php endif; ?>
                 <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
                 <li class="sidebar-li">
                     <a class="sidebar-a <?php echo is_active_route('/admin/settings') ? 'active' : ''; ?>" href="<?php echo url('/admin/settings'); ?>">

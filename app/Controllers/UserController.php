@@ -5,13 +5,14 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Models\User;
 use App\Models\Major;
+use App\Models\Level;
 
 class UserController extends Controller
 {
     private function canManage(): bool
     {
         $role = $_SESSION['user_role'] ?? '';
-        return $role === 'admin';
+        return $role === 'admin' || $role === 'major_admin';
     }
 
     public function index(): void
@@ -20,8 +21,27 @@ class UserController extends Controller
             flash('error', 'لا تملك صلاحية الوصول');
             redirect(url('/admin/courses'));
         }
-        $users = User::getAllWithMajor();
-        $this->view('admin/users/index', ['users' => $users]);
+
+        $currentRole = $_SESSION['user_role'] ?? '';
+        $currentUserId = $_SESSION['user_id'] ?? 0;
+        $scopedMajorId = null;
+
+        if ($currentRole === 'major_admin') {
+            $currentUser = User::find($currentUserId);
+            $scopedMajorId = $currentUser ? ($currentUser->managed_major_id ?: $currentUser->major_id) : null;
+        }
+
+        $search = trim($_GET['search'] ?? '');
+        $role = trim($_GET['role'] ?? 'all');
+
+        $users = User::getFilteredUsers($search, $role, $scopedMajorId);
+
+        $this->view('admin/users/index', [
+            'users' => $users,
+            'search' => $search,
+            'role' => $role,
+            'currentRole' => $currentRole,
+        ]);
     }
 
     public function create(): void
@@ -31,7 +51,8 @@ class UserController extends Controller
             redirect(url('/admin/courses'));
         }
         $majors = Major::getActive();
-        $this->view('admin/users/create', ['majors' => $majors]);
+        $levels = Level::getAll();
+        $this->view('admin/users/create', ['majors' => $majors, 'levels' => $levels]);
     }
 
     public function store(): void
@@ -44,21 +65,27 @@ class UserController extends Controller
             redirect(url('/admin/users'));
         }
 
+        $requestedRole = $this->postParam('role', 'student');
+        $currentRole = $_SESSION['user_role'] ?? '';
+
+        if ($currentRole !== 'admin' && $requestedRole === 'admin') {
+            $requestedRole = 'manager';
+        }
+
+        $majorId = $this->postParam('major_id', '');
+        $levelId = $this->postParam('managed_level_id', '');
+
         $data = [
             'full_name' => trim($this->postParam('full_name', '')),
             'email' => trim($this->postParam('email', '')),
+            'phone' => trim($this->postParam('phone', '')),
             'password' => $this->postParam('password', ''),
-            'role' => $this->postParam('role', 'manager'),
-            'major_id' => $this->postParam('major_id', ''),
+            'role' => $requestedRole,
+            'major_id' => !empty($majorId) ? (int)$majorId : null,
+            'managed_major_id' => !empty($majorId) ? (int)$majorId : null,
+            'managed_level_id' => !empty($levelId) ? (int)$levelId : null,
+            'is_active' => $this->postParam('is_active', '1') ? 1 : 0,
         ];
-
-        $majorId = $this->postParam('major_id', '');
-        if (!empty($majorId)) {
-            $data['managed_major_id'] = (int)$majorId;
-            if ($data['role'] !== 'admin') {
-                $data['role'] = 'manager';
-            }
-        }
 
         $errors = $this->validate($data, [
             'full_name' => 'required',
@@ -69,10 +96,12 @@ class UserController extends Controller
         if (!empty($errors)) {
             flash('error', 'يرجى التحقق من الحقول المطلوبة');
             $majors = Major::getActive();
+            $levels = Level::getAll();
             $this->view('admin/users/create', [
                 'errors' => $errors,
                 'data' => $data,
                 'majors' => $majors,
+                'levels' => $levels,
             ]);
             return;
         }
@@ -81,10 +110,12 @@ class UserController extends Controller
         if ($existingUser) {
             flash('error', 'البريد الإلكتروني مستخدم بالفعل');
             $majors = Major::getActive();
+            $levels = Level::getAll();
             $this->view('admin/users/create', [
                 'errors' => ['email' => ['البريد الإلكتروني مستخدم بالفعل']],
                 'data' => $data,
                 'majors' => $majors,
+                'levels' => $levels,
             ]);
             return;
         }
@@ -102,7 +133,13 @@ class UserController extends Controller
             flash('error', 'لا تملك صلاحية الوصول');
             redirect(url('/admin/courses'));
         }
-        $id = $this->getParam('id');
+        $id = (int)$this->getParam('id');
+
+        if ($id === 1) {
+            flash('error', 'لا يمكن تعديل الحساب الرئيسي للنظام');
+            redirect(url('/admin/users'));
+        }
+
         $user = User::find($id);
 
         if (!$user) {
@@ -111,7 +148,8 @@ class UserController extends Controller
         }
 
         $majors = Major::getActive();
-        $this->view('admin/users/edit', ['user' => $user, 'majors' => $majors]);
+        $levels = Level::getAll();
+        $this->view('admin/users/edit', ['user' => $user, 'majors' => $majors, 'levels' => $levels]);
     }
 
     public function update(): void
@@ -124,7 +162,13 @@ class UserController extends Controller
             redirect(url('/admin/users'));
         }
 
-        $id = $this->postParam('id');
+        $id = (int)$this->postParam('id');
+
+        if ($id === 1) {
+            flash('error', 'لا يمكن تعديل الحساب الرئيسي للنظام');
+            redirect(url('/admin/users'));
+        }
+
         $user = User::find($id);
 
         if (!$user) {
@@ -132,23 +176,26 @@ class UserController extends Controller
             redirect(url('/admin/users'));
         }
 
+        $requestedRole = $this->postParam('role', $user->role);
+        $currentRole = $_SESSION['user_role'] ?? '';
+
+        if ($currentRole !== 'admin' && $requestedRole === 'admin') {
+            $requestedRole = $user->role;
+        }
+
         $majorId = $this->postParam('major_id', $user->major_id);
+        $levelId = $this->postParam('managed_level_id', $user->managed_level_id);
 
         $data = [
             'full_name' => trim($this->postParam('full_name', '')),
             'email' => trim($this->postParam('email', '')),
-            'role' => $this->postParam('role', $user->role),
+            'phone' => trim($this->postParam('phone', '')),
+            'role' => $requestedRole,
             'major_id' => !empty($majorId) ? (int)$majorId : null,
+            'managed_major_id' => !empty($majorId) ? (int)$majorId : null,
+            'managed_level_id' => !empty($levelId) ? (int)$levelId : null,
+            'is_active' => $this->postParam('is_active', '1') ? 1 : 0,
         ];
-
-        if (!empty($majorId)) {
-            $data['managed_major_id'] = (int)$majorId;
-            if ($data['role'] !== 'admin') {
-                $data['role'] = 'manager';
-            }
-        } else {
-            $data['managed_major_id'] = null;
-        }
 
         $errors = $this->validate($data, [
             'full_name' => 'required',
@@ -165,10 +212,12 @@ class UserController extends Controller
         if (!empty($errors)) {
             flash('error', 'يرجى التحقق من الحقول المطلوبة');
             $majors = Major::getActive();
+            $levels = Level::getAll();
             $this->view('admin/users/edit', [
                 'user' => $user,
                 'errors' => $errors,
                 'majors' => $majors,
+                'levels' => $levels,
             ]);
             return;
         }
@@ -178,10 +227,12 @@ class UserController extends Controller
             if ($existingUser) {
                 flash('error', 'البريد الإلكتروني مستخدم بالفعل');
                 $majors = Major::getActive();
+                $levels = Level::getAll();
                 $this->view('admin/users/edit', [
                     'user' => $user,
                     'errors' => ['email' => ['البريد الإلكتروني مستخدم بالفعل']],
                     'majors' => $majors,
+                    'levels' => $levels,
                 ]);
                 return;
             }
@@ -193,7 +244,7 @@ class UserController extends Controller
 
         User::updateRecord($id, $data);
         log_activity('update', 'users', $id, 'تحديث المستخدم: ' . $data['full_name']);
-        flash('success', 'تم تحديث المستخدم بنجاح');
+        flash('success', 'تم تحديث حساب ودور المستخدم بنجاح');
         redirect(url('/admin/users'));
     }
 
@@ -207,7 +258,12 @@ class UserController extends Controller
             flash('error', 'طلب غير صالح أو انتهت مهلة الجلسة');
             redirect(url('/admin/users'));
         }
-        $id = $this->getParam('id');
+        $id = (int)$this->getParam('id');
+
+        if ($id === 1) {
+            flash('error', 'لا يمكن حذف الحساب الرئيسي للنظام');
+            redirect(url('/admin/users'));
+        }
 
         if ($id == $_SESSION['user_id']) {
             flash('error', 'لا يمكنك حذف حسابك الخاص');

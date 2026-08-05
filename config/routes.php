@@ -86,12 +86,12 @@ return [
     '/admin/settings' => ['controller' => 'SettingController', 'action' => 'index', 'method' => 'GET', 'middleware' => ['Auth', 'Admin']],
     '/admin/settings/update' => ['controller' => 'SettingController', 'action' => 'update', 'method' => 'POST', 'middleware' => ['Auth', 'Admin']],
 
-    '/admin/managers' => ['controller' => 'ManagerController', 'action' => 'index', 'method' => 'GET', 'middleware' => ['Auth']],
-    '/admin/managers/create' => ['controller' => 'ManagerController', 'action' => 'create', 'method' => 'GET', 'middleware' => ['Auth']],
-    '/admin/managers/store' => ['controller' => 'ManagerController', 'action' => 'store', 'method' => 'POST', 'middleware' => ['Auth']],
-    '/admin/managers/{id}/edit' => ['controller' => 'ManagerController', 'action' => 'edit', 'method' => 'GET', 'middleware' => ['Auth']],
-    '/admin/managers/update' => ['controller' => 'ManagerController', 'action' => 'update', 'method' => 'POST', 'middleware' => ['Auth']],
-    '/admin/managers/{id}/delete' => ['controller' => 'ManagerController', 'action' => 'delete', 'method' => 'GET', 'middleware' => ['Auth']],
+    '/admin/managers' => ['controller' => 'UserController', 'action' => 'index', 'method' => 'GET', 'middleware' => ['Auth']],
+    '/admin/managers/create' => ['controller' => 'UserController', 'action' => 'create', 'method' => 'GET', 'middleware' => ['Auth']],
+    '/admin/managers/store' => ['controller' => 'UserController', 'action' => 'store', 'method' => 'POST', 'middleware' => ['Auth']],
+    '/admin/managers/{id}/edit' => ['controller' => 'UserController', 'action' => 'edit', 'method' => 'GET', 'middleware' => ['Auth']],
+    '/admin/managers/update' => ['controller' => 'UserController', 'action' => 'update', 'method' => 'POST', 'middleware' => ['Auth']],
+    '/admin/managers/{id}/delete' => ['controller' => 'UserController', 'action' => 'delete', 'method' => 'GET', 'middleware' => ['Auth']],
 
     '/notifications/{id}/read' => ['controller' => 'NotificationController', 'action' => 'markRead', 'method' => 'POST', 'middleware' => ['Auth']],
     '/notifications/read-all' => ['controller' => 'NotificationController', 'action' => 'readAll', 'method' => 'POST', 'middleware' => ['Auth']],
