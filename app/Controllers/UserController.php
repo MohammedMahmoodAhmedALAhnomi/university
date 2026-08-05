@@ -127,13 +127,13 @@ class UserController extends Controller
         redirect(url('/admin/users'));
     }
 
-    public function edit(): void
+    public function edit($id = 0): void
     {
         if (!$this->canManage()) {
             flash('error', 'لا تملك صلاحية الوصول');
             redirect(url('/admin/courses'));
         }
-        $id = (int)$this->getParam('id');
+        $id = (int)($id ?: $this->getParam('id'));
 
         if ($id === 1) {
             flash('error', 'لا يمكن تعديل الحساب الرئيسي للنظام');
@@ -152,7 +152,7 @@ class UserController extends Controller
         $this->view('admin/users/edit', ['user' => $user, 'majors' => $majors, 'levels' => $levels]);
     }
 
-    public function update(): void
+    public function update($id = 0): void
     {
         if (!$this->canManage()) {
             flash('error', 'لا تملك صلاحية الوصول');
@@ -162,7 +162,7 @@ class UserController extends Controller
             redirect(url('/admin/users'));
         }
 
-        $id = (int)$this->postParam('id');
+        $id = (int)($id ?: $this->postParam('id', $this->getParam('id', 0)));
 
         if ($id === 1) {
             flash('error', 'لا يمكن تعديل الحساب الرئيسي للنظام');
@@ -248,7 +248,7 @@ class UserController extends Controller
         redirect(url('/admin/users'));
     }
 
-    public function delete(): void
+    public function delete($id = 0): void
     {
         if (!$this->canManage()) {
             flash('error', 'لا تملك صلاحية الوصول');
@@ -258,7 +258,7 @@ class UserController extends Controller
             flash('error', 'طلب غير صالح أو انتهت مهلة الجلسة');
             redirect(url('/admin/users'));
         }
-        $id = (int)$this->getParam('id');
+        $id = (int)($id ?: $this->getParam('id'));
 
         if ($id === 1) {
             flash('error', 'لا يمكن حذف الحساب الرئيسي للنظام');
