@@ -1174,15 +1174,65 @@ class ApiController extends Controller
 
     public function adminFiles(): void
     {
+        $userId = (int)($this->getParam('user_id', $_GET['user_id'] ?? 0));
+        $user = $userId ? \App\Models\User::findById($userId) : null;
+
+        $where = "";
+        $params = [];
+
+        if ($user) {
+            if ($user->role === 'manager' && $user->managed_major_id && $user->managed_level_id) {
+                $where = "WHERE c.major_id = ? AND c.level_id = ?";
+                $params = [(int)$user->managed_major_id, (int)$user->managed_level_id];
+            } else if ($user->role === 'major_admin' && $user->managed_major_id) {
+                $where = "WHERE c.major_id = ?";
+                $params = [(int)$user->managed_major_id];
+            }
+        }
+
         $files = \App\Config\Database::fetchAll(
             "SELECT f.*, c.name as course_name, m.name as major_name, u.full_name as uploader_name
              FROM files f
              LEFT JOIN courses c ON c.id = f.course_id
              LEFT JOIN majors m ON m.id = c.major_id
              LEFT JOIN users u ON u.id = f.uploaded_by
-             ORDER BY f.id DESC"
+             {$where}
+             ORDER BY f.id DESC",
+            $params
         );
         $this->jsonResponse(['status' => 'success', 'data' => $files]);
+    }
+
+    public function adminCourses(): void
+    {
+        $userId = (int)($this->getParam('user_id', $_GET['user_id'] ?? 0));
+        $user = $userId ? \App\Models\User::findById($userId) : null;
+
+        $where = "";
+        $params = [];
+
+        if ($user) {
+            if ($user->role === 'manager' && $user->managed_major_id && $user->managed_level_id) {
+                $where = "WHERE c.major_id = ? AND c.level_id = ?";
+                $params = [(int)$user->managed_major_id, (int)$user->managed_level_id];
+            } else if ($user->role === 'major_admin' && $user->managed_major_id) {
+                $where = "WHERE c.major_id = ?";
+                $params = [(int)$user->managed_major_id];
+            }
+        }
+
+        $courses = \App\Config\Database::fetchAll(
+            "SELECT c.*, m.name as major_name, l.name as level_name, s.name as semester_name,
+                    (SELECT COUNT(*) FROM files f WHERE f.course_id = c.id) as files_count
+             FROM courses c
+             LEFT JOIN majors m ON m.id = c.major_id
+             LEFT JOIN levels l ON l.id = c.level_id
+             LEFT JOIN semesters s ON s.id = c.semester_id
+             {$where}
+             ORDER BY c.id DESC",
+            $params
+        );
+        $this->jsonResponse(['status' => 'success', 'data' => $courses]);
     }
 
     public function approveFile(): void

@@ -133,6 +133,7 @@ return [
     '/api/admin/files/{id}/delete' => ['controller' => 'ApiController', 'action' => 'deleteFile', 'method' => 'POST'],
     '/api/admin/majors/create' => ['controller' => 'ApiController', 'action' => 'createMajor', 'method' => 'POST'],
     '/api/admin/majors/{id}/delete' => ['controller' => 'ApiController', 'action' => 'deleteMajor', 'method' => 'POST'],
+    '/api/admin/courses' => ['controller' => 'ApiController', 'action' => 'adminCourses', 'method' => 'GET'],
     '/api/admin/courses/create' => ['controller' => 'ApiController', 'action' => 'createCourse', 'method' => 'POST'],
     '/api/admin/courses/{id}/delete' => ['controller' => 'ApiController', 'action' => 'deleteCourse', 'method' => 'POST'],
     '/api/admin/announcements/{id}/delete' => ['controller' => 'ApiController', 'action' => 'deleteAnnouncement', 'method' => 'POST'],

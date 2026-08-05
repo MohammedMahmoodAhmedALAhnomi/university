@@ -6,6 +6,7 @@ import '../../services/api_service.dart';
 import '../../core/constants/api_endpoints.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/ui_helpers.dart';
+import '../../services/download_service.dart';
 import '../files/upload_file_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
@@ -18,6 +19,8 @@ class AdminDashboardScreen extends StatefulWidget {
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   bool _isLoading = true;
   List _requests = [];
+  List _courses = [];
+  List _files = [];
   Map<String, dynamic> _stats = {
     'users': 0,
     'majors': 0,
@@ -39,11 +42,112 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     await Future.wait([
       _fetchRequests(),
       _fetchStats(),
+      _fetchCourses(),
+      _fetchFiles(),
     ]);
     if (!mounted) return;
     setState(() => _isLoading = false);
   }
 
+  Future<void> _fetchCourses() async {
+    try {
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+      final userId = auth.user?.id ?? 0;
+      final res = await ApiService.get('${ApiEndpoints.adminCourses}?user_id=$userId');
+      if (res['status'] == 'success' && res['data'] != null) {
+        _courses = res['data'] as List;
+      }
+    } catch (e) {
+      debugPrint('Error fetching admin courses: $e');
+    }
+  }
+
+  Future<void> _fetchFiles() async {
+    try {
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+      final userId = auth.user?.id ?? 0;
+      final res = await ApiService.get('${ApiEndpoints.adminFiles}?user_id=$userId');
+      if (res['status'] == 'success' && res['data'] != null) {
+        _files = res['data'] as List;
+      }
+    } catch (e) {
+      debugPrint('Error fetching admin files: $e');
+    }
+  }
+
+  Future<void> _handleDeleteCourse(int courseId, String courseName) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('حذف المادة الدراسية'),
+        content: Text('هل أنت تأكد من حذف مادة "$courseName" نهائياً؟'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('إلغاء')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('حذف مؤكد', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      final res = await ApiService.post('${ApiEndpoints.deleteCourse}$courseId/delete', {});
+      if (mounted) {
+        if (res['status'] == 'success') {
+          UiHelpers.showSnackBar(context, message: 'تم حذف المادة الدراسية بنجاح');
+          _fetchDashboardData();
+        } else {
+          UiHelpers.showSnackBar(context, message: res['message'] ?? 'تعذر حذف المادة', isError: true);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        UiHelpers.showSnackBar(context, message: 'خطأ أثناء حذف المادة: $e', isError: true);
+      }
+    }
+  }
+
+  Future<void> _handleDeleteFile(int fileId, String fileTitle) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('حذف الملف التعليمي'),
+        content: Text('هل أنت تأكد من حذف ملف "$fileTitle" نهائياً؟'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('إلغاء')),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('حذف مؤكد', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      final res = await ApiService.post('${ApiEndpoints.deleteFile}$fileId/delete', {});
+      if (mounted) {
+        if (res['status'] == 'success') {
+          UiHelpers.showSnackBar(context, message: 'تم حذف الملف بنجاح');
+          _fetchDashboardData();
+        } else {
+          UiHelpers.showSnackBar(context, message: res['message'] ?? 'تعذر حذف الملف', isError: true);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        UiHelpers.showSnackBar(context, message: 'خطأ أثناء حذف الملف: $e', isError: true);
+      }
+    }
+  }
 
   Future<void> _fetchRequests() async {
     try {
@@ -727,6 +831,149 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           },
                         ),
               ],
+
+              // Courses Management Section
+              const SizedBox(height: 28),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.menu_book_rounded, color: AppColors.primary),
+                      SizedBox(width: 8),
+                      Text(
+                        'إدارة وحذف المواد الدراسية',
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.add_circle_outline_rounded, color: AppColors.primary),
+                    onPressed: _showAddCourseDialog,
+                    tooltip: 'إضافة مادة جديدة',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+
+              _courses.isEmpty
+                  ? UiHelpers.buildEmptyState(
+                      icon: Icons.menu_book_rounded,
+                      title: 'لا توجد مواد مسجلة حالياً',
+                      subtitle: 'اضغط على زر "إضافة مادة" لإضافة مادة جديدة',
+                    )
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _courses.length,
+                      itemBuilder: (context, index) {
+                        final course = _courses[index];
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          child: ListTile(
+                            leading: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.book_rounded, color: AppColors.primary, size: 20),
+                            ),
+                            title: Text(course['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                            subtitle: Text('${course['major_name'] ?? ''} • ${course['level_name'] ?? ''}', style: const TextStyle(fontSize: 12)),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
+                              tooltip: 'حذف المادة',
+                              onPressed: () => _handleDeleteCourse(course['id'], course['name'] ?? ''),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+
+              // Files Management Section
+              const SizedBox(height: 28),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.folder_copy_rounded, color: AppColors.accentAmber),
+                      SizedBox(width: 8),
+                      Text(
+                        'إدارة وحذف الملفات والملازم',
+                        style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.upload_file_rounded, color: AppColors.accentAmber),
+                    onPressed: () async {
+                      final res = await Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const UploadFileScreen()),
+                      );
+                      if (res == true) _fetchDashboardData();
+                    },
+                    tooltip: 'رفع ملف جديد',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+
+              _files.isEmpty
+                  ? UiHelpers.buildEmptyState(
+                      icon: Icons.folder_open_rounded,
+                      title: 'لا توجد ملفات مرفوعة حالياً',
+                      subtitle: 'اضغط على زر "رفع ملف" لنشر ملخصات وملازم',
+                    )
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _files.length,
+                      itemBuilder: (context, index) {
+                        final file = _files[index];
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          child: ListTile(
+                            leading: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.red.withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.picture_as_pdf, color: Colors.redAccent, size: 20),
+                            ),
+                            title: Text(file['title'] ?? file['original_name'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                            subtitle: Text('${file['course_name'] ?? ''} • بواسطة: ${file['uploader_name'] ?? "المندوب"}', style: const TextStyle(fontSize: 12)),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.remove_red_eye_rounded, color: Colors.blueAccent),
+                                  tooltip: 'معاينة الملف',
+                                  onPressed: () {
+                                    DownloadService.previewFileInApp(
+                                      context,
+                                      fileId: file['id'] ?? 0,
+                                      fileTitle: file['title'] ?? '',
+                                      rawFilePath: file['file_path'],
+                                    );
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent),
+                                  tooltip: 'حذف الملف',
+                                  onPressed: () => _handleDeleteFile(file['id'], file['title'] ?? ''),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
             ],
           ),
         ),

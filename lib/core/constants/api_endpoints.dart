@@ -47,6 +47,7 @@ class ApiEndpoints {
   // Major & Course Management
   static const String createMajor = "/admin/majors/create";
   static const String deleteMajor = "/admin/majors/"; // /{id}/delete
+  static const String adminCourses = "/admin/courses";
   static const String createCourse = "/admin/courses/create";
   static const String deleteCourse = "/admin/courses/"; // /{id}/delete
 
