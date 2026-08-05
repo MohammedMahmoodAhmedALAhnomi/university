@@ -479,11 +479,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     return;
                   }
                   try {
+                    final auth = Provider.of<AuthProvider>(context, listen: false);
                     final res = await ApiService.post(ApiEndpoints.createCourse, {
                       'name': nameController.text.trim(),
                       'code': codeController.text.trim(),
                       'major_id': selectedMajorId,
                       'description': descController.text.trim(),
+                      'user_id': auth.user?.id,
                     });
                     if (mounted) {
                       Navigator.pop(ctx);

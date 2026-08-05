@@ -1275,28 +1275,44 @@ class ApiController extends Controller
 
     public function createCourse(): void
     {
-        $input = $this->getJsonInput();
-        $name = trim($input['name'] ?? '');
-        $code = trim($input['code'] ?? '');
-        $majorId = (int)($input['major_id'] ?? 0);
-        $levelId = !empty($input['level_id']) ? (int)$input['level_id'] : 1;
-        $semesterId = !empty($input['semester_id']) ? (int)$input['semester_id'] : 1;
-        $description = trim($input['description'] ?? '');
+        try {
+            $input = $this->getJsonInput();
+            $name = trim($input['name'] ?? '');
+            $code = trim($input['code'] ?? '');
+            $majorId = (int)($input['major_id'] ?? 0);
+            $userId = (int)($input['user_id'] ?? 0);
+            $levelId = !empty($input['level_id']) ? (int)$input['level_id'] : 0;
+            $semesterId = !empty($input['semester_id']) ? (int)$input['semester_id'] : 1;
+            $description = trim($input['description'] ?? '');
 
-        if (empty($name) || !$majorId) {
-            $this->jsonResponse(['status' => 'error', 'message' => 'اسم المادة والتخصص مطلوبان'], 400);
+            if ($userId && !$levelId) {
+                $user = \App\Models\User::findById($userId);
+                if ($user && $user->role === 'manager' && $user->managed_level_id) {
+                    $levelId = (int)$user->managed_level_id;
+                }
+            }
+
+            if (!$levelId) {
+                $levelId = 1;
+            }
+
+            if (empty($name) || !$majorId) {
+                $this->jsonResponse(['status' => 'error', 'message' => 'اسم المادة والتخصص مطلوبان'], 400);
+            }
+
+            $id = \App\Models\Course::create([
+                'name' => $name,
+                'code' => $code,
+                'major_id' => $majorId,
+                'level_id' => $levelId,
+                'semester_id' => $semesterId,
+                'description' => $description,
+                'is_active' => 1
+            ]);
+            $this->jsonResponse(['status' => 'success', 'message' => 'تم إضافة المادة الدراسية بنجاح', 'data' => ['id' => $id]]);
+        } catch (\Throwable $e) {
+            $this->jsonResponse(['status' => 'error', 'message' => 'حدث خطأ أثناء إضافة المادة: ' . $e->getMessage()], 500);
         }
-
-        $id = \App\Models\Course::create([
-            'name' => $name,
-            'code' => $code,
-            'major_id' => $majorId,
-            'level_id' => $levelId,
-            'semester_id' => $semesterId,
-            'description' => $description,
-            'is_active' => 1
-        ]);
-        $this->jsonResponse(['status' => 'success', 'message' => 'تم إضافة المادة الدراسية بنجاح', 'data' => ['id' => $id]]);
     }
 
     public function deleteCourse(): void
