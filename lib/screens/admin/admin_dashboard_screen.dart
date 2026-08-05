@@ -281,22 +281,26 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       UiHelpers.showSnackBar(context, message: 'يرجى تعبئة العنوان والمحتوى', isError: true);
                       return;
                     }
-                    Navigator.pop(context);
-                    final messenger = ScaffoldMessenger.of(this.context);
                     try {
                       final res = await ApiService.post(ApiEndpoints.createAnnouncement, {
                         'title': titleController.text.trim(),
                         'content': contentController.text.trim(),
                         'type': type,
                       });
-                      if (res['status'] == 'success') {
-                        messenger.showSnackBar(const SnackBar(content: Text('تم نشر الإعلان ونشر الإشعار للجميع 🎉')));
-                        _fetchDashboardData();
-                      } else {
-                        messenger.showSnackBar(SnackBar(content: Text(res['message'] ?? 'تعذر نشر الإعلان')));
+                      if (mounted) {
+                        Navigator.pop(context);
+                        if (res['status'] == 'success') {
+                          UiHelpers.showSnackBar(context, message: 'تم نشر الإعلان ونشر الإشعار للجميع 🎉');
+                          _fetchDashboardData();
+                        } else {
+                          UiHelpers.showSnackBar(context, message: res['message'] ?? 'تعذر نشر الإعلان', isError: true);
+                        }
                       }
                     } catch (e) {
-                      messenger.showSnackBar(SnackBar(content: Text('خطأ أثناء النشر: $e')));
+                      if (mounted) {
+                        Navigator.pop(context);
+                        UiHelpers.showSnackBar(context, message: 'خطأ أثناء النشر: $e', isError: true);
+                      }
                     }
                   },
                   icon: const Icon(Icons.send_rounded, size: 18),
@@ -362,7 +366,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 UiHelpers.showSnackBar(context, message: 'يرجى كتابة اسم التخصص', isError: true);
                 return;
               }
-              Navigator.pop(ctx);
               try {
                 final res = await ApiService.post(ApiEndpoints.createMajor, {
                   'name': nameController.text.trim(),
@@ -370,6 +373,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   'description': descController.text.trim(),
                 });
                 if (mounted) {
+                  Navigator.pop(ctx);
                   if (res['status'] == 'success') {
                     UiHelpers.showSnackBar(context, message: 'تم إضافة التخصص بنجاح 🎉');
                     _fetchDashboardData();
@@ -378,7 +382,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   }
                 }
               } catch (e) {
-                if (mounted) UiHelpers.showSnackBar(context, message: 'خطأ أثناء الإضافة: $e', isError: true);
+                if (mounted) {
+                  Navigator.pop(ctx);
+                  UiHelpers.showSnackBar(context, message: 'خطأ أثناء الإضافة: $e', isError: true);
+                }
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.secondary, foregroundColor: Colors.white),
@@ -471,7 +478,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     UiHelpers.showSnackBar(context, message: 'يرجى كتابة اسم المادة واختيار التخصص', isError: true);
                     return;
                   }
-                  Navigator.pop(ctx);
                   try {
                     final res = await ApiService.post(ApiEndpoints.createCourse, {
                       'name': nameController.text.trim(),
@@ -480,6 +486,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       'description': descController.text.trim(),
                     });
                     if (mounted) {
+                      Navigator.pop(ctx);
                       if (res['status'] == 'success') {
                         UiHelpers.showSnackBar(context, message: 'تم إضافة المادة بنجاح 🎉');
                         _fetchDashboardData();
@@ -488,7 +495,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       }
                     }
                   } catch (e) {
-                    if (mounted) UiHelpers.showSnackBar(context, message: 'خطأ أثناء الإضافة: $e', isError: true);
+                    if (mounted) {
+                      Navigator.pop(ctx);
+                      UiHelpers.showSnackBar(context, message: 'خطأ أثناء الإضافة: $e', isError: true);
+                    }
                   }
                 },
                 style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
