@@ -30,14 +30,15 @@ class ApiController extends Controller
 
     private function getJsonInput(): array
     {
+        $post = $_POST ?? [];
         $raw = file_get_contents('php://input');
         if (!empty($raw)) {
             $decoded = json_decode($raw, true);
             if (is_array($decoded)) {
-                return $decoded;
+                return array_merge($post, $decoded);
             }
         }
-        return $_POST ?? [];
+        return $post;
     }
 
     protected function jsonResponse(array $data, int $status = 200): void
@@ -704,59 +705,70 @@ class ApiController extends Controller
 
     public function uploadFile(): void
     {
-        $input = $this->getJsonInput();
-        $title = trim($input['title'] ?? $_POST['title'] ?? '');
-        $courseId = (int)($input['course_id'] ?? $_POST['course_id'] ?? 0);
-        $fileType = trim($input['file_type'] ?? $_POST['file_type'] ?? 'other');
-        $description = trim($input['description'] ?? $_POST['description'] ?? '');
-        $userId = (int)($input['user_id'] ?? $_POST['user_id'] ?? 0);
+        try {
+            $input = $this->getJsonInput();
+            $title = trim($input['title'] ?? '');
+            $courseId = (int)($input['course_id'] ?? 0);
+            $fileType = trim($input['file_type'] ?? 'other');
+            $description = trim($input['description'] ?? '');
+            $userId = (int)($input['user_id'] ?? 0);
 
-        if ($userId > 0) {
-            $user = \App\Models\User::findById($userId);
-            if (!$user || $user->role === 'guest') {
-                $this->jsonResponse(['status' => 'error', 'message' => 'عذراً، رفع الملفات والملخصات متاح فقط لمندوبي الدفعات والمشرفين'], 403);
+            if ($userId > 0) {
+                $user = \App\Models\User::findById($userId);
+                if (!$user || $user->role === 'guest') {
+                    $this->jsonResponse(['status' => 'error', 'message' => 'عذراً، رفع الملفات والملخصات متاح فقط لمندوبي الدفعات والمشرفين والأعضاء المسجلين'], 403);
+                }
             }
-        }
 
-        if (empty($title) || !$courseId) {
-            $this->jsonResponse(['status' => 'error', 'message' => 'اسم الملف والمادة الدراسية مطلوبان'], 400);
-        }
-
-        $filePath = '';
-        if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
-            $uploadDir = __DIR__ . '/../../public/uploads/files/';
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
+            if (empty($title) || !$courseId) {
+                $this->jsonResponse(['status' => 'error', 'message' => 'اسم الملف والمادة الدراسية مطلوبان'], 400);
             }
-            $ext = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
-            $filename = uniqid('file_') . '.' . $ext;
-            $targetPath = $uploadDir . $filename;
-            if (move_uploaded_file($_FILES['file']['tmp_name'], $targetPath)) {
-                $filePath = 'uploads/files/' . $filename;
+
+            $filePath = '';
+            $originalName = $title;
+            $fileSize = 0;
+
+            if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
+                $uploadDir = __DIR__ . '/../../public/uploads/files/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+                $originalName = $_FILES['file']['name'];
+                $fileSize = (int)$_FILES['file']['size'];
+                $ext = pathinfo($originalName, PATHINFO_EXTENSION);
+                $filename = uniqid('file_') . '.' . $ext;
+                $targetPath = $uploadDir . $filename;
+                if (move_uploaded_file($_FILES['file']['tmp_name'], $targetPath)) {
+                    $filePath = 'uploads/files/' . $filename;
+                }
+            } elseif (!empty($input['file_path'])) {
+                $filePath = $input['file_path'];
             }
-        } elseif (!empty($input['file_path'])) {
-            $filePath = $input['file_path'];
+
+            if (empty($filePath)) {
+                $this->jsonResponse(['status' => 'error', 'message' => 'يرجى إرفاق ملف للرفع'], 400);
+            }
+
+            $fileId = \App\Models\File::create([
+                'course_id' => $courseId,
+                'title' => $title,
+                'description' => $description,
+                'file_type' => $fileType,
+                'file_path' => $filePath,
+                'original_name' => $originalName,
+                'file_size' => $fileSize,
+                'uploaded_by' => $userId ?: null,
+                'is_approved' => 1
+            ]);
+
+            $this->jsonResponse([
+                'status' => 'success',
+                'message' => 'تم رفع الملف بنجاح',
+                'data' => ['id' => $fileId]
+            ]);
+        } catch (\Throwable $e) {
+            $this->jsonResponse(['status' => 'error', 'message' => 'حدث خطأ أثناء رفع الملف: ' . $e->getMessage()], 500);
         }
-
-        if (empty($filePath)) {
-            $this->jsonResponse(['status' => 'error', 'message' => 'يرجى إرفاق ملف للرفع'], 400);
-        }
-
-        $fileId = \App\Models\File::create([
-            'course_id' => $courseId,
-            'title' => $title,
-            'description' => $description,
-            'file_type' => $fileType,
-            'file_path' => $filePath,
-            'uploaded_by' => $userId ?: null,
-            'is_approved' => 1 // Direct approval for app submissions or pending based on settings
-        ]);
-
-        $this->jsonResponse([
-            'status' => 'success',
-            'message' => 'تم رفع الملف بنجاح',
-            'data' => ['id' => $fileId]
-        ]);
     }
 
     public function bookmarks(): void
