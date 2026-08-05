@@ -864,6 +864,8 @@ class ApiController extends Controller
                     'phone' => $user->phone ?? '',
                     'role' => $user->role,
                     'major_id' => $user->major_id ? (int)$user->major_id : null,
+                    'managed_level_id' => $user->managed_level_id ? (int)$user->managed_level_id : null,
+                    'managed_major_id' => $user->managed_major_id ? (int)$user->managed_major_id : null,
                 ],
                 'latest_join_request' => $latestRequest
             ]

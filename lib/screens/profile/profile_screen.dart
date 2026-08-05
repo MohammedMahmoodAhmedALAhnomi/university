@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../core/constants/app_colors.dart';
+import '../../models/user_model.dart';
 import '../auth/login_screen.dart';
 import '../about/about_screen.dart';
 import '../contact/contact_screen.dart';
@@ -119,7 +120,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
-                              _getRoleArabic(user.role),
+                              _getRoleArabic(user),
                               style: const TextStyle(
                                 color: AppColors.secondary,
                                 fontSize: 12,
@@ -235,14 +236,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  String _getRoleArabic(String role) {
-    switch (role) {
+  String _getRoleArabic(UserModel user) {
+    switch (user.role) {
       case 'admin':
         return 'مدير النظام الشامل';
       case 'major_admin':
-        return 'رئيس التخصص الأكاديمي';
+        return 'مسؤول التخصص الأكاديمي';
       case 'manager':
-        return 'مندوب / مدير مستوى';
+        final lvl = user.managedLevelId;
+        if (lvl == 1) return 'مندوب المستوى الأول 🎖️';
+        if (lvl == 2) return 'مندوب المستوى الثاني 🎖️';
+        if (lvl == 3) return 'مندوب المستوى الثالث 🎖️';
+        if (lvl == 4) return 'مندوب المستوى الرابع 🎖️';
+        return 'مندوب مستوى ودفعة 🎖️';
       default:
         return 'طالب / زائر';
     }

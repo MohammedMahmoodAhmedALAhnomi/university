@@ -6,6 +6,7 @@ import '../../services/api_service.dart';
 import '../../core/constants/api_endpoints.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/ui_helpers.dart';
+import '../../models/user_model.dart';
 import '../../services/download_service.dart';
 import '../files/upload_file_screen.dart';
 
@@ -577,7 +578,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         const Icon(Icons.admin_panel_settings_rounded, color: Colors.amber, size: 28),
                         const SizedBox(width: 8),
                         Text(
-                          user != null ? _getRoleTitle(user.role) : 'لوحة التحكم',
+                          _getRoleTitle(user),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 18,
@@ -1060,13 +1061,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  String _getRoleTitle(String role) {
-    switch (role) {
+  String _getRoleTitle(UserModel? user) {
+    if (user == null) return 'لوحة التحكم';
+    switch (user.role) {
       case 'admin':
         return 'مدير النظام الشامل';
       case 'major_admin':
-        return 'مشرف تخصص أكاديمي';
+        return 'مسؤول التخصص الأكاديمي';
       case 'manager':
+        final lvl = user.managedLevelId;
+        if (lvl == 1) return 'مندوب المستوى الأول';
+        if (lvl == 2) return 'مندوب المستوى الثاني';
+        if (lvl == 3) return 'مندوب المستوى الثالث';
+        if (lvl == 4) return 'مندوب المستوى الرابع';
         return 'مندوب مستوى ودفعة';
       default:
         return 'لوحة التحكم';

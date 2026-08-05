@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../core/constants/app_colors.dart';
 import '../providers/auth_provider.dart';
 import '../providers/theme_provider.dart';
+import '../models/user_model.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/profile/request_role_screen.dart';
 import '../screens/about/about_screen.dart';
@@ -111,7 +112,7 @@ class AppDrawer extends StatelessWidget {
                       border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
                     ),
                     child: Text(
-                      _getRoleArabic(user.role),
+                      _getRoleArabic(user),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 11,
@@ -364,14 +365,19 @@ class AppDrawer extends StatelessWidget {
     );
   }
 
-  static String _getRoleArabic(String role) {
-    switch (role) {
+  static String _getRoleArabic(UserModel user) {
+    switch (user.role) {
       case 'admin':
         return 'مدير النظام الشامل';
       case 'major_admin':
-        return 'رئيس التخصص الأكاديمي';
+        return 'مسؤول التخصص الأكاديمي';
       case 'manager':
-        return 'مندوب / مدير مستوى';
+        final lvl = user.managedLevelId;
+        if (lvl == 1) return 'مندوب المستوى الأول 🎖️';
+        if (lvl == 2) return 'مندوب المستوى الثاني 🎖️';
+        if (lvl == 3) return 'مندوب المستوى الثالث 🎖️';
+        if (lvl == 4) return 'مندوب المستوى الرابع 🎖️';
+        return 'مندوب مستوى ودفعة 🎖️';
       default:
         return 'طالب / زائر';
     }
