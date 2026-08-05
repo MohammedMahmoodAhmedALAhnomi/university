@@ -14,6 +14,11 @@ class Level extends Model
         return Database::fetchAll("SELECT * FROM levels ORDER BY sort_order");
     }
 
+    public static function getAll(): array
+    {
+        return static::getActive();
+    }
+
     private static ?array $cacheActive = null;
 
     public static function getActive(): array

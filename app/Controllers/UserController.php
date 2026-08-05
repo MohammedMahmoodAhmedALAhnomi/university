@@ -51,7 +51,7 @@ class UserController extends Controller
             redirect(url('/admin/courses'));
         }
         $majors = Major::getActive();
-        $levels = Level::getAll();
+        $levels = Level::getActive();
         $this->view('admin/users/create', ['majors' => $majors, 'levels' => $levels]);
     }
 
@@ -96,7 +96,7 @@ class UserController extends Controller
         if (!empty($errors)) {
             flash('error', 'يرجى التحقق من الحقول المطلوبة');
             $majors = Major::getActive();
-            $levels = Level::getAll();
+            $levels = Level::getActive();
             $this->view('admin/users/create', [
                 'errors' => $errors,
                 'data' => $data,
@@ -148,7 +148,7 @@ class UserController extends Controller
         }
 
         $majors = Major::getActive();
-        $levels = Level::getAll();
+        $levels = Level::getActive();
         $this->view('admin/users/edit', ['user' => $user, 'majors' => $majors, 'levels' => $levels]);
     }
 
@@ -212,7 +212,7 @@ class UserController extends Controller
         if (!empty($errors)) {
             flash('error', 'يرجى التحقق من الحقول المطلوبة');
             $majors = Major::getActive();
-            $levels = Level::getAll();
+            $levels = Level::getActive();
             $this->view('admin/users/edit', [
                 'user' => $user,
                 'errors' => $errors,
@@ -227,7 +227,7 @@ class UserController extends Controller
             if ($existingUser) {
                 flash('error', 'البريد الإلكتروني مستخدم بالفعل');
                 $majors = Major::getActive();
-                $levels = Level::getAll();
+                $levels = Level::getActive();
                 $this->view('admin/users/edit', [
                     'user' => $user,
                     'errors' => ['email' => ['البريد الإلكتروني مستخدم بالفعل']],
