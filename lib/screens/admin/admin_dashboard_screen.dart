@@ -47,7 +47,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   Future<void> _fetchRequests() async {
     try {
-      final res = await ApiService.get(ApiEndpoints.adminRequests);
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+      final userId = auth.user?.id ?? 0;
+      final res = await ApiService.get('${ApiEndpoints.adminRequests}?user_id=$userId');
       if (res['status'] == 'success' && res['data'] != null) {
         _requests = res['data'] as List;
       }

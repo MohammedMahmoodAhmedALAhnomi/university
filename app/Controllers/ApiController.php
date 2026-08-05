@@ -968,7 +968,17 @@ class ApiController extends Controller
 
     public function adminRequests(): void
     {
-        $requests = \App\Models\JoinRequest::getAllWithDetails();
+        $userId = (int)($this->getParam('user_id', $_GET['user_id'] ?? 0));
+        $user = $userId ? \App\Models\User::findById($userId) : null;
+
+        $requests = [];
+        if ($user && $user->role === 'major_admin') {
+            $majorId = (int)($user->managed_major_id ?: $user->major_id);
+            $requests = \App\Models\JoinRequest::getAllWithDetails($majorId);
+        } else {
+            $requests = \App\Models\JoinRequest::getAllWithDetails();
+        }
+
         $this->jsonResponse([
             'status' => 'success',
             'data' => array_map(function($r) {
@@ -982,7 +992,7 @@ class ApiController extends Controller
                     'major_name' => $r->major_name,
                     'level_name' => $r->level_name ?? 'جميع المستويات',
                     'status' => $r->status,
-                    'notes' => $r->notes ?? '',
+                    'notes' => $r->notes ?? ($r->reason ?? ''),
                     'created_at' => $r->created_at,
                 ];
             }, $requests)
@@ -1257,6 +1267,7 @@ class ApiController extends Controller
             "SELECT u.*, m.name as major_name
              FROM users u
              LEFT JOIN majors m ON m.id = u.major_id
+             WHERE u.id != 1
              ORDER BY u.id DESC"
         );
         $data = array_map(function($u) {
@@ -1282,6 +1293,12 @@ class ApiController extends Controller
 
         if (!$id || empty($role)) {
             $this->jsonResponse(['status' => 'error', 'message' => 'بيانات التحديث غير مكتملة'], 400);
+            return;
+        }
+
+        if ($id === 1) {
+            $this->jsonResponse(['status' => 'error', 'message' => 'حساب مدير النظام الرئيسي محمي ولا يمكن تعديله'], 403);
+            return;
         }
 
         \App\Config\Database::raw("UPDATE users SET role = ? WHERE id = ?", [$role, $id]);

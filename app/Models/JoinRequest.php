@@ -29,8 +29,22 @@ class JoinRequest extends Model
         );
     }
 
-    public static function getAllWithDetails(): array
+    public static function getAllWithDetails(?int $majorId = null): array
     {
+        if ($majorId) {
+            return Database::fetchAll(
+                "SELECT jr.*, u.full_name as user_name, u.email as user_email,
+                        m.name as major_name, l.name as level_name
+                 FROM join_requests jr
+                 JOIN users u ON u.id = jr.user_id
+                 JOIN majors m ON m.id = jr.major_id
+                 LEFT JOIN levels l ON l.id = jr.level_id
+                 WHERE jr.major_id = ?
+                 ORDER BY FIELD(jr.status, 'pending', 'approved', 'rejected'), jr.created_at DESC",
+                [$majorId]
+            );
+        }
+
         return Database::fetchAll(
             "SELECT jr.*, u.full_name as user_name, u.email as user_email,
                     m.name as major_name, l.name as level_name
