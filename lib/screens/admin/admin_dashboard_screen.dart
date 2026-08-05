@@ -411,7 +411,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
     final auth = Provider.of<AuthProvider>(context);
     final user = auth.user;
+    final role = user?.role ?? 'guest';
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final isSuperAdmin = role == 'admin';
+    final isMajorAdmin = role == 'major_admin';
+
+    final canManageRequests = isSuperAdmin || isMajorAdmin;
+    final canCreateAnnouncement = isSuperAdmin || isMajorAdmin;
+    final canAddMajor = isSuperAdmin;
 
     return Scaffold(
       appBar: AppBar(
@@ -466,7 +474,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'مرحباً بك في لوحة تحكم المنصة. يمكنك متابعة الإحصائيات الحية، قبول طلبات المندوبين، ونشر التنبيهات للطلاب.',
+                      'مرحباً بك في لوحة تحكم المنصة. يمكنك متابعة الإحصائيات الحية وإدارة المحتوى الأكاديمي للطلاب.',
                       style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
                     ),
                   ],
@@ -492,7 +500,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   _buildStatCard('المواد', '${_stats['courses']}', Icons.menu_book_rounded, Colors.purple, isDark),
                   _buildStatCard('الملفات', '${_stats['files']}', Icons.folder_copy_outlined, Colors.orange, isDark),
                   _buildStatCard('الإعلانات', '${_stats['announcements']}', Icons.campaign_outlined, Colors.teal, isDark),
-                  _buildStatCard('طلبات المعلقة', '${_stats['pending_requests']}', Icons.pending_actions_rounded, Colors.redAccent, isDark),
+                  if (canManageRequests)
+                    _buildStatCard('طلبات المعلقة', '${_stats['pending_requests']}', Icons.pending_actions_rounded, Colors.redAccent, isDark),
                 ],
               ),
               const SizedBox(height: 24),
@@ -504,19 +513,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 children: [
                   Row(
                     children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: _showCreateAnnouncementDialog,
-                          icon: const Icon(Icons.campaign_rounded, color: Colors.white, size: 18),
-                          label: const Text('نشر إعلان جديد', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      if (canCreateAnnouncement) ...[
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: _showCreateAnnouncementDialog,
+                            icon: const Icon(Icons.campaign_rounded, color: Colors.white, size: 18),
+                            label: const Text('نشر إعلان جديد', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
+                        const SizedBox(width: 10),
+                      ],
                       Expanded(
                         child: ElevatedButton.icon(
                           onPressed: () async {
@@ -540,18 +551,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: _showAddMajorDialog,
-                          icon: const Icon(Icons.add_business_rounded, size: 18, color: AppColors.secondary),
-                          label: const Text('إضافة تخصص', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      if (canAddMajor) ...[
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _showAddMajorDialog,
+                            icon: const Icon(Icons.add_business_rounded, size: 18, color: AppColors.secondary),
+                            label: const Text('إضافة تخصص', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 10),
+                        const SizedBox(width: 10),
+                      ],
                       Expanded(
                         child: OutlinedButton.icon(
                           onPressed: _showAddCourseDialog,
@@ -565,54 +578,57 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () => _openAdminUrl('/admin/dashboard'),
-                      icon: const Icon(Icons.open_in_browser_rounded, size: 20),
-                      label: const Text('فتح لوحة التحكم الكاملة عبر الويب 🌐', style: TextStyle(fontWeight: FontWeight.bold)),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  if (isSuperAdmin) ...[
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => _openAdminUrl('/admin/dashboard'),
+                        icon: const Icon(Icons.open_in_browser_rounded, size: 20),
+                        label: const Text('فتح لوحة التحكم الكاملة عبر الويب 🌐', style: TextStyle(fontWeight: FontWeight.bold)),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ],
               ),
 
-              const SizedBox(height: 28),
+              if (canManageRequests) ...[
+                const SizedBox(height: 28),
 
-              // Pending Requests Section
-              const Row(
-                children: [
-                  Icon(Icons.rule_folder_rounded, color: AppColors.primary),
-                  SizedBox(width: 8),
-                  Text(
-                    'طلبات الانضمام والترقية للمندوبين',
-                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
+                // Pending Requests Section
+                const Row(
+                  children: [
+                    Icon(Icons.rule_folder_rounded, color: AppColors.primary),
+                    SizedBox(width: 8),
+                    Text(
+                      'طلبات الانضمام والترقية للمندوبين',
+                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
 
-              _isLoading
-                  ? Column(
-                      children: [
-                        UiHelpers.buildSkeletonLoader(height: 120, borderRadius: 16),
-                        UiHelpers.buildSkeletonLoader(height: 120, borderRadius: 16),
-                      ],
-                    )
-                  : _requests.isEmpty
-                      ? UiHelpers.buildEmptyState(
-                          icon: Icons.assignment_turned_in_rounded,
-                          title: 'لا توجد طلبات معلقة',
-                          subtitle: 'جميع طلبات ترقية المندوبين والمشرفين مراجعة ومحدثة حالياً',
-                        )
-                      : ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: _requests.length,
+                _isLoading
+                    ? Column(
+                        children: [
+                          UiHelpers.buildSkeletonLoader(height: 120, borderRadius: 16),
+                          UiHelpers.buildSkeletonLoader(height: 120, borderRadius: 16),
+                        ],
+                      )
+                    : _requests.isEmpty
+                        ? UiHelpers.buildEmptyState(
+                            icon: Icons.assignment_turned_in_rounded,
+                            title: 'لا توجد طلبات معلقة',
+                            subtitle: 'جميع طلبات ترقية المندوبين والمشرفين مراجعة ومحدثة حالياً',
+                          )
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: _requests.length,
                           itemBuilder: (context, index) {
                             final req = _requests[index];
                             final isPending = req['status'] == 'pending';
@@ -710,6 +726,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             );
                           },
                         ),
+              ],
             ],
           ),
         ),
