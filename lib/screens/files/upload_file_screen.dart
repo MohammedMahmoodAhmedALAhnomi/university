@@ -105,14 +105,28 @@ class _UploadFileScreenState extends State<UploadFileScreen> {
           res['data']['courses'] != null) {
         if (mounted) {
           setState(() {
-            _courses = res['data']['courses'] as List;
+            final allCourses = res['data']['courses'] as List;
+            final user = Provider.of<AuthProvider>(context, listen: false).user;
+
+            // Restrict courses list for Representatives to ONLY courses belonging to their assigned level
+            final levelId = user?.managedLevelId;
+            if (user != null && user.role == 'manager' && levelId != null) {
+              _courses = allCourses.where((c) => (c['level_id'] == levelId || c['level_id'] == null)).toList();
+            } else {
+              _courses = allCourses;
+            }
+
             if (_selectedCourseId != null) {
               final exists = _courses.any((c) => c['id'] == _selectedCourseId);
               if (!exists && _courses.isNotEmpty) {
                 _selectedCourseId = _courses.first['id'];
+              } else if (!exists) {
+                _selectedCourseId = null;
               }
             } else if (_courses.isNotEmpty) {
               _selectedCourseId = _courses.first['id'];
+            } else {
+              _selectedCourseId = null;
             }
           });
         }
