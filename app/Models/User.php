@@ -19,6 +19,12 @@ class User extends Model
         try {
             Database::raw("ALTER TABLE users ADD COLUMN avatar VARCHAR(500) NULL AFTER google_id");
         } catch (\Throwable $e) {}
+        try {
+            Database::raw("ALTER TABLE users MODIFY COLUMN role VARCHAR(50) NOT NULL DEFAULT 'student'");
+        } catch (\Throwable $e) {}
+        try {
+            Database::raw("ALTER TABLE join_requests MODIFY COLUMN account_type VARCHAR(50) NOT NULL DEFAULT 'representative'");
+        } catch (\Throwable $e) {}
         self::$migrated = true;
     }
 
@@ -41,6 +47,7 @@ class User extends Model
 
     public static function getFilteredUsers(?string $search = null, ?string $role = null, ?int $scopedMajorId = null): array
     {
+        self::ensureColumns();
         $where = ["u.id != 1"]; // Protect primary super admin
         $params = [];
 

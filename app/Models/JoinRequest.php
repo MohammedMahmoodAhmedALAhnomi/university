@@ -62,6 +62,7 @@ class JoinRequest extends Model
             $req = Database::fetch("SELECT * FROM join_requests WHERE id = ?", [$requestId]);
             if (!$req) return false;
 
+            User::ensureColumns();
             $targetRole = ($req->account_type === 'major_admin') ? 'major_admin' : 'manager';
 
             // Update User Account Role & Scope safely

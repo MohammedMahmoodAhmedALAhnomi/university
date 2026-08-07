@@ -139,6 +139,7 @@ class UserController extends Controller
             return;
         }
 
+        User::ensureColumns();
         $data['password'] = User::hashPassword($data['password']);
         $userId = User::create($data);
         log_activity('create', 'users', $userId, 'إضافة مستخدم جديد: ' . $data['full_name']);
@@ -305,6 +306,7 @@ class UserController extends Controller
             $data['password'] = User::hashPassword($password);
         }
 
+        User::ensureColumns();
         User::updateRecord($id, $data);
         log_activity('update', 'users', $id, 'تحديث المستخدم: ' . $data['full_name']);
         flash('success', 'تم تحديث حساب ودور المستخدم بنجاح');
