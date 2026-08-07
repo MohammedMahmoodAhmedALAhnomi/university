@@ -50,6 +50,7 @@ $router = new \App\Config\Router();
 
 $router->registerMiddleware('Auth', \App\Middleware\Auth::class);
 $router->registerMiddleware('Admin', \App\Middleware\Admin::class);
+$router->registerMiddleware('AdminAccess', \App\Middleware\AdminAccess::class);
 
 $uri = $_SERVER['REQUEST_URI'];
 $method = $_SERVER['REQUEST_METHOD'];
