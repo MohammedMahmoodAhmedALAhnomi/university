@@ -83,13 +83,6 @@
                         ?>
                             <span class="badge bg-danger">+<?php echo $badgeCount; ?></span>
                         <?php endif; ?>
-                    </a>
-                </li>
-                <li class="sidebar-li">
-                    <a class="sidebar-a <?php echo is_active_route('/admin/schedule') ? 'active' : ''; ?>" href="<?php echo url('/admin/schedule'); ?>">
-                        <i class="fa-solid fa-calendar-alt me-2 text-success"></i>
-                        <span>الجداول والأمتحانات</span>
-                    </a>
                 </li>
                 <?php if (isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['admin', 'major_admin'])): ?>
                 <li class="sidebar-li">

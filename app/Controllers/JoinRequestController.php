@@ -105,30 +105,62 @@ class JoinRequestController extends Controller
         ]);
     }
 
-    // Super Admin: List all requests
+    private function canManage(): bool
+    {
+        $role = $_SESSION['user_role'] ?? '';
+        return $role === 'admin' || $role === 'major_admin';
+    }
+
     public function adminIndex(): void
     {
-        $requests = JoinRequest::getAllWithDetails();
+        if (!$this->canManage()) {
+            flash('error', 'لا تملك صلاحية الوصول');
+            redirect(url('/admin/courses'));
+        }
+
+        $role = $_SESSION['user_role'] ?? '';
+        $managedMajorId = get_managed_major_id();
+
+        if ($role === 'major_admin' && $managedMajorId) {
+            $requests = JoinRequest::getAllWithDetails($managedMajorId);
+        } else {
+            $requests = JoinRequest::getAllWithDetails();
+        }
+
         $this->view('admin/requests/index', [
             'requests' => $requests
         ]);
     }
 
-    // Super Admin: Approve request
     public function approve(): void
     {
+        if (!$this->canManage()) {
+            flash('error', 'لا تملك صلاحية الوصول');
+            redirect(url('/admin/courses'));
+        }
         if (!verify_csrf()) {
             flash('error', 'طلب غير صالح أو انتهت مهلة الجلسة');
             redirect(url('/admin/requests'));
         }
 
         $id = (int)$this->getParam('id');
-        $req = \App\Config\Database::fetch("SELECT user_id FROM join_requests WHERE id = ?", [$id]);
+        $req = \App\Config\Database::fetch("SELECT * FROM join_requests WHERE id = ?", [$id]);
+
+        if (!$req) {
+            flash('error', 'الطلب غير موجود');
+            redirect(url('/admin/requests'));
+        }
+
+        $role = $_SESSION['user_role'] ?? '';
+        $managedMajorId = get_managed_major_id();
+
+        if ($role === 'major_admin' && $managedMajorId && (int)$req->major_id !== (int)$managedMajorId) {
+            flash('error', 'لا يمكنك الموافقة على طلبات في تخصص آخر');
+            redirect(url('/admin/requests'));
+        }
 
         if (JoinRequest::approve($id)) {
-            if ($req) {
-                Notification::send((int)$req->user_id, 'تمت الموافقة على طلبك 🎉', 'تمت الموافقة على طلب الانضمام وتفعيل صلاحياتك بنجاح. أهلاً بك في لوحة التحكم!', 'success', url('/admin/dashboard'));
-            }
+            Notification::send((int)$req->user_id, 'تمت الموافقة على طلبك 🎉', 'تمت الموافقة على طلب الانضمام وتفعيل صلاحياتك بنجاح. أهلاً بك في لوحة التحكم!', 'success', url('/admin/dashboard'));
             log_activity('update', 'join_requests', $id, 'الموافقة على طلب الانضمام رقم ' . $id);
             flash('success', 'تمت الموافقة على الطلب وتعيين الصلاحيات بنجاح');
         } else {
@@ -137,21 +169,35 @@ class JoinRequestController extends Controller
         redirect(url('/admin/requests'));
     }
 
-    // Super Admin: Reject request
     public function reject(): void
     {
+        if (!$this->canManage()) {
+            flash('error', 'لا تملك صلاحية الوصول');
+            redirect(url('/admin/courses'));
+        }
         if (!verify_csrf()) {
             flash('error', 'طلب غير صالح أو انتهت مهلة الجلسة');
             redirect(url('/admin/requests'));
         }
 
         $id = (int)$this->getParam('id');
-        $req = \App\Config\Database::fetch("SELECT user_id FROM join_requests WHERE id = ?", [$id]);
+        $req = \App\Config\Database::fetch("SELECT * FROM join_requests WHERE id = ?", [$id]);
+
+        if (!$req) {
+            flash('error', 'الطلب غير موجود');
+            redirect(url('/admin/requests'));
+        }
+
+        $role = $_SESSION['user_role'] ?? '';
+        $managedMajorId = get_managed_major_id();
+
+        if ($role === 'major_admin' && $managedMajorId && (int)$req->major_id !== (int)$managedMajorId) {
+            flash('error', 'لا يمكنك رفض طلبات في تخصص آخر');
+            redirect(url('/admin/requests'));
+        }
 
         if (JoinRequest::reject($id)) {
-            if ($req) {
-                Notification::send((int)$req->user_id, 'نتيجة طلب الانضمام ❌', 'نأسف، تم رفض طلب الانضمام الخاص بك.', 'danger', url('/request-role'));
-            }
+            Notification::send((int)$req->user_id, 'نتيجة طلب الانضمام ❌', 'نأسف، تم رفض طلب الانضمام الخاص بك.', 'danger', url('/request-role'));
             log_activity('update', 'join_requests', $id, 'رفض طلب الانضمام رقم ' . $id);
             flash('success', 'تم رفض طلب الانضمام');
         } else {

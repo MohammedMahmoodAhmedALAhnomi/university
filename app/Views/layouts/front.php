@@ -126,12 +126,6 @@
                                 <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="<?php echo url('/student/gpa-calculator'); ?>">
                                     <i class="fas fa-calculator text-primary"></i> حاسبة المعدل (GPA)
                                 </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="<?php echo url('/student/schedule'); ?>">
-                                    <i class="fas fa-calendar-alt text-success"></i> جدول المحاضرات والامتحانات
-                                </a>
-                            </li>
                             <li>
                                 <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="<?php echo url('/student/bookmarks'); ?>">
                                     <i class="fas fa-bookmark text-warning"></i> الملفات المحفوظة

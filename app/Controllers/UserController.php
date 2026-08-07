@@ -65,14 +65,29 @@ class UserController extends Controller
             redirect(url('/admin/users'));
         }
 
-        $requestedRole = $this->postParam('role', 'student');
         $currentRole = $_SESSION['user_role'] ?? '';
+        $currentUserId = $_SESSION['user_id'] ?? 0;
+        $scopedMajorId = null;
 
-        if ($currentRole !== 'admin' && $requestedRole === 'admin') {
-            $requestedRole = 'manager';
+        if ($currentRole === 'major_admin') {
+            $currentUser = User::find($currentUserId);
+            $scopedMajorId = $currentUser ? ($currentUser->managed_major_id ?: $currentUser->major_id) : null;
         }
 
-        $majorId = $this->postParam('major_id', '');
+        $requestedRole = $this->postParam('role', 'manager');
+
+        if ($currentRole === 'major_admin') {
+            if ($requestedRole === 'admin' || $requestedRole === 'major_admin') {
+                $requestedRole = 'manager';
+            }
+            $majorId = $scopedMajorId;
+        } else {
+            $majorId = $this->postParam('major_id', '');
+            if ($currentRole !== 'admin' && $requestedRole === 'admin') {
+                $requestedRole = 'manager';
+            }
+        }
+
         $levelId = $this->postParam('managed_level_id', '');
 
         $data = [
@@ -102,6 +117,8 @@ class UserController extends Controller
                 'data' => $data,
                 'majors' => $majors,
                 'levels' => $levels,
+                'currentRole' => $currentRole,
+                'scopedMajorId' => $scopedMajorId,
             ]);
             return;
         }
@@ -110,12 +127,14 @@ class UserController extends Controller
         if ($existingUser) {
             flash('error', 'البريد الإلكتروني مستخدم بالفعل');
             $majors = Major::getActive();
-            $levels = Level::getAll();
+            $levels = Level::getActive();
             $this->view('admin/users/create', [
                 'errors' => ['email' => ['البريد الإلكتروني مستخدم بالفعل']],
                 'data' => $data,
                 'majors' => $majors,
                 'levels' => $levels,
+                'currentRole' => $currentRole,
+                'scopedMajorId' => $scopedMajorId,
             ]);
             return;
         }
@@ -147,9 +166,29 @@ class UserController extends Controller
             redirect(url('/admin/users'));
         }
 
+        $currentRole = $_SESSION['user_role'] ?? '';
+        $currentUserId = $_SESSION['user_id'] ?? 0;
+        $scopedMajorId = null;
+
+        if ($currentRole === 'major_admin') {
+            $currentUser = User::find($currentUserId);
+            $scopedMajorId = $currentUser ? ($currentUser->managed_major_id ?: $currentUser->major_id) : null;
+            $userMajor = $user->managed_major_id ?: $user->major_id;
+            if ((int)$userMajor !== (int)$scopedMajorId) {
+                flash('error', 'لا يمكنك تعديل مستخدم ينتمي لتخصص آخر');
+                redirect(url('/admin/users'));
+            }
+        }
+
         $majors = Major::getActive();
         $levels = Level::getActive();
-        $this->view('admin/users/edit', ['user' => $user, 'majors' => $majors, 'levels' => $levels]);
+        $this->view('admin/users/edit', [
+            'user' => $user,
+            'majors' => $majors,
+            'levels' => $levels,
+            'currentRole' => $currentRole,
+            'scopedMajorId' => $scopedMajorId,
+        ]);
     }
 
     public function update($id = 0): void
@@ -176,14 +215,34 @@ class UserController extends Controller
             redirect(url('/admin/users'));
         }
 
-        $requestedRole = $this->postParam('role', $user->role);
         $currentRole = $_SESSION['user_role'] ?? '';
+        $currentUserId = $_SESSION['user_id'] ?? 0;
+        $scopedMajorId = null;
 
-        if ($currentRole !== 'admin' && $requestedRole === 'admin') {
-            $requestedRole = $user->role;
+        if ($currentRole === 'major_admin') {
+            $currentUser = User::find($currentUserId);
+            $scopedMajorId = $currentUser ? ($currentUser->managed_major_id ?: $currentUser->major_id) : null;
+            $userMajor = $user->managed_major_id ?: $user->major_id;
+            if ((int)$userMajor !== (int)$scopedMajorId) {
+                flash('error', 'لا يمكنك تعديل مستخدم ينتمي لتخصص آخر');
+                redirect(url('/admin/users'));
+            }
         }
 
-        $majorId = $this->postParam('major_id', $user->major_id);
+        $requestedRole = $this->postParam('role', $user->role);
+
+        if ($currentRole === 'major_admin') {
+            if ($requestedRole === 'admin' || $requestedRole === 'major_admin') {
+                $requestedRole = $user->role;
+            }
+            $majorId = $scopedMajorId;
+        } else {
+            $majorId = $this->postParam('major_id', $user->major_id);
+            if ($currentRole !== 'admin' && $requestedRole === 'admin') {
+                $requestedRole = $user->role;
+            }
+        }
+
         $levelId = $this->postParam('managed_level_id', $user->managed_level_id);
 
         $data = [
@@ -205,7 +264,7 @@ class UserController extends Controller
         $password = $this->postParam('password', '');
         if (!empty($password)) {
             if (mb_strlen($password) < 8) {
-                $errors['password'][] = 'حقل password يجب أن يكون 8 حرفًا على الأقل';
+                $errors['password'][] = 'حقل كلمة المرور يجب أن يكون 8 حروف على الأقل';
             }
         }
 
@@ -218,6 +277,8 @@ class UserController extends Controller
                 'errors' => $errors,
                 'majors' => $majors,
                 'levels' => $levels,
+                'currentRole' => $currentRole,
+                'scopedMajorId' => $scopedMajorId,
             ]);
             return;
         }
@@ -233,6 +294,8 @@ class UserController extends Controller
                     'errors' => ['email' => ['البريد الإلكتروني مستخدم بالفعل']],
                     'majors' => $majors,
                     'levels' => $levels,
+                    'currentRole' => $currentRole,
+                    'scopedMajorId' => $scopedMajorId,
                 ]);
                 return;
             }
@@ -275,6 +338,19 @@ class UserController extends Controller
         if (!$user) {
             flash('error', 'المستخدم غير موجود');
             redirect(url('/admin/users'));
+        }
+
+        $currentRole = $_SESSION['user_role'] ?? '';
+        $currentUserId = $_SESSION['user_id'] ?? 0;
+
+        if ($currentRole === 'major_admin') {
+            $currentUser = User::find($currentUserId);
+            $scopedMajorId = $currentUser ? ($currentUser->managed_major_id ?: $currentUser->major_id) : null;
+            $userMajor = $user->managed_major_id ?: $user->major_id;
+            if ((int)$userMajor !== (int)$scopedMajorId) {
+                flash('error', 'لا يمكنك حذف مستخدم ينتمي لتخصص آخر');
+                redirect(url('/admin/users'));
+            }
         }
 
         User::deleteRecord($id);

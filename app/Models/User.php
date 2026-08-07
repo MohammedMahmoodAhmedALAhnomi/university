@@ -87,12 +87,30 @@ class User extends Model
 
     public static function hashPassword(string $password): string
     {
-        return password_hash($password, PASSWORD_DEFAULT);
+        return password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
     }
 
-    public static function verifyPassword(string $password, string $hash): bool
+    public static function verifyPassword(string $password, string $hash, ?int $userId = null): bool
     {
-        return password_verify($password, $hash);
+        if (password_verify($password, $hash)) {
+            // Rehash if algorithm/cost parameters changed
+            if ($userId && password_needs_rehash($hash, PASSWORD_BCRYPT, ['cost' => 12])) {
+                $newHash = self::hashPassword($password);
+                Database::raw("UPDATE users SET password = ? WHERE id = ?", [$newHash, $userId]);
+            }
+            return true;
+        }
+
+        // Fallback for legacy plaintext password & auto-encrypt to secure bcrypt hash
+        if ($password === $hash) {
+            if ($userId) {
+                $newHash = self::hashPassword($password);
+                Database::raw("UPDATE users SET password = ? WHERE id = ?", [$newHash, $userId]);
+            }
+            return true;
+        }
+
+        return false;
     }
 
     public static function getCountByRole(): array

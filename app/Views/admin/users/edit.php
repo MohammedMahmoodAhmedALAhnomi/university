@@ -56,14 +56,23 @@
 
                 <div class="col-md-4">
                     <label for="major_id" class="form-label fw-bold">التخصص التابع له</label>
-                    <select class="form-select" id="major_id" name="major_id">
-                        <option value="">-- اختر التخصص --</option>
-                        <?php foreach ($majors as $major): ?>
-                            <option value="<?php echo escape($major->id); ?>" <?php echo (old('major_id', $user->managed_major_id ?? $user->major_id) == $major->id) ? 'selected' : ''; ?>>
-                                <?php echo escape($major->name); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+                    <?php if (($_SESSION['user_role'] ?? '') === 'major_admin' && !empty($scopedMajorId)): ?>
+                        <?php 
+                            $myMajor = array_filter($majors, fn($m) => $m->id == $scopedMajorId);
+                            $myMajorName = !empty($myMajor) ? reset($myMajor)->name : 'تخصصك المحجوز';
+                        ?>
+                        <input type="hidden" name="major_id" value="<?php echo escape($scopedMajorId); ?>">
+                        <input type="text" class="form-control" value="<?php echo escape($myMajorName); ?>" disabled readonly>
+                    <?php else: ?>
+                        <select class="form-select" id="major_id" name="major_id">
+                            <option value="">-- اختر التخصص --</option>
+                            <?php foreach ($majors as $major): ?>
+                                <option value="<?php echo escape($major->id); ?>" <?php echo (old('major_id', $user->managed_major_id ?? $user->major_id) == $major->id) ? 'selected' : ''; ?>>
+                                    <?php echo escape($major->name); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    <?php endif; ?>
                 </div>
 
                 <div class="col-md-4">

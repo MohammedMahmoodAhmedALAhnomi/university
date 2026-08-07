@@ -38,7 +38,7 @@ class AuthController extends Controller
 
         $user = User::findByEmail($email);
 
-        if (!$user || !User::verifyPassword($password, $user->password)) {
+        if (!$user || !User::verifyPassword($password, $user->password, (int)$user->id)) {
             flash('error', 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
             redirect(url('/login'));
         }
@@ -192,7 +192,6 @@ class AuthController extends Controller
         } else {
             redirect(url('/admin/courses'));
         }
-
     }
 
     public function logout(): void
@@ -202,6 +201,8 @@ class AuthController extends Controller
         }
         $_SESSION = [];
         session_destroy();
-        redirect(url('/'));
+        session_start();
+        flash('success', 'تم تسجيل الخروج بنجاح.');
+        redirect(url('/login'));
     }
 }

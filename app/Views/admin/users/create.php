@@ -37,27 +37,39 @@
                     <input type="text" class="form-control" id="phone" name="phone" value="<?php echo escape(old('phone')); ?>">
                 </div>
                 <div class="col-md-4">
-                    <label for="role" class="form-label">الدور <span class="text-danger">*</span></label>
+                    <label for="role" class="form-label">الدور والترقية <span class="text-danger">*</span></label>
                     <select class="form-select" id="role" name="role" required>
-                        <option value="manager" <?php echo old('role') === 'manager' ? 'selected' : ''; ?>>مسؤول</option>
-                        <option value="admin" <?php echo old('role') === 'admin' ? 'selected' : ''; ?>>مدير</option>
+                        <option value="manager" <?php echo old('role') === 'manager' ? 'selected' : ''; ?>>مندوب (ممثل الدفعة)</option>
+                        <?php if (($_SESSION['user_role'] ?? '') === 'admin'): ?>
+                            <option value="major_admin" <?php echo old('role') === 'major_admin' ? 'selected' : ''; ?>>مسؤول تخصص (مدير تخصص محدد)</option>
+                            <option value="admin" <?php echo old('role') === 'admin' ? 'selected' : ''; ?>>مدير عام بالنظام (Admin)</option>
+                        <?php endif; ?>
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <label for="major_id" class="form-label">التخصص</label>
-                    <select class="form-select" id="major_id" name="major_id">
-                        <option value="">بدون تخصص</option>
-                        <?php foreach ($majors as $major): ?>
-                            <option value="<?php echo escape($major->id); ?>" <?php echo old('major_id') == $major->id ? 'selected' : ''; ?>>
-                                <?php echo escape($major->name); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+                    <label for="major_id" class="form-label">التخصص التابع له <span class="text-danger">*</span></label>
+                    <?php if (($_SESSION['user_role'] ?? '') === 'major_admin' && !empty($scopedMajorId)): ?>
+                        <?php 
+                            $myMajor = array_filter($majors, fn($m) => $m->id == $scopedMajorId);
+                            $myMajorName = !empty($myMajor) ? reset($myMajor)->name : 'تخصصك المحجوز';
+                        ?>
+                        <input type="hidden" name="major_id" value="<?php echo escape($scopedMajorId); ?>">
+                        <input type="text" class="form-control" value="<?php echo escape($myMajorName); ?>" disabled readonly>
+                    <?php else: ?>
+                        <select class="form-select" id="major_id" name="major_id">
+                            <option value="">بدون تخصص (إداري عام)</option>
+                            <?php foreach ($majors as $major): ?>
+                                <option value="<?php echo escape($major->id); ?>" <?php echo old('major_id') == $major->id ? 'selected' : ''; ?>>
+                                    <?php echo escape($major->name); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    <?php endif; ?>
                 </div>
                 <div class="col-md-4">
                     <div class="form-check form-switch mt-4">
                         <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" <?php echo (old('is_active') !== '0' && old('is_active') !== 0) ? 'checked' : ''; ?>>
-                        <label class="form-check-label" for="is_active">نشط</label>
+                        <label class="form-check-label" for="is_active">تفعيل الحساب (نشط)</label>
                     </div>
                 </div>
                 <div class="col-12">

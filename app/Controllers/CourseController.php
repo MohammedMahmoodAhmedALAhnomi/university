@@ -158,11 +158,11 @@ class CourseController extends Controller
 
         $managedLevelId = get_managed_level_id();
         $managedMajorId = get_managed_major_id();
-        if ($managedLevelId && $managedMajorId && ($course->level_id != $managedLevelId || $course->major_id != $managedMajorId)) {
-            flash('error', 'لا يمكنك تعديل هذه المادة');
+        if ($managedMajorId && (int)$course->major_id !== (int)$managedMajorId) {
+            flash('error', 'لا يمكنك تعديل مادة في تخصص آخر');
             redirect(url('/admin/courses'));
         }
-        if ($managedLevelId && !$managedMajorId && $course->level_id != $managedLevelId) {
+        if ($managedLevelId && (int)$course->level_id !== (int)$managedLevelId) {
             flash('error', 'لا يمكنك تعديل هذه المادة');
             redirect(url('/admin/courses'));
         }
@@ -196,11 +196,11 @@ class CourseController extends Controller
 
         $managedLevelId = get_managed_level_id();
         $managedMajorId = get_managed_major_id();
-        if ($managedLevelId && $managedMajorId && ($course->level_id != $managedLevelId || $course->major_id != $managedMajorId)) {
-            flash('error', 'لا يمكنك تعديل هذه المادة');
+        if ($managedMajorId && (int)$course->major_id !== (int)$managedMajorId) {
+            flash('error', 'لا يمكنك تعديل مادة في تخصص آخر');
             redirect(url('/admin/courses'));
         }
-        if ($managedLevelId && !$managedMajorId && $course->level_id != $managedLevelId) {
+        if ($managedLevelId && (int)$course->level_id !== (int)$managedLevelId) {
             flash('error', 'لا يمكنك تعديل هذه المادة');
             redirect(url('/admin/courses'));
         }
@@ -227,6 +227,7 @@ class CourseController extends Controller
             $this->view('admin/courses/edit', [
                 'course' => $course,
                 'errors' => $errors,
+                'data' => $data,
                 'majors' => $majors,
                 'levels' => $levels,
                 'semesters' => $semesters,
@@ -259,11 +260,11 @@ class CourseController extends Controller
 
         $managedLevelId = get_managed_level_id();
         $managedMajorId = get_managed_major_id();
-        if ($managedLevelId && $managedMajorId && ($course->level_id != $managedLevelId || $course->major_id != $managedMajorId)) {
-            flash('error', 'لا يمكنك حذف هذه المادة');
+        if ($managedMajorId && (int)$course->major_id !== (int)$managedMajorId) {
+            flash('error', 'لا يمكنك حذف مادة في تخصص آخر');
             redirect(url('/admin/courses'));
         }
-        if ($managedLevelId && !$managedMajorId && $course->level_id != $managedLevelId) {
+        if ($managedLevelId && (int)$course->level_id !== (int)$managedLevelId) {
             flash('error', 'لا يمكنك حذف هذه المادة');
             redirect(url('/admin/courses'));
         }

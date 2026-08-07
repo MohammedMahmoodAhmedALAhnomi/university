@@ -17,7 +17,8 @@ class DashboardController extends Controller
 {
     public function index(): void
     {
-        if (($_SESSION['user_role'] ?? '') !== 'admin') {
+        $userRole = $_SESSION['user_role'] ?? '';
+        if (!in_array($userRole, ['admin', 'major_admin'])) {
             redirect(url('/admin/courses'));
             return;
         }

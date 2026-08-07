@@ -60,7 +60,7 @@ class ApiController extends Controller
         }
 
         $user = User::findByEmail($email);
-        if (!$user || !User::verifyPassword($password, $user->password)) {
+        if (!$user || !User::verifyPassword($password, $user->password, (int)$user->id)) {
             $this->jsonResponse(['status' => 'error', 'message' => 'البريد الإلكتروني أو كلمة المرور غير صحيحة'], 401);
         }
 
@@ -1297,10 +1297,21 @@ class ApiController extends Controller
             $semesterId = !empty($input['semester_id']) ? (int)$input['semester_id'] : 1;
             $description = trim($input['description'] ?? '');
 
-            if ($userId && !$levelId) {
+            if ($userId) {
                 $user = \App\Models\User::findById($userId);
-                if ($user && $user->role === 'manager' && $user->managed_level_id) {
-                    $levelId = (int)$user->managed_level_id;
+                if ($user) {
+                    if ($user->role === 'manager') {
+                        if ($user->managed_major_id) {
+                            $majorId = (int)$user->managed_major_id;
+                        }
+                        if ($user->managed_level_id) {
+                            $levelId = (int)$user->managed_level_id;
+                        }
+                    } elseif ($user->role === 'major_admin') {
+                        if ($user->managed_major_id) {
+                            $majorId = (int)$user->managed_major_id;
+                        }
+                    }
                 }
             }
 
