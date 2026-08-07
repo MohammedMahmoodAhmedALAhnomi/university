@@ -112,46 +112,46 @@
                                 <td>
                                     <?php $r = $user->role ?? 'student'; ?>
                                     <?php if ($isOwnerRow): ?>
-                                        <span class="badge bg-warning text-dark border border-warning rounded-pill px-3 py-2 fw-bold shadow-sm">
-                                            <i class="fas fa-crown ms-1"></i>مالك النظام الشامل
+                                        <span class="badge bg-warning text-dark border border-dark rounded-pill px-3 py-2 fw-bold shadow-sm" style="font-size: 0.85rem;">
+                                            <i class="fas fa-crown ms-1"></i>👑 مالك النظام الشامل
                                         </span>
                                     <?php elseif ($r === 'admin'): ?>
-                                        <span class="badge bg-danger bg-opacity-15 text-danger border border-danger border-opacity-25 rounded-pill px-3 py-2">
-                                            <i class="fas fa-user-shield ms-1"></i>مدير إداري
+                                        <span class="badge bg-danger text-white rounded-pill px-3 py-2 fw-bold shadow-sm" style="font-size: 0.85rem;">
+                                            <i class="fas fa-user-shield ms-1"></i>👑 مدير عام بالنظام
                                         </span>
                                     <?php elseif ($r === 'major_admin'): ?>
-                                        <span class="badge bg-primary bg-opacity-15 text-primary border border-primary border-opacity-25 rounded-pill px-3 py-2">
-                                            <i class="fas fa-user-shield ms-1"></i>مسؤول تخصص
+                                        <span class="badge bg-primary text-white rounded-pill px-3 py-2 fw-bold shadow-sm" style="font-size: 0.85rem;">
+                                            <i class="fas fa-user-shield ms-1"></i>🛡️ مسؤول تخصص
                                         </span>
                                     <?php elseif ($r === 'manager'): ?>
-                                        <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25 rounded-pill px-3 py-2">
-                                            <i class="fas fa-award ms-1"></i>مندوب مستوى
+                                        <span class="badge bg-success text-white rounded-pill px-3 py-2 fw-bold shadow-sm" style="font-size: 0.85rem;">
+                                            <i class="fas fa-award ms-1"></i>🎖️ مندوب مستوى
                                         </span>
                                     <?php else: ?>
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-3 py-2">
-                                            <i class="fas fa-user ms-1"></i>طالب / زائر
+                                        <span class="badge bg-secondary text-white rounded-pill px-3 py-2 fw-bold shadow-sm" style="font-size: 0.85rem;">
+                                            <i class="fas fa-user ms-1"></i>👤 طالب / زائر
                                         </span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php if (!empty($user->major_name)): ?>
-                                        <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3 py-2"><i class="fas fa-graduation-cap ms-1"></i><?php echo escape($user->major_name); ?></span>
+                                        <span class="badge bg-info text-dark rounded-pill px-3 py-2 fw-bold"><i class="fas fa-graduation-cap ms-1"></i><?php echo escape($user->major_name); ?></span>
                                     <?php else: ?>
                                         <span class="text-muted small">-</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php if (!empty($user->level_name)): ?>
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2"><i class="fas fa-layer-group ms-1"></i><?php echo escape($user->level_name); ?></span>
+                                        <span class="badge bg-light text-dark border rounded-pill px-3 py-2 fw-bold"><i class="fas fa-layer-group ms-1"></i><?php echo escape($user->level_name); ?></span>
                                     <?php else: ?>
                                         <span class="text-muted small">-</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php if ($user->is_active): ?>
-                                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-1"><i class="fas fa-check-circle ms-1"></i>نشط</span>
+                                        <span class="badge bg-success text-white rounded-pill px-3 py-2 fw-bold"><i class="fas fa-check-circle ms-1"></i>نشط</span>
                                     <?php else: ?>
-                                        <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2 py-1"><i class="fas fa-times-circle ms-1"></i>معطل</span>
+                                        <span class="badge bg-danger text-white rounded-pill px-3 py-2 fw-bold"><i class="fas fa-times-circle ms-1"></i>معطل</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>

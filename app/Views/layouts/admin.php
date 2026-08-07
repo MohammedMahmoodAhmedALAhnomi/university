@@ -83,6 +83,7 @@
                         ?>
                             <span class="badge bg-danger">+<?php echo $badgeCount; ?></span>
                         <?php endif; ?>
+                    </a>
                 </li>
                 <?php if (isset($_SESSION['user_role']) && in_array($_SESSION['user_role'], ['admin', 'major_admin'])): ?>
                 <li class="sidebar-li">
