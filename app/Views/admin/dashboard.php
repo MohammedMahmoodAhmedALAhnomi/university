@@ -284,10 +284,17 @@
                                         <td><small class="text-muted"><?php echo escape($file->course_name ?? '-'); ?></small></td>
                                         <td><small class="text-muted"><?php echo escape($file->doctor_name ?? '-'); ?></small></td>
                                         <td>
-                                            <span class="badge rounded-pill px-3 <?php
+                                            <span class="badge rounded-pill px-3 py-1 <?php
                                                 $t = $file->file_type ?? '';
-                                                $lbls = ['lecture' => 'محاضرة', 'summary' => 'ملخص', 'model' => 'نماذج', 'reference' => 'مرجع'];
-                                                $cls = $t === 'summary' ? 'bg-success bg-opacity-10 text-success' : ($t === 'model' ? 'bg-warning bg-opacity-10 text-warning' : ($t === 'reference' ? 'bg-secondary bg-opacity-10 text-secondary' : 'bg-info bg-opacity-10 text-info'));
+                                                $lbls = ['lecture' => 'محاضرة', 'summary' => 'ملخص', 'assignment' => 'تكليف', 'model' => 'نماذج', 'reference' => 'مرجع'];
+                                                $cls = match($t) {
+                                                    'summary' => 'bg-success text-white',
+                                                    'assignment' => 'bg-warning text-dark border border-warning fw-bold',
+                                                    'model' => 'bg-info text-dark',
+                                                    'reference' => 'bg-secondary text-white',
+                                                    default => 'bg-primary text-white',
+                                                };
+                                                echo $cls;
                                             ?>"><?php echo escape($lbls[$t] ?? $t); ?></span>
                                         </td>
                                         <td class="pe-3"><small class="text-muted"><?php echo escape(format_date($file->created_at ?? '', 'Y-m-d')); ?></small></td>

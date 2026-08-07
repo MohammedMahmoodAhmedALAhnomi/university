@@ -140,6 +140,73 @@ class ApiController extends Controller
         ]);
     }
 
+    public function googleLogin(): void
+    {
+        $input = $this->getJsonInput();
+        $email = trim($input['email'] ?? '');
+        $googleId = trim($input['google_id'] ?? '');
+        $name = trim($input['name'] ?? '');
+
+        if (empty($email)) {
+            $this->jsonResponse(['status' => 'error', 'message' => 'البريد الإلكتروني مطلوب'], 400);
+            return;
+        }
+
+        // Check if user exists
+        $user = User::findByEmail($email);
+
+        if ($user) {
+            // Update google_id if provided
+            if (!empty($googleId) && (empty($user->google_id) || $user->google_id !== $googleId)) {
+                $db = \App\Core\Database::getInstance();
+                $db->query("UPDATE users SET google_id = ? WHERE id = ?", [$googleId, $user->id]);
+            }
+
+            $token = base64_encode($user->id . ':' . hash('sha256', ($user->password ?? 'google_auth') . 'university_salt'));
+
+            $this->jsonResponse([
+                'status' => 'success',
+                'message' => 'تم تسجيل الدخول بنجاح',
+                'user' => [
+                    'id' => (int)$user->id,
+                    'full_name' => $user->full_name,
+                    'email' => $user->email,
+                    'phone' => $user->phone ?? '',
+                    'role' => $user->role,
+                    'major_id' => $user->major_id ? (int)$user->major_id : null,
+                ],
+                'token' => $token
+            ]);
+        } else {
+            // Create new user with Google info
+            $userId = User::create([
+                'full_name' => !empty($name) ? $name : explode('@', $email)[0],
+                'email' => $email,
+                'password' => password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT),
+                'google_id' => $googleId,
+                'role' => 'guest',
+                'is_active' => 1
+            ]);
+
+            $newUser = User::findById($userId);
+            $token = base64_encode($newUser->id . ':' . hash('sha256', ($newUser->password ?? 'google_auth') . 'university_salt'));
+
+            $this->jsonResponse([
+                'status' => 'success',
+                'message' => 'تم إنشاء حسابك بنجاح عبر Google',
+                'user' => [
+                    'id' => (int)$newUser->id,
+                    'full_name' => $newUser->full_name,
+                    'email' => $newUser->email,
+                    'phone' => $newUser->phone ?? '',
+                    'role' => $newUser->role,
+                    'major_id' => $newUser->major_id ? (int)$newUser->major_id : null,
+                ],
+                'token' => $token
+            ]);
+        }
+    }
+
     private function ensureSamplePdfFiles(): void
     {
         $uploadDir = __DIR__ . '/../../public/uploads/';
@@ -1358,10 +1425,10 @@ class ApiController extends Controller
             "SELECT u.*, m.name as major_name
              FROM users u
              LEFT JOIN majors m ON m.id = u.major_id
-             WHERE u.id != 1
              ORDER BY u.id DESC"
         );
         $data = array_map(function($u) {
+            $isOwner = \App\Models\User::isSystemOwner($u);
             return [
                 'id' => (int)$u->id,
                 'full_name' => $u->full_name,
@@ -1370,6 +1437,7 @@ class ApiController extends Controller
                 'role' => $u->role,
                 'major_name' => $u->major_name ?? 'غير محدد',
                 'is_active' => (int)$u->is_active === 1,
+                'is_owner' => $isOwner,
                 'created_at' => $u->created_at,
             ];
         }, $users);
@@ -1387,13 +1455,98 @@ class ApiController extends Controller
             return;
         }
 
-        if ($id === 1 || \App\Models\User::isSystemOwner($id)) {
+        $user = \App\Models\User::findById($id);
+        if ($user && \App\Models\User::isSystemOwner($user)) {
             $this->jsonResponse(['status' => 'error', 'message' => 'حساب مالك النظام الرئيسي محمي ولا يمكن تعديله أو تغيير دوره'], 403);
             return;
         }
 
         \App\Config\Database::raw("UPDATE users SET role = ? WHERE id = ?", [$role, $id]);
         $this->jsonResponse(['status' => 'success', 'message' => 'تم تحديث دور المستخدم بنجاح']);
+    }
+
+    public function googleLogin(): void
+    {
+        $input = $this->getJsonInput();
+        $email = strtolower(trim($input['email'] ?? ''));
+        $googleId = trim($input['google_id'] ?? '');
+        $fullName = trim($input['name'] ?? $email);
+
+        if (empty($email)) {
+            $this->jsonResponse(['status' => 'error', 'message' => 'البريد الإلكتروني من Google مطلوب'], 400);
+            return;
+        }
+
+        // Find or create user
+        $user = User::findByEmail($email);
+        if (!$user && !empty($googleId)) {
+            $user = User::findByGoogleId($googleId);
+        }
+
+        if (!$user) {
+            $userId = Database::insert('users', [
+                'full_name' => $fullName,
+                'email' => $email,
+                'google_id' => $googleId,
+                'password' => User::hashPassword(bin2hex(random_bytes(10))),
+                'role' => 'guest',
+                'is_active' => 1,
+            ]);
+            $user = User::find($userId);
+        } else {
+            if (empty($user->google_id) && !empty($googleId)) {
+                Database::update('users', ['google_id' => $googleId], 'id = :id', ['id' => $user->id]);
+            }
+        }
+
+        if (!$user || !$user->is_active) {
+            $this->jsonResponse(['status' => 'error', 'message' => 'الحساب غير نشط، يرجى التواصل مع الإدارة'], 403);
+            return;
+        }
+
+        User::updateLastLogin($user->id);
+        log_activity('login', 'users', $user->id, 'تسجيل دخول بـ Google عبر التطبيق المحمول');
+
+        $secret = env('APP_SECRET', 'university_app_secret_2026');
+        $token = $user->id . ':' . hash_hmac('sha256', $user->id . '|' . $user->email . '|' . $user->password, $secret);
+
+        $this->jsonResponse([
+            'status' => 'success',
+            'message' => 'تم تسجيل الدخول بحساب Google بنجاح',
+            'token' => $token,
+            'user' => [
+                'id' => (int)$user->id,
+                'full_name' => $user->full_name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'phone' => $user->phone ?? '',
+                'major_id' => $user->major_id ? (int)$user->major_id : null,
+                'level_id' => $user->level_id ? (int)$user->level_id : null,
+                'managed_major_id' => $user->managed_major_id ? (int)$user->managed_major_id : null,
+                'managed_level_id' => $user->managed_level_id ? (int)$user->managed_level_id : null,
+            ]
+        ]);
+    }
+
+    public function adminSettings(): void
+    {
+        $settings = \App\Models\Setting::getAllGrouped();
+        $this->jsonResponse(['status' => 'success', 'data' => $settings]);
+    }
+
+    public function updateAdminSettings(): void
+    {
+        $input = $this->getJsonInput();
+        $settings = $input['settings'] ?? [];
+
+        if (is_array($settings)) {
+            foreach ($settings as $key => $val) {
+                if (in_array($key, ['logo_path', 'university_logo'], true)) continue;
+                \App\Models\Setting::set($key, (string)$val);
+            }
+        }
+
+        $this->jsonResponse(['status' => 'success', 'message' => 'تم تحديث الإعدادات بنجاح']);
     }
 }
 

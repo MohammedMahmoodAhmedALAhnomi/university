@@ -8,8 +8,8 @@ class GoogleAuthService
 {
     public static function getClientId(): ?string
     {
-        $id = Setting::get('google_client_id') ?: env('GOOGLE_CLIENT_ID');
-        return (!empty($id) && !str_contains($id, 'YOUR_')) ? trim($id) : null;
+        $id = Setting::get('google_client_id') ?: env('GOOGLE_CLIENT_ID', '370667576817-05dr9sj6geb4bf0ini4r9nq8l0bdnfqm.apps.googleusercontent.com');
+        return (!empty($id) && !str_contains($id, 'YOUR_')) ? trim($id) : '370667576817-05dr9sj6geb4bf0ini4r9nq8l0bdnfqm.apps.googleusercontent.com';
     }
 
     public static function getClientSecret(): ?string
