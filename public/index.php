@@ -29,12 +29,38 @@ if (file_exists($dotenv)) {
     }
 }
 
+ini_set('session.gc_maxlifetime', 31536000);
 if (session_status() === PHP_SESSION_NONE) {
     session_start([
+        'cookie_lifetime' => 31536000,
         'cookie_httponly' => true,
         'cookie_samesite' => 'Lax',
         'use_strict_mode' => true,
     ]);
+}
+
+// Auto-restore session from persistent remember token if session expired or browser restarted
+if (empty($_SESSION['user_id']) && !empty($_COOKIE['app_remember_token'])) {
+    $token = $_COOKIE['app_remember_token'];
+    if (str_contains($token, ':')) {
+        [$id, $hash] = explode(':', $token, 2);
+        $id = (int)$id;
+        if ($id > 0) {
+            $user = \App\Models\User::find($id);
+            if ($user && !empty($user->is_active)) {
+                $secret = env('APP_SECRET', 'university_app_secret_2026');
+                $expectedHash = hash_hmac('sha256', $user->id . '|' . $user->email . '|' . $user->password, $secret);
+                if (hash_equals($expectedHash, $hash)) {
+                    $_SESSION['user_id'] = $user->id;
+                    $_SESSION['user_name'] = $user->full_name;
+                    $_SESSION['user_role'] = $user->role;
+                    $_SESSION['user_email'] = $user->email;
+                    $_SESSION['managed_major_id'] = $user->managed_major_id ?? $user->major_id;
+                    $_SESSION['managed_level_id'] = $user->managed_level_id;
+                }
+            }
+        }
+    }
 }
 
 error_reporting(E_ALL);
