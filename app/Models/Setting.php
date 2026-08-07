@@ -60,12 +60,17 @@ class Setting extends Model
      */
     public static function getAllGrouped(): array
     {
+        // Delete logo_path and university_logo permanently if they exist in DB
+        try {
+            Database::raw("DELETE FROM settings WHERE setting_key IN ('logo_path', 'university_logo')");
+        } catch (\Throwable $e) {}
+
         // Seed Google OAuth keys safely if missing
         Database::raw("INSERT IGNORE INTO settings (setting_key, setting_value, setting_type, setting_group) 
                        VALUES ('google_client_id', '', 'text', 'Google OAuth (تسجيل الدخول بقوقل)'),
                               ('google_client_secret', '', 'text', 'Google OAuth (تسجيل الدخول بقوقل)')");
 
-        $rows = Database::fetchAll("SELECT * FROM settings ORDER BY setting_group, id");
+        $rows = Database::fetchAll("SELECT * FROM settings WHERE setting_key NOT IN ('logo_path', 'university_logo') ORDER BY setting_group, id");
         $grouped = [];
         foreach ($rows as $row) {
             static::$cache[$row->setting_key] = $row->setting_value;

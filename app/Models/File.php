@@ -8,9 +8,20 @@ use App\Config\Database;
 class File extends Model
 {
     protected static string $table = 'files';
+    private static bool $migrated = false;
+
+    public static function ensureColumns(): void
+    {
+        if (self::$migrated) return;
+        try {
+            Database::raw("ALTER TABLE files MODIFY COLUMN file_type VARCHAR(50) NOT NULL DEFAULT 'lecture'");
+        } catch (\Throwable $e) {}
+        self::$migrated = true;
+    }
 
     public static function getByCourse(int $courseId, string $sort = 'newest', int $page = 1, int $perPage = 20): array
     {
+        self::ensureColumns();
         $orderBy = match ($sort) {
             'downloads' => 'f.download_count DESC, f.created_at DESC',
             default => 'f.created_at DESC',

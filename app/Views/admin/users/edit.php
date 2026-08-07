@@ -42,16 +42,32 @@
                     <input type="text" class="form-control" id="phone" name="phone" value="<?php echo escape(old('phone', $user->phone ?? '')); ?>" placeholder="مثال: 771234567">
                 </div>
 
+                <?php if (!empty($isOwnerTarget)): ?>
+                    <div class="col-12">
+                        <div class="alert alert-warning border-warning d-flex align-items-center mb-2">
+                            <i class="fas fa-crown me-2 fs-4"></i>
+                            <div>
+                                <strong>حساب مالك النظام الرئيسي:</strong> أنت تقوم بتعديل حساب مالك النظام الرئيسي (mohammedalahnomi04@gmail.com). هذا الحساب محمي بصلاحية مدير عام دائماً وحالة نشطة.
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <div class="col-md-4">
                     <label for="role" class="form-label fw-bold">الدور في النظام <span class="text-danger">*</span></label>
-                    <select class="form-select border-primary" id="role" name="role" required>
-                        <option value="student" <?php echo (old('role', $user->role ?? '') === 'student' || old('role', $user->role ?? '') === 'guest') ? 'selected' : ''; ?>>👤 طالب / زائر عادي</option>
-                        <option value="manager" <?php echo (old('role', $user->role ?? '') === 'manager') ? 'selected' : ''; ?>>🎖️ مندوب مستوى ودفعة</option>
-                        <option value="major_admin" <?php echo (old('role', $user->role ?? '') === 'major_admin') ? 'selected' : ''; ?>>🛡️ مسؤول تخصص أكاديمي</option>
-                        <?php if (($_SESSION['user_role'] ?? '') === 'admin'): ?>
-                            <option value="admin" <?php echo (old('role', $user->role ?? '') === 'admin') ? 'selected' : ''; ?>>👑 مدير إداري / نظام شامل</option>
-                        <?php endif; ?>
-                    </select>
+                    <?php if (!empty($isOwnerTarget)): ?>
+                        <input type="hidden" name="role" value="admin">
+                        <input type="text" class="form-control border-warning bg-warning bg-opacity-10 fw-bold" value="👑 مدير إداري شامل (مالك النظام)" disabled readonly>
+                    <?php else: ?>
+                        <select class="form-select border-primary" id="role" name="role" required>
+                            <option value="student" <?php echo (old('role', $user->role ?? '') === 'student' || old('role', $user->role ?? '') === 'guest') ? 'selected' : ''; ?>>👤 طالب / زائر عادي</option>
+                            <option value="manager" <?php echo (old('role', $user->role ?? '') === 'manager') ? 'selected' : ''; ?>>🎖️ مندوب مستوى ودفعة</option>
+                            <option value="major_admin" <?php echo (old('role', $user->role ?? '') === 'major_admin') ? 'selected' : ''; ?>>🛡️ مسؤول تخصص أكاديمي</option>
+                            <?php if (($_SESSION['user_role'] ?? '') === 'admin'): ?>
+                                <option value="admin" <?php echo (old('role', $user->role ?? '') === 'admin') ? 'selected' : ''; ?>>👑 مدير إداري / نظام شامل</option>
+                            <?php endif; ?>
+                        </select>
+                    <?php endif; ?>
                 </div>
 
                 <div class="col-md-4">
@@ -96,8 +112,14 @@
 
                 <div class="col-12 mt-4">
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" <?php echo (old('is_active', $user->is_active ?? '1')) ? 'checked' : ''; ?>>
-                        <label class="form-check-label fw-bold" for="is_active">حالة الحساب (نشط ومفعل)</label>
+                        <?php if (!empty($isOwnerTarget)): ?>
+                            <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" checked disabled>
+                            <input type="hidden" name="is_active" value="1">
+                            <label class="form-check-label fw-bold" for="is_active">حالة الحساب (نشط ومفعل دائماً)</label>
+                        <?php else: ?>
+                            <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" <?php echo (old('is_active', $user->is_active ?? '1')) ? 'checked' : ''; ?>>
+                            <label class="form-check-label fw-bold" for="is_active">حالة الحساب (نشط ومفعل)</label>
+                        <?php endif; ?>
                     </div>
                 </div>
 

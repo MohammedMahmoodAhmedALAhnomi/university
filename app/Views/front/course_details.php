@@ -95,9 +95,9 @@
 
 <div>
         <?php
-        $typeLabels = ['lecture' => 'محاضرات', 'summary' => 'ملخصات', 'model' => 'نماذج', 'reference' => 'مراجع'];
-        $typeIcons = ['lecture' => 'fa-book', 'summary' => 'fa-file-lines', 'model' => 'fa-clipboard', 'reference' => 'fa-bookmark'];
-        $typeColors = ['lecture' => 'primary', 'summary' => 'success', 'model' => 'warning', 'reference' => 'secondary'];
+        $typeLabels = ['lecture' => 'محاضرات', 'summary' => 'ملخصات', 'assignment' => 'تكاليف', 'model' => 'نماذج', 'reference' => 'مراجع'];
+        $typeIcons = ['lecture' => 'fa-book', 'summary' => 'fa-file-lines', 'assignment' => 'fa-clipboard-list', 'model' => 'fa-clipboard', 'reference' => 'fa-bookmark'];
+        $typeColors = ['lecture' => 'primary', 'summary' => 'success', 'assignment' => 'warning', 'model' => 'info', 'reference' => 'secondary'];
         $grouped = [];
         foreach ($files as $file) {
             $t = $file->file_type ?? 'lecture';

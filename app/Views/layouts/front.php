@@ -97,11 +97,25 @@
                                     <?php endif; ?>
                                 </div>
                             </div>
-                        </div>
-
-                        <a href="<?php echo url('/admin/dashboard'); ?>" class="btn btn-light btn-sm rounded-pill px-3">
-                            <i class="fas fa-user ms-1"></i><?php echo escape($_SESSION['user_name']); ?>
-                        </a>
+                        <?php 
+                            $userRole = $_SESSION['user_role'] ?? 'guest';
+                            $canRequestUpgrade = in_array($userRole, ['student', 'guest', '']);
+                        ?>
+                        <?php if ($canRequestUpgrade): ?>
+                            <a href="<?php echo url('/request-role'); ?>" class="btn btn-warning btn-sm rounded-pill px-3 me-2 fw-bold text-dark shadow-sm">
+                                <i class="fas fa-user-graduate ms-1"></i>طلب ترقية لمندوب
+                            </a>
+                        <?php endif; ?>
+                        <?php if (in_array($userRole, ['admin', 'major_admin', 'manager'])): ?>
+                            <a href="<?php echo url('/admin/dashboard'); ?>" class="btn btn-light btn-sm rounded-pill px-3">
+                                <i class="fas fa-cog ms-1"></i>لوحة التحكم (<?php echo escape($_SESSION['user_name']); ?>)
+                            </a>
+                        <?php else: ?>
+                            <span class="text-white small me-2"><i class="fas fa-user ms-1"></i><?php echo escape($_SESSION['user_name']); ?></span>
+                            <a href="<?php echo url('/logout'); ?>" class="btn btn-outline-light btn-sm rounded-pill px-2" title="تسجيل الخروج">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </a>
+                        <?php endif; ?>
                     <?php else: ?>
                         <a href="<?php echo url('/login'); ?>" class="btn btn-light btn-sm rounded-pill px-3">
                             <i class="fas fa-sign-in-alt ms-1"></i>تسجيل الدخول
@@ -222,6 +236,12 @@
                                 <i class="fas fa-home text-primary"></i>
                                 <span>الرئيسية</span>
                             </a>
+                            <?php if (isset($_SESSION['user_id']) && in_array($_SESSION['user_role'] ?? 'guest', ['student', 'guest', ''])): ?>
+                                <a class="offcanvas-nav-item text-warning fw-bold <?php echo is_active_route('/request-role') ? 'active' : ''; ?>" href="<?php echo url('/request-role'); ?>">
+                                    <i class="fas fa-user-graduate text-warning"></i>
+                                    <span>🎖️ طلب ترقية لمندوب مستوى</span>
+                                </a>
+                            <?php endif; ?>
                             <a class="offcanvas-nav-item <?php echo is_active_route('/courses') ? 'active' : ''; ?>" href="<?php echo url('/courses'); ?>">
                                 <i class="fas fa-book-open text-warning"></i>
                                 <span>المواد الدراسية</span>

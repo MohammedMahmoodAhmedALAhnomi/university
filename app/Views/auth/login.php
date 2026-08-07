@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل الدخول - اللجنة العلمية</title>
+    <title>تسجيل الدخول - البوابة الأكاديمية الذكية</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -24,8 +24,8 @@
                     <div class="card-body p-5">
                         <div class="text-center mb-4">
                             <i class="fas fa-graduation-cap fa-3x text-primary mb-3"></i>
-                            <h3 class="fw-bold">اللجنة العلمية</h3>
-                            <p class="text-muted">تسجيل الدخول إلى لوحة التحكم</p>
+                            <h3 class="fw-bold">البوابة الأكاديمية الذكية</h3>
+                            <p class="text-muted">تسجيل الدخول إلى البوابة الأكاديمية الذكية</p>
                         </div>
                         <?php if (flash_has('error')): ?>
                             <div class="alert alert-danger text-center">

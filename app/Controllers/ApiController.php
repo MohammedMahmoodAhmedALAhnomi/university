@@ -1387,8 +1387,8 @@ class ApiController extends Controller
             return;
         }
 
-        if ($id === 1) {
-            $this->jsonResponse(['status' => 'error', 'message' => 'حساب مدير النظام الرئيسي محمي ولا يمكن تعديله'], 403);
+        if ($id === 1 || \App\Models\User::isSystemOwner($id)) {
+            $this->jsonResponse(['status' => 'error', 'message' => 'حساب مالك النظام الرئيسي محمي ولا يمكن تعديله أو تغيير دوره'], 403);
             return;
         }
 

@@ -28,6 +28,27 @@ class User extends Model
         self::$migrated = true;
     }
 
+    public static function isSystemOwner($user): bool
+    {
+        if (empty($user)) return false;
+        if (is_numeric($user)) {
+            $id = (int)$user;
+            if ($id === 1) return true;
+            $u = Database::fetch("SELECT email FROM users WHERE id = ? LIMIT 1", [$id]);
+            return $u && strtolower(trim($u->email ?? '')) === 'mohammedalahnomi04@gmail.com';
+        }
+        if (is_string($user)) {
+            return strtolower(trim($user)) === 'mohammedalahnomi04@gmail.com';
+        }
+        if (is_object($user)) {
+            return ((int)($user->id ?? 0) === 1) || (strtolower(trim($user->email ?? '')) === 'mohammedalahnomi04@gmail.com');
+        }
+        if (is_array($user)) {
+            return ((int)($user['id'] ?? 0) === 1) || (strtolower(trim($user['email'] ?? '')) === 'mohammedalahnomi04@gmail.com');
+        }
+        return false;
+    }
+
     public static function findByEmail(string $email)
     {
         self::ensureColumns();
@@ -48,7 +69,7 @@ class User extends Model
     public static function getFilteredUsers(?string $search = null, ?string $role = null, ?int $scopedMajorId = null): array
     {
         self::ensureColumns();
-        $where = ["u.id != 1"]; // Protect primary super admin
+        $where = [];
         $params = [];
 
         if ($scopedMajorId) {

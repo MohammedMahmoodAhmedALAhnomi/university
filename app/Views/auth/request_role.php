@@ -33,9 +33,9 @@
                 <div class="card shadow-lg border-0 rounded-4">
                     <div class="card-body p-4 p-md-5">
                         <div class="text-center mb-4">
-                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 fs-6 mb-2">الخطوة الأخيرة</span>
-                            <h3 class="fw-bold text-dark mb-1">اختر نوع الحساب وتفاصيله</h3>
-                            <p class="text-muted small">يرجى تحديد نوع الحساب وإرسال الطلب لموافقة المشرف العام</p>
+                            <span class="badge bg-warning bg-opacity-20 text-dark rounded-pill px-3 py-2 fs-6 mb-2"><i class="fas fa-user-graduate me-1 text-warning"></i>طلب ترقية</span>
+                            <h3 class="fw-bold text-dark mb-1">طلب ترقية لمندوب أو مسؤول تخصص</h3>
+                            <p class="text-muted small">يرجى تحديد التخصص والمستوى المطلوب وإرسال الطلب للموافقة عليه من قِبَل مسؤول التخصص أو المدير العام</p>
                         </div>
 
                         <?php if (flash_has('error')): ?>

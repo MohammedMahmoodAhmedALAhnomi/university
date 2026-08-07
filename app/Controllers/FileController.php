@@ -118,6 +118,10 @@ class FileController extends Controller
         if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
             $errors['file'][] = 'يرجى رفع ملف صالح';
         } else {
+            $maxSizeBytes = 500 * 1024 * 1024; // 500 MB
+            if ($file['size'] > $maxSizeBytes) {
+                $errors['file'][] = 'حجم الملف يتجاوز الحد الأقصى المسموح به (500 ميجابايت)';
+            }
             $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
             $forbiddenExts = ['php', 'phtml', 'php3', 'php4', 'php5', 'phar', 'exe', 'sh', 'bat', 'cmd', 'pl', 'py', 'cgi', 'js', 'html', 'htm'];
             if (in_array($ext, $forbiddenExts, true)) {

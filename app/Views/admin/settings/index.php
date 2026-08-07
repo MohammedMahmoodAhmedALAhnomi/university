@@ -17,6 +17,7 @@
             </div>
             <div class="card-body">
                 <?php foreach ($items as $setting): ?>
+                    <?php if (in_array($setting->setting_key, ['logo_path', 'university_logo'], true)) continue; ?>
                     <div class="row mb-3 align-items-center">
                         <label class="col-md-3 col-form-label fw-bold">
                             <?php

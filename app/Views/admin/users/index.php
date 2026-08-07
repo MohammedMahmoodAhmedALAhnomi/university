@@ -81,15 +81,24 @@
                         </tr>
                     <?php else: ?>
                         <?php foreach ($users as $user): ?>
-                            <tr>
+                            <?php 
+                                $isOwnerRow = \App\Models\User::isSystemOwner($user);
+                                $isLoggedInOwner = strtolower(trim($_SESSION['user_email'] ?? '')) === 'mohammedalahnomi04@gmail.com' || (int)($_SESSION['user_id'] ?? 0) === (int)$user->id;
+                            ?>
+                            <tr class="<?php echo $isOwnerRow ? 'table-warning bg-warning bg-opacity-10' : ''; ?>">
                                 <td class="ps-3 text-muted fw-bold">#<?php echo escape($user->id); ?></td>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
-                                        <div class="avatar-circle bg-primary bg-opacity-10 text-primary fw-bold d-flex align-items-center justify-content-center rounded-circle" style="width: 38px; height: 38px;">
-                                            <?php echo mb_substr(escape($user->full_name ?? 'U'), 0, 1); ?>
+                                        <div class="avatar-circle <?php echo $isOwnerRow ? 'bg-warning text-dark' : 'bg-primary bg-opacity-10 text-primary'; ?> fw-bold d-flex align-items-center justify-content-center rounded-circle" style="width: 38px; height: 38px;">
+                                            <?php echo $isOwnerRow ? '👑' : mb_substr(escape($user->full_name ?? 'U'), 0, 1); ?>
                                         </div>
                                         <div>
-                                            <div class="fw-bold text-dark"><?php echo escape($user->full_name ?? $user->name ?? 'بدون اسم'); ?></div>
+                                            <div class="fw-bold text-dark">
+                                                <?php echo escape($user->full_name ?? $user->name ?? 'بدون اسم'); ?>
+                                                <?php if ($isOwnerRow): ?>
+                                                    <span class="badge bg-warning text-dark border border-warning rounded-pill ms-1 small"><i class="fas fa-crown ms-1"></i>مالك النظام (الرئيسي)</span>
+                                                <?php endif; ?>
+                                            </div>
                                             <small class="text-muted"><i class="fas fa-clock me-1"></i>انضم: <?php echo escape(format_date($user->created_at, 'Y-m-d')); ?></small>
                                         </div>
                                     </div>
@@ -102,9 +111,13 @@
                                 </td>
                                 <td>
                                     <?php $r = $user->role ?? 'student'; ?>
-                                    <?php if ($r === 'admin'): ?>
+                                    <?php if ($isOwnerRow): ?>
+                                        <span class="badge bg-warning text-dark border border-warning rounded-pill px-3 py-2 fw-bold shadow-sm">
+                                            <i class="fas fa-crown ms-1"></i>مالك النظام الشامل
+                                        </span>
+                                    <?php elseif ($r === 'admin'): ?>
                                         <span class="badge bg-danger bg-opacity-15 text-danger border border-danger border-opacity-25 rounded-pill px-3 py-2">
-                                            <i class="fas fa-crown ms-1"></i>مدير إداري
+                                            <i class="fas fa-user-shield ms-1"></i>مدير إداري
                                         </span>
                                     <?php elseif ($r === 'major_admin'): ?>
                                         <span class="badge bg-primary bg-opacity-15 text-primary border border-primary border-opacity-25 rounded-pill px-3 py-2">
@@ -143,13 +156,25 @@
                                 </td>
                                 <td>
                                     <div class="d-flex gap-1">
-                                        <a href="<?php echo url('/admin/users/' . escape($user->id) . '/edit'); ?>" class="btn btn-outline-warning btn-sm rounded-pill px-3 fw-bold" title="تعديل الدور والبيانات">
-                                            <i class="fas fa-user-edit ms-1"></i>تعديل الدور
-                                        </a>
-                                        <?php if ((int)$user->id !== 1 && (int)$user->id !== (int)($_SESSION['user_id'] ?? 0)): ?>
-                                            <a href="<?php echo url('/admin/users/' . escape($user->id) . '/delete?_csrf_token=' . csrf_token()); ?>" class="btn btn-outline-danger btn-sm rounded-pill px-2" onclick="return confirm('هل أنت متأكد من حذف هذا الحساب نهائياً؟')" title="حذف الحساب">
-                                                <i class="fas fa-trash"></i>
+                                        <?php if ($isOwnerRow): ?>
+                                            <?php if ($isLoggedInOwner): ?>
+                                                <a href="<?php echo url('/admin/users/' . escape($user->id) . '/edit'); ?>" class="btn btn-outline-warning btn-sm rounded-pill px-3 fw-bold" title="تعديل حسابك الشخصي">
+                                                    <i class="fas fa-user-edit ms-1"></i>تعديل حسابي
+                                                </a>
+                                            <?php else: ?>
+                                                <span class="badge bg-secondary bg-opacity-10 text-muted border rounded-pill px-3 py-2" title="حساب مالك النظام محمي ولا يمكن تعديله أو حذفه إلا بواسطة المالك شخصياً">
+                                                    <i class="fas fa-lock ms-1 text-warning"></i>حساب محمي (المالك)
+                                                </span>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            <a href="<?php echo url('/admin/users/' . escape($user->id) . '/edit'); ?>" class="btn btn-outline-warning btn-sm rounded-pill px-3 fw-bold" title="تعديل الدور والبيانات">
+                                                <i class="fas fa-user-edit ms-1"></i>تعديل الدور
                                             </a>
+                                            <?php if ((int)$user->id !== (int)($_SESSION['user_id'] ?? 0)): ?>
+                                                <a href="<?php echo url('/admin/users/' . escape($user->id) . '/delete?_csrf_token=' . csrf_token()); ?>" class="btn btn-outline-danger btn-sm rounded-pill px-2" onclick="return confirm('هل أنت متأكد من حذف هذا الحساب نهائياً؟')" title="حذف الحساب">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            <?php endif; ?>
                                         <?php endif; ?>
                                     </div>
                                 </td>

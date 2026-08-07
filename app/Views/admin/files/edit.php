@@ -33,6 +33,7 @@
                         <option value="">اختر التصنيف</option>
                         <option value="lecture" <?php echo (old('file_type', $file->file_type ?? '') === 'lecture') ? 'selected' : ''; ?>>محاضرة</option>
                         <option value="summary" <?php echo (old('file_type', $file->file_type ?? '') === 'summary') ? 'selected' : ''; ?>>ملخص</option>
+                        <option value="assignment" <?php echo (old('file_type', $file->file_type ?? '') === 'assignment') ? 'selected' : ''; ?>>تكليف</option>
                         <option value="model" <?php echo (old('file_type', $file->file_type ?? '') === 'model') ? 'selected' : ''; ?>>نماذج</option>
                         <option value="reference" <?php echo (old('file_type', $file->file_type ?? '') === 'reference') ? 'selected' : ''; ?>>مرجع</option>
                     </select>

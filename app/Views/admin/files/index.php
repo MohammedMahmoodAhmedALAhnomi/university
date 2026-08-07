@@ -69,12 +69,13 @@
                                 <td><?php echo escape($file->doctor_name ?? '-'); ?></td>
                                 <td>
                                     <?php
-                                    $typeLabels = ['lecture' => 'محاضرة', 'summary' => 'ملخص', 'model' => 'نماذج أسئلة', 'reference' => 'مرجع'];
-                                    $typeIcons = ['lecture' => 'fas fa-chalkboard-teacher', 'summary' => 'fas fa-file-alt', 'model' => 'fas fa-tasks', 'reference' => 'fas fa-atlas'];
+                                    $typeLabels = ['lecture' => 'محاضرة', 'summary' => 'ملخص', 'assignment' => 'تكليف', 'model' => 'نماذج أسئلة', 'reference' => 'مرجع'];
+                                    $typeIcons = ['lecture' => 'fas fa-chalkboard-teacher', 'summary' => 'fas fa-file-alt', 'assignment' => 'fas fa-clipboard-list', 'model' => 'fas fa-tasks', 'reference' => 'fas fa-atlas'];
                                     $typeColors = [
                                         'lecture' => 'bg-primary bg-opacity-10 text-primary',
                                         'summary' => 'bg-success bg-opacity-10 text-success',
-                                        'model' => 'bg-warning bg-opacity-10 text-dark',
+                                        'assignment' => 'bg-warning bg-opacity-15 text-dark border border-warning',
+                                        'model' => 'bg-info bg-opacity-10 text-info',
                                         'reference' => 'bg-purple bg-opacity-10 text-purple'
                                     ];
                                     $fileType = $file->file_type ?? 'lecture';

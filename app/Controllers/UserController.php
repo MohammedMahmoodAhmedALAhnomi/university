@@ -155,11 +155,6 @@ class UserController extends Controller
         }
         $id = (int)($id ?: $this->getParam('id'));
 
-        if ($id === 1) {
-            flash('error', 'لا يمكن تعديل الحساب الرئيسي للنظام');
-            redirect(url('/admin/users'));
-        }
-
         $user = User::find($id);
 
         if (!$user) {
@@ -168,7 +163,17 @@ class UserController extends Controller
         }
 
         $currentRole = $_SESSION['user_role'] ?? '';
-        $currentUserId = $_SESSION['user_id'] ?? 0;
+        $currentUserId = (int)($_SESSION['user_id'] ?? 0);
+        $currentUserEmail = strtolower(trim($_SESSION['user_email'] ?? ''));
+
+        if (User::isSystemOwner($user)) {
+            $isLoggedInOwner = ($currentUserId === (int)$user->id) || ($currentUserEmail === 'mohammedalahnomi04@gmail.com');
+            if (!$isLoggedInOwner) {
+                flash('error', 'حساب مالك النظام الرئيسي محمي، ولا يمكن تعديله إلا من قِبَل المالك شخصياً.');
+                redirect(url('/admin/users'));
+            }
+        }
+
         $scopedMajorId = null;
 
         if ($currentRole === 'major_admin') {
@@ -189,6 +194,7 @@ class UserController extends Controller
             'levels' => $levels,
             'currentRole' => $currentRole,
             'scopedMajorId' => $scopedMajorId,
+            'isOwnerTarget' => User::isSystemOwner($user),
         ]);
     }
 
@@ -204,11 +210,6 @@ class UserController extends Controller
 
         $id = (int)($id ?: $this->postParam('id', $this->getParam('id', 0)));
 
-        if ($id === 1) {
-            flash('error', 'لا يمكن تعديل الحساب الرئيسي للنظام');
-            redirect(url('/admin/users'));
-        }
-
         $user = User::find($id);
 
         if (!$user) {
@@ -217,7 +218,17 @@ class UserController extends Controller
         }
 
         $currentRole = $_SESSION['user_role'] ?? '';
-        $currentUserId = $_SESSION['user_id'] ?? 0;
+        $currentUserId = (int)($_SESSION['user_id'] ?? 0);
+        $currentUserEmail = strtolower(trim($_SESSION['user_email'] ?? ''));
+
+        if (User::isSystemOwner($user)) {
+            $isLoggedInOwner = ($currentUserId === (int)$user->id) || ($currentUserEmail === 'mohammedalahnomi04@gmail.com');
+            if (!$isLoggedInOwner) {
+                flash('error', 'حساب مالك النظام الرئيسي محمي، ولا يمكن تعديله إلا من قِبَل المالك شخصياً.');
+                redirect(url('/admin/users'));
+            }
+        }
+
         $scopedMajorId = null;
 
         if ($currentRole === 'major_admin') {
@@ -232,7 +243,9 @@ class UserController extends Controller
 
         $requestedRole = $this->postParam('role', $user->role);
 
-        if ($currentRole === 'major_admin') {
+        if (User::isSystemOwner($user)) {
+            $requestedRole = 'admin';
+        } elseif ($currentRole === 'major_admin') {
             if ($requestedRole === 'admin' || $requestedRole === 'major_admin') {
                 $requestedRole = $user->role;
             }
@@ -254,7 +267,7 @@ class UserController extends Controller
             'major_id' => !empty($majorId) ? (int)$majorId : null,
             'managed_major_id' => !empty($majorId) ? (int)$majorId : null,
             'managed_level_id' => !empty($levelId) ? (int)$levelId : null,
-            'is_active' => $this->postParam('is_active', '1') ? 1 : 0,
+            'is_active' => User::isSystemOwner($user) ? 1 : ($this->postParam('is_active', '1') ? 1 : 0),
         ];
 
         $errors = $this->validate($data, [
@@ -280,6 +293,7 @@ class UserController extends Controller
                 'levels' => $levels,
                 'currentRole' => $currentRole,
                 'scopedMajorId' => $scopedMajorId,
+                'isOwnerTarget' => User::isSystemOwner($user),
             ]);
             return;
         }
@@ -297,6 +311,7 @@ class UserController extends Controller
                     'levels' => $levels,
                     'currentRole' => $currentRole,
                     'scopedMajorId' => $scopedMajorId,
+                    'isOwnerTarget' => User::isSystemOwner($user),
                 ]);
                 return;
             }
@@ -325,8 +340,8 @@ class UserController extends Controller
         }
         $id = (int)($id ?: $this->getParam('id'));
 
-        if ($id === 1) {
-            flash('error', 'لا يمكن حذف الحساب الرئيسي للنظام');
+        if ($id === 1 || User::isSystemOwner($id)) {
+            flash('error', 'لا يمكن حذف حساب مالك النظام الرئيسي فهو محمي نهائياً');
             redirect(url('/admin/users'));
         }
 
@@ -339,6 +354,11 @@ class UserController extends Controller
 
         if (!$user) {
             flash('error', 'المستخدم غير موجود');
+            redirect(url('/admin/users'));
+        }
+
+        if (User::isSystemOwner($user)) {
+            flash('error', 'لا يمكن حذف حساب مالك النظام الرئيسي فهو محمي نهائياً');
             redirect(url('/admin/users'));
         }
 

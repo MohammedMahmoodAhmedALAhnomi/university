@@ -18,10 +18,10 @@ class JoinRequestController extends Controller
             redirect(url('/login'));
         }
 
-        // If user already has an approved role, go to admin dashboard
         $role = $_SESSION['user_role'] ?? 'guest';
-        if ($role !== 'guest') {
-            redirect(url('/admin/dashboard'));
+        if (in_array($role, ['admin', 'major_admin', 'manager'])) {
+            flash('info', 'أنت تمتلك بالفعل صلاحية إدارية أو دور مندوب في المنصة');
+            redirect(url('/'));
         }
 
         // Check if there is already a pending request

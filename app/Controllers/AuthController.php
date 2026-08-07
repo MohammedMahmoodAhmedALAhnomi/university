@@ -11,15 +11,23 @@ class AuthController extends Controller
     public function loginForm(): void
     {
         if (isset($_SESSION['user_id'])) {
-            $role = $_SESSION['user_role'] ?? 'guest';
-            if ($role === 'admin' || $role === 'major_admin' || $role === 'manager') {
-                redirect(url('/admin/dashboard'));
-            }
             redirect(url('/'));
         }
         $this->view('auth/login');
     }
 
+
+    private function setRememberCookie($user): void
+    {
+        if (empty($user)) return;
+        $secret = env('APP_SECRET', 'university_app_secret_2026');
+        $userId = is_object($user) ? $user->id : ($user['id'] ?? 0);
+        $userEmail = is_object($user) ? $user->email : ($user['email'] ?? '');
+        $userPass = is_object($user) ? $user->password : ($user['password'] ?? '');
+        $hash = hash_hmac('sha256', $userId . '|' . $userEmail . '|' . $userPass, $secret);
+        $token = $userId . ':' . $hash;
+        setcookie('app_remember_token', $token, time() + 31536000, '/', '', false, true);
+    }
 
     public function login(): void
     {
@@ -52,24 +60,22 @@ class AuthController extends Controller
         $_SESSION['user_id'] = $user->id;
         $_SESSION['user_name'] = $user->full_name;
         $_SESSION['user_role'] = $user->role;
+        $_SESSION['user_email'] = $user->email;
         $_SESSION['managed_major_id'] = $user->managed_major_id;
         $_SESSION['managed_level_id'] = $user->managed_level_id;
 
+        $this->setRememberCookie($user);
         log_activity('login', 'users', $user->id, 'تسجيل دخول ناجح');
 
         flash('success', 'مرحبًا بعودتك، ' . $user->full_name);
-        if ($user->role === 'admin' || $user->role === 'major_admin' || $user->role === 'manager') {
-            redirect(url('/admin/dashboard'));
-        } else {
-            redirect(url('/'));
-        }
+        redirect(url('/'));
     }
 
 
     public function registerForm(): void
     {
         if (isset($_SESSION['user_id'])) {
-            redirect(url('/admin/dashboard'));
+            redirect(url('/'));
         }
         $this->view('auth/register');
     }
@@ -104,10 +110,17 @@ class AuthController extends Controller
             'is_active' => 1,
         ]);
 
+        $createdUser = User::find($userId);
+
         session_regenerate_id(true);
         $_SESSION['user_id'] = $userId;
         $_SESSION['user_name'] = $fullName;
         $_SESSION['user_role'] = 'guest';
+        $_SESSION['user_email'] = $email;
+
+        if ($createdUser) {
+            $this->setRememberCookie($createdUser);
+        }
 
         log_activity('create', 'users', $userId, 'تسجيل حساب جديد كـ guest');
         flash('success', 'تم إنشاء حسابك بنجاح! أهلاً بك في المنصة التعليمية.');
@@ -175,23 +188,16 @@ class AuthController extends Controller
         $_SESSION['user_id'] = $user->id;
         $_SESSION['user_name'] = $user->full_name;
         $_SESSION['user_role'] = $user->role;
+        $_SESSION['user_email'] = $user->email;
         $_SESSION['managed_level_id'] = $user->managed_level_id;
         $_SESSION['managed_major_id'] = $user->managed_major_id;
 
+        $this->setRememberCookie($user);
         User::updateLastLogin($user->id);
         log_activity('login', 'users', $user->id, 'تسجيل دخول عبر Google');
 
-        if ($user->role === 'guest') {
-            flash('success', 'مرحباً بعودتك، ' . $user->full_name);
-            redirect(url('/'));
-        }
-
         flash('success', 'مرحباً بعودتك، ' . $user->full_name);
-        if ($user->role === 'admin') {
-            redirect(url('/admin/dashboard'));
-        } else {
-            redirect(url('/admin/courses'));
-        }
+        redirect(url('/'));
     }
 
     public function logout(): void
@@ -200,6 +206,7 @@ class AuthController extends Controller
             log_activity('logout', 'users', $_SESSION['user_id'], 'تسجيل خروج');
         }
         $_SESSION = [];
+        setcookie('app_remember_token', '', time() - 3600, '/');
         session_destroy();
         session_start();
         flash('success', 'تم تسجيل الخروج بنجاح.');

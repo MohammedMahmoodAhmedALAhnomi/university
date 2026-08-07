@@ -32,6 +32,7 @@
                         <option value="">اختر التصنيف</option>
                         <option value="lecture" <?php echo old('file_type') === 'lecture' ? 'selected' : ''; ?>>محاضرة</option>
                         <option value="summary" <?php echo old('file_type') === 'summary' ? 'selected' : ''; ?>>ملخص</option>
+                        <option value="assignment" <?php echo old('file_type') === 'assignment' ? 'selected' : ''; ?>>تكليف</option>
                         <option value="model" <?php echo old('file_type') === 'model' ? 'selected' : ''; ?>>نماذج</option>
                         <option value="reference" <?php echo old('file_type') === 'reference' ? 'selected' : ''; ?>>مرجع</option>
                     </select>
@@ -47,6 +48,7 @@
                 <div class="col-md-6">
                     <label for="file" class="form-label">الملف <span class="text-danger">*</span></label>
                     <input type="file" class="form-control" id="file" name="file" required>
+                    <small class="text-muted d-block mt-1"><i class="fas fa-info-circle me-1 text-primary"></i>الحد الأقصى المسموح به لرفع الملفات والمراجع هو <strong>500 ميجابايت (500MB)</strong>.</small>
                 </div>
                 <div class="col-12">
                     <label for="description" class="form-label">الوصف</label>
